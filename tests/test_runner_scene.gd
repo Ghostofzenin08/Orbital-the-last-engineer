@@ -1972,18 +1972,21 @@ func _test_m5_datapad_encryption_and_scanner() -> void:
 	_assert_true(rejected_reason[0] == DatapadPickupClass.ENCRYPTED_PROMPT_MSG, "Encrypted datapad emits decryption_rejected with exact scanner prompt")
 	_assert_true(not MissionManager.is_datapad_decrypted("datapad_medbay_autopsy"), "MissionManager does not unlock encrypted datapad on rejection")
 	
-	# 3. Encrypted DatapadPickup rejection when Scanner battery < 5%
+	# 3. Encrypted DatapadPickup rejection at exact < 5% boundary (4.99%) and acceptance at exact 5.0%
 	InventoryManager.equip_slot(1) # Diagnostic Scanner
-	InventoryManager.tools["diagnostic_scanner"]["battery"] = 3.0
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 4.99
 	enc_dp.interact(null)
-	_assert_true(not enc_dp.is_collected and not enc_dp.is_decrypted, "Encrypted datapad rejects decryption when scanner battery < 5%")
+	_assert_true(not enc_dp.is_collected and not enc_dp.is_decrypted, "Encrypted datapad rejects decryption when scanner battery is 4.99% (< 5.0% boundary)")
 	
-	# 4. Encrypted DatapadPickup successful decryption with Diagnostic Scanner equipped (drains 5% battery)
-	InventoryManager.tools["diagnostic_scanner"]["battery"] = 100.0
+	# 4. Encrypted DatapadPickup successful decryption at exact 5.0% boundary (drains to 0.0%) and rapid repeat interaction safety
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 5.0
 	enc_dp.interact(null)
-	_assert_true(enc_dp.is_collected and enc_dp.is_decrypted, "Encrypted datapad decrypts and collects when Diagnostic Scanner is equipped with charge")
-	_assert_true(abs(InventoryManager.get_scanner_battery() - 95.0) < 0.01, "Decrypting encrypted datapad drains 5.0% scanner battery (100% -> 95%)")
+	_assert_true(enc_dp.is_collected and enc_dp.is_decrypted, "Encrypted datapad decrypts and collects when Diagnostic Scanner is at exact 5.0% boundary")
+	_assert_true(abs(InventoryManager.get_scanner_battery() - 0.0) < 0.01, "Decrypting encrypted datapad at 5.0% drains battery to 0.0%")
 	_assert_true(MissionManager.is_datapad_decrypted("datapad_medbay_autopsy"), "MissionManager records decrypted datapad_medbay_autopsy")
+	# Rapid second interaction should not fail or re-drain
+	enc_dp.interact(null)
+	_assert_true(enc_dp.is_collected and enc_dp.is_decrypted, "Rapid repeat interaction on already-decrypted datapad preserves state safely")
 	
 	# 5. Subsystem repair alternative decryption (AvionicsRelayBank repaired allows decrypting datapad_avionics_telemetry without scanner)
 	var mock_relay = RepairPanel.new()
@@ -2001,6 +2004,22 @@ func _test_m5_datapad_encryption_and_scanner() -> void:
 	av_dp.interact(null)
 	_assert_true(av_dp.is_collected and av_dp.is_decrypted, "Repaired AvionicsRelayBank allows decrypting datapad_avionics_telemetry without scanner battery drain")
 	
+	# 6. Medbay powered alternative decryption (energized bus allows decrypting datapad_medbay_autopsy without scanner)
+	MissionManager.reset_missions()
+	ShipState.reset_to_defaults()
+	ShipState.set_generator_breaker(true)
+	ShipState.set_bus_relay(true)
+	var med_dp = dp_scene.instantiate()
+	med_dp.datapad_id = "datapad_medbay_autopsy"
+	med_dp.is_encrypted = true
+	med_dp.requires_scanner_to_decrypt = true
+	add_child(med_dp)
+	InventoryManager.equip_slot(2) # Multitool equipped (not scanner)
+	med_dp.interact(null)
+	_assert_true(med_dp.is_collected and med_dp.is_decrypted, "Powered Medbay allows decrypting datapad_medbay_autopsy without Diagnostic Scanner")
+	
+	remove_child(med_dp)
+	med_dp.free()
 	remove_child(mock_relay)
 	mock_relay.free()
 	remove_child(av_dp)
@@ -2028,13 +2047,24 @@ func _test_m5_revelations_and_system_consequences() -> void:
 	_assert_true(not MissionManager.is_revelation_unlocked("revelation_anomaly"), "Revelation I stays locked with 2/3 clues")
 	
 	# Edge case: collecting encrypted 3rd datapad WITHOUT decrypting it does NOT unlock Revelation I
+	var dp_scene = load("res://scenes/interactables/datapad_pickup.tscn")
+	var av_node = dp_scene.instantiate()
+	av_node.datapad_id = "datapad_avionics_telemetry"
+	av_node.is_encrypted = true
+	av_node.requires_scanner_to_decrypt = true
+	add_child(av_node)
+	
 	MissionManager.collect_datapad("datapad_avionics_telemetry", false)
 	_assert_true(MissionManager.is_datapad_collected("datapad_avionics_telemetry"), "datapad_avionics_telemetry marked collected")
 	_assert_true(not MissionManager.is_datapad_decrypted("datapad_avionics_telemetry"), "datapad_avionics_telemetry remains un-decrypted when mark_decrypted=false")
+	_assert_true(av_node.is_collected and not av_node.is_decrypted, "DatapadPickup node syncs is_collected=true and is_decrypted=false when collected un-decrypted")
 	_assert_true(not MissionManager.is_revelation_unlocked("revelation_anomaly"), "Revelation I does NOT unlock while 3rd clue is still encrypted")
 	
 	# Now decrypt the 3rd clue
 	MissionManager.decrypt_datapad("datapad_avionics_telemetry")
+	_assert_true(av_node.is_decrypted, "DatapadPickup node updates is_decrypted=true upon decryption")
+	remove_child(av_node)
+	av_node.free()
 	_assert_true(MissionManager.is_revelation_unlocked("revelation_anomaly"), "Revelation I unlocks automatically upon decrypting 3rd datapad")
 	_assert_true(rev_signals.has("revelation_anomaly"), "revelation_unlocked signal emitted for revelation_anomaly")
 	_assert_true(ShipState.has_revelation_anomaly, "ShipState.has_revelation_anomaly is true after Revelation I")
@@ -2078,6 +2108,12 @@ func _test_m5_revelations_and_system_consequences() -> void:
 	_assert_true(ShipState.commander_override_code == "7394-OMEGA", "Commander override code 7394-OMEGA unlocked on ShipState")
 	_assert_true(ShipState.quarantine_lockout_cleared, "ShipState quarantine_lockout_cleared is true")
 	_assert_true(abs(ShipState.thruster_efficiency_boost - 1.25) < 0.001, "ShipState thruster_efficiency_boost is 1.25")
+	_assert_true(abs(ShipState.devices["ion_propulsion"].power_draw - 48.0) < 0.01, "Ion propulsion power draw reduced to 48.0 kW by Revelation III")
+	
+	# Verify MissionManager.reset_missions() restores device-level modifications on ShipState
+	MissionManager.reset_missions()
+	_assert_true(abs(ShipState.devices["ion_propulsion"].power_draw - 60.0) < 0.01, "MissionManager.reset_missions() restores ion_propulsion power_draw to 60.0 kW")
+	_assert_true(abs(ShipState.devices["reactor_primary"].power_generation - 150.0) < 0.01, "MissionManager.reset_missions() restores reactor_primary power_generation to 150.0 kW")
 	
 	MissionManager.revelation_unlocked.disconnect(conn)
 
@@ -2085,10 +2121,18 @@ func _test_m5_terminal_ui_and_save_load() -> void:
 	MissionManager.reset_missions()
 	ShipState.reset_to_defaults()
 	
+	var hud_scene = load("res://scenes/ui/hud.tscn")
+	var hud_node = hud_scene.instantiate()
+	add_child(hud_node)
+	
 	# Collect 3 datapads to unlock Revelation I, leave 7 unrecovered
 	MissionManager.collect_datapad("datapad_eng_vasquez", true)
 	MissionManager.collect_datapad("datapad_subdeck_throttle", true)
 	MissionManager.collect_datapad("datapad_avionics_telemetry", true)
+	
+	_assert_true(hud_node.notification_lbl.text.contains("Kharon-4 Magnetosphere Carrier Telemetry") and hud_node.notification_lbl.text.contains("Revelation I"), "HUD notification banner displays both recovered datapad title and synthesized Revelation I")
+	remove_child(hud_node)
+	hud_node.free()
 	
 	var term_scene = load("res://scenes/ui/terminal_dialog.tscn")
 	var term = term_scene.instantiate()
@@ -2160,9 +2204,46 @@ func _test_m5_terminal_ui_and_save_load() -> void:
 	_assert_true(ShipState.power_system.harmonic_damping_active, "PowerSystem restores harmonic_damping_active on load")
 	_assert_true(dp_node.is_collected and dp_node.is_decrypted, "DatapadPickup node restores is_collected and is_decrypted on load")
 	
+	# Edge Case: Loading a legacy Milestone 4 save file (without "datapads" or revelation keys) after unlocking all 3 revelations in-session
+	MissionManager.collect_datapad("datapad_ls_contamination", true)
+	MissionManager.collect_datapad("datapad_crew_quarantine", true)
+	MissionManager.collect_datapad("datapad_medbay_autopsy", true)
+	MissionManager.collect_datapad("datapad_cargo_manifest", true)
+	MissionManager.collect_datapad("datapad_crawlway_blackbox", true)
+	MissionManager.collect_datapad("datapad_airlock_jettison", true)
+	MissionManager.collect_datapad("datapad_bridge_directive", true)
+	_assert_true(ShipState.has_revelation_quarantine and ShipState.has_revelation_directive, "All 3 revelations active prior to legacy save load")
+	
+	var legacy_save := {
+		"version": 1,
+		"missions": {
+			"current_objective_index": 1,
+			"inventory": []
+		},
+		"ship_state": {
+			"auxiliary_scrubber_active": false
+		}
+	}
+	var lf := FileAccess.open(SaveManager.SAVE_PATH, FileAccess.WRITE)
+	lf.store_string(JSON.stringify(legacy_save))
+	lf.close()
+	
+	var legacy_load_ok: bool = SaveManager.load_game()
+	_assert_true(legacy_load_ok, "Loading legacy Milestone 4 save succeeds")
+	_assert_true(MissionManager.collected_datapads.is_empty(), "Legacy save load clears collected_datapads")
+	_assert_true(MissionManager.unlocked_revelations.is_empty(), "Legacy save load clears unlocked_revelations")
+	_assert_true(MissionManager.commander_override_code == "", "Legacy save load resets MissionManager.commander_override_code to empty")
+	_assert_true(not MissionManager.quarantine_lockout_cleared, "Legacy save load resets MissionManager.quarantine_lockout_cleared to false")
+	_assert_true(not ShipState.has_revelation_anomaly and not ShipState.has_revelation_quarantine and not ShipState.has_revelation_directive, "Legacy save load clears all ShipState revelation flags")
+	_assert_true(abs(ShipState.scrubber_efficiency_multiplier - 1.0) < 0.001, "Legacy save load resets ShipState.scrubber_efficiency_multiplier to 1.0")
+	_assert_true(ShipState.commander_override_code == "", "Legacy save load resets ShipState.commander_override_code to empty")
+	_assert_true(abs(ShipState.devices["ion_propulsion"].power_draw - 60.0) < 0.01, "Legacy save load restores ion_propulsion power_draw to 60.0 kW")
+	_assert_true(not dp_node.is_collected, "Legacy save load without 'datapads' key resets DatapadPickup node to uncollected")
+	
 	remove_child(dp_node)
 	dp_node.free()
 	SaveManager.delete_save()
 	MissionManager.reset_missions()
 	ShipState.reset_to_defaults()
+
 
