@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/interactables/repair_panel.gd" id="1_panel"]
 
@@ -8,13 +8,39 @@ size = Vector3(0.5, 0.7, 0.25)
 [sub_resource type="BoxMesh" id="BoxMesh_housing"]
 size = Vector3(0.45, 0.65, 0.12)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_housing"]
+albedo_color = Color(0.15, 0.17, 0.2, 1)
+metallic = 0.85
+roughness = 0.35
+
+[sub_resource type="BoxMesh" id="BoxMesh_hazard_border"]
+size = Vector3(0.47, 0.67, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hazard"]
+albedo_color = Color(0.85, 0.65, 0.1, 1)
+metallic = 0.5
+roughness = 0.4
+
 [sub_resource type="BoxMesh" id="BoxMesh_cavity"]
 size = Vector3(0.2, 0.2, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cavity"]
+albedo_color = Color(0.06, 0.07, 0.09, 1)
+metallic = 0.95
+roughness = 0.2
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_coupler"]
 top_radius = 0.05
 bottom_radius = 0.05
 height = 0.16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coupler"]
+albedo_color = Color(0.2, 0.7, 0.85, 1)
+metallic = 0.9
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.1, 0.5, 0.7, 1)
+emission_energy_multiplier = 1.4
 
 [sub_resource type="SphereMesh" id="SphereMesh_led"]
 radius = 0.035
@@ -28,17 +54,25 @@ script = ExtResource("1_panel")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_panel")
 
+[node name="HazardBorderMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.04)
+mesh = SubResource("BoxMesh_hazard_border")
+surface_material_override/0 = SubResource("StandardMaterial3D_hazard")
+
 [node name="HousingMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_housing")
+surface_material_override/0 = SubResource("StandardMaterial3D_housing")
 
 [node name="CavityMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0.05)
 mesh = SubResource("BoxMesh_cavity")
+surface_material_override/0 = SubResource("StandardMaterial3D_cavity")
 
 [node name="SocketMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -0.05, 0.08)
 visible = false
 mesh = SubResource("CylinderMesh_coupler")
+surface_material_override/0 = SubResource("StandardMaterial3D_coupler")
 
 [node name="IndicatorLED" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0.07)
