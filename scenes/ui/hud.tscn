@@ -50,9 +50,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -250.0
-offset_top = 24.0
+offset_top = 135.0
 offset_right = 250.0
-offset_bottom = 70.0
+offset_bottom = 175.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -62,16 +62,16 @@ layout_mode = 2
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 11
 text = "[E] Interact"
 horizontal_alignment = 1
 
 [node name="TopLeftMargin" type="MarginContainer" parent="."]
 anchors_preset = 0
-offset_right = 440.0
-offset_bottom = 140.0
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
+offset_right = 460.0
+offset_bottom = 110.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
 
 [node name="ObjectivePanel" type="PanelContainer" parent="TopLeftMargin"]
 layout_mode = 2
@@ -79,9 +79,9 @@ layout_mode = 2
 [node name="Margin" type="MarginContainer" parent="TopLeftMargin/ObjectivePanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 10
+theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_bottom = 8
 
 [node name="VBox" type="VBoxContainer" parent="TopLeftMargin/ObjectivePanel/Margin"]
 layout_mode = 2
@@ -90,37 +90,42 @@ theme_override_constants/separation = 4
 [node name="ObjectiveTitle" type="Label" parent="TopLeftMargin/ObjectivePanel/Margin/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "MISSION 1: RESTORE EMERGENCY GENERATOR"
+
+[node name="ImmediateTaskLabel" type="Label" parent="TopLeftMargin/ObjectivePanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_font_sizes/font_size = 12
+text = "IMMEDIATE TASK: Flip Generator Breaker Lever"
 
 [node name="ObjectiveDesc" type="Label" parent="TopLeftMargin/ObjectivePanel/Margin/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(380, 0)
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
-theme_override_font_sizes/font_size = 12
-text = "Locate the primary fusion generator in Engineering Bay..."
-autowrap_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Briefing..."
 
 [node name="TutorialMargin" type="MarginContainer" parent="."]
 unique_name_in_owner = true
 visible = false
 anchors_preset = 0
-offset_top = 138.0
+offset_top = 125.0
 offset_right = 440.0
-offset_bottom = 224.0
-theme_override_constants/margin_left = 20
+offset_bottom = 205.0
+theme_override_constants/margin_left = 16
 
 [node name="TutorialPanel" type="PanelContainer" parent="TutorialMargin"]
 layout_mode = 2
 
 [node name="Margin" type="MarginContainer" parent="TutorialMargin/TutorialPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
 
 [node name="VBox" type="VBoxContainer" parent="TutorialMargin/TutorialPanel/Margin"]
 layout_mode = 2
@@ -130,7 +135,7 @@ theme_override_constants/separation = 3
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.75, 0.2, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 text = "TRAINING: DIAGNOSTIC TUTORIAL"
 
 [node name="TutorialDescLabel" type="Label" parent="TutorialMargin/TutorialPanel/Margin/VBox"]
@@ -146,130 +151,57 @@ autowrap_mode = 2
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -340.0
-offset_bottom = 110.0
+offset_left = -160.0
+offset_bottom = 56.0
 grow_horizontal = 0
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
 
-[node name="OxygenPanel" type="PanelContainer" parent="TopRightMargin"]
+[node name="InfoPanel" type="PanelContainer" parent="TopRightMargin"]
 layout_mode = 2
 
-[node name="Margin" type="MarginContainer" parent="TopRightMargin/OxygenPanel"]
+[node name="InfoMargin" type="MarginContainer" parent="TopRightMargin/InfoPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
 
-[node name="VBox" type="VBoxContainer" parent="TopRightMargin/OxygenPanel/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="LocationLabel" type="Label" parent="TopRightMargin/OxygenPanel/Margin/VBox"]
+[node name="InfoButton" type="Button" parent="TopRightMargin/InfoPanel/InfoMargin"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 32)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "LOCATION: ENGINEERING BAY"
-
-[node name="OxygenStatusLabel" type="Label" parent="TopRightMargin/OxygenPanel/Margin/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.9, 0.4, 1)
-theme_override_font_sizes/font_size = 13
-text = "O2 LEVEL: 100% [NOMINAL]"
-
-[node name="OxygenBar" type="ProgressBar" parent="TopRightMargin/OxygenPanel/Margin/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 14)
-layout_mode = 2
-value = 100.0
-show_percentage = false
-
-[node name="CO2StatusLabel" type="Label" parent="TopRightMargin/OxygenPanel/Margin/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.9, 0.4, 1)
 theme_override_font_sizes/font_size = 12
-text = "CO2: 420 ppm [NOMINAL]"
-
-[node name="AtmosphereMetricsLabel" type="Label" parent="TopRightMargin/OxygenPanel/Margin/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
-theme_override_font_sizes/font_size = 11
-text = "TEMP: 21.0°C | PRESS: 101.3 kPa"
-
-[node name="HazardLabel" type="Label" parent="TopRightMargin/OxygenPanel/Margin/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 1.0, 0.4, 1)
-theme_override_font_sizes/font_size = 11
-text = "STATUS: SAFE [ALL NOMINAL]"
+text = "[TAB] INFO"
 
 [node name="BottomLeftMargin" type="MarginContainer" parent="."]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -170.0
-offset_right = 500.0
+offset_top = -54.0
+offset_right = 440.0
 grow_vertical = 0
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_bottom = 12
 
-[node name="VBox" type="VBoxContainer" parent="BottomLeftMargin"]
+[node name="CompactGearPanel" type="PanelContainer" parent="BottomLeftMargin"]
 layout_mode = 2
-theme_override_constants/separation = 4
 
-[node name="EquippedToolLabel" type="Label" parent="BottomLeftMargin/VBox"]
+[node name="CompactMargin" type="MarginContainer" parent="BottomLeftMargin/CompactGearPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="CompactGearLabel" type="Label" parent="BottomLeftMargin/CompactGearPanel/CompactMargin"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_font_sizes/font_size = 14
-text = "EQUIPPED: [1] Diagnostic Scanner"
-
-[node name="ToolHBox" type="HBoxContainer" parent="BottomLeftMargin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="ScannerChargeLabel" type="Label" parent="BottomLeftMargin/VBox/ToolHBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "SCANNER CHARGE:"
-
-[node name="ScannerChargeBar" type="ProgressBar" parent="BottomLeftMargin/VBox/ToolHBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 10)
-layout_mode = 2
-size_flags_vertical = 4
-value = 100.0
-show_percentage = false
-
-[node name="ResourceTallyLabel" type="Label" parent="BottomLeftMargin/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_colors/font_color = Color(0.75, 0.85, 0.95, 0.9)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_font_sizes/font_size = 12
-text = "FUSES: 2 | COOLANT: 1 | FILTERS: 1 | CELLS: 2"
-
-[node name="QuickSlotsLabel" type="Label" parent="BottomLeftMargin/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 0.9)
 theme_override_font_sizes/font_size = 11
-text = "[1] Scanner  [2] Multitool (Calibrate)  [3] Fuse  [4] Cell"
-
-[node name="InventoryLabel" type="Label" parent="BottomLeftMargin/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_font_sizes/font_size = 12
-text = "INVENTORY: [ Empty ]"
+text = "[1] Scanner  [2] Multitool  |  [TAB] Full Info & Gear"
 
 [node name="ScanTelemetryMargin" type="MarginContainer" parent="."]
 unique_name_in_owner = true
@@ -279,10 +211,10 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -380.0
-offset_top = -140.0
-offset_right = -20.0
-offset_bottom = 140.0
+offset_left = -340.0
+offset_top = -120.0
+offset_right = -16.0
+offset_bottom = 120.0
 grow_horizontal = 0
 grow_vertical = 2
 
@@ -291,10 +223,10 @@ layout_mode = 2
 
 [node name="ScanMargin" type="MarginContainer" parent="ScanTelemetryMargin/ScanPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
 
 [node name="ScanVBox" type="VBoxContainer" parent="ScanTelemetryMargin/ScanPanel/ScanMargin"]
 layout_mode = 2
@@ -304,35 +236,35 @@ theme_override_constants/separation = 4
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.1, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 11
 text = "DIAGNOSTIC SCAN REPORT"
 
 [node name="ScanDeviceName" type="Label" parent="ScanTelemetryMargin/ScanPanel/ScanMargin/ScanVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "Device Name"
 
 [node name="ScanIntegrityLabel" type="Label" parent="ScanTelemetryMargin/ScanPanel/ScanMargin/ScanVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 1, 0.4, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 text = "INTEGRITY: 100%"
 
 [node name="ScanMetricsLabel" type="Label" parent="ScanTelemetryMargin/ScanPanel/ScanMargin/ScanVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "POWER: 0.0 kW | TEMP: 21.0°C"
 
 [node name="ScanFaultsLabel" type="Label" parent="ScanTelemetryMargin/ScanPanel/ScanMargin/ScanVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.3, 0.2, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "FAULTS: None Detected"
 autowrap_mode = 2
 
@@ -340,10 +272,9 @@ autowrap_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "RECOMMENDED: Nominal"
 autowrap_mode = 2
-
 
 [node name="BottomRightMargin" type="MarginContainer" parent="."]
 anchors_preset = 3
@@ -351,18 +282,18 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -300.0
-offset_top = -60.0
+offset_left = -280.0
+offset_top = -54.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
 
 [node name="SchematicPromptLabel" type="Label" parent="BottomRightMargin"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 0.85)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 text = "[M] Tactical Schematic"
 horizontal_alignment = 2
 
@@ -384,7 +315,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 text = "Notification"
 horizontal_alignment = 1
 
