@@ -2,29 +2,24 @@ class_name HUDController
 extends CanvasLayer
 
 # HUD Controller for ORBITAL: The Last Engineer
-# Displays reticle, interaction prompt, mission tracker, environmental telemetry, status effects, and inventory.
+# Milestone 6: Compact gameplay HUD with upper-right INFO option, bottom-left compact gear,
+# upper-left immediate task display, decreased prompt sizing at object bottom, and paused telemetry.
 
 @onready var prompt_label: Label = %PromptLabel
 @onready var objective_title_lbl: Label = %ObjectiveTitle
-@onready var objective_desc_lbl: Label = %ObjectiveDesc
-@onready var o2_bar: ProgressBar = %OxygenBar
-@onready var o2_status_lbl: Label = %OxygenStatusLabel
-@onready var inventory_lbl: Label = %InventoryLabel
+@onready var immediate_task_lbl: Label = get_node_or_null("%ImmediateTaskLabel")
+@onready var objective_desc_lbl: Label = get_node_or_null("%ObjectiveDesc")
 @onready var notification_lbl: Label = %NotificationLabel
 
-# Milestone 2 Environmental & Status UI
-@onready var location_lbl: Label = get_node_or_null("%LocationLabel")
-@onready var co2_status_lbl: Label = get_node_or_null("%CO2StatusLabel")
-@onready var metrics_lbl: Label = get_node_or_null("%AtmosphereMetricsLabel")
-@onready var hazard_lbl: Label = get_node_or_null("%HazardLabel")
+# Milestone 6 UI Controls
+@onready var info_btn: Button = get_node_or_null("%InfoButton")
+@onready var compact_gear_lbl: Label = get_node_or_null("%CompactGearLabel")
 @onready var overlay_rect: ColorRect = get_node_or_null("%StatusEffectOverlay")
 
-# Milestone 3 Tool & Resource UI
-@onready var equipped_tool_lbl: Label = get_node_or_null("%EquippedToolLabel")
-@onready var scanner_charge_bar: ProgressBar = get_node_or_null("%ScannerChargeBar")
-@onready var scanner_charge_lbl: Label = get_node_or_null("%ScannerChargeLabel")
-@onready var resource_tally_lbl: Label = get_node_or_null("%ResourceTallyLabel")
-@onready var quick_slots_lbl: Label = get_node_or_null("%QuickSlotsLabel")
+# Tutorial UI
+@onready var tutorial_margin: MarginContainer = get_node_or_null("%TutorialMargin")
+@onready var tutorial_title_lbl: Label = get_node_or_null("%TutorialTitleLabel")
+@onready var tutorial_desc_lbl: Label = get_node_or_null("%TutorialDescLabel")
 
 # Scanner Telemetry Card
 @onready var scan_telemetry_margin: MarginContainer = get_node_or_null("%ScanTelemetryMargin")
@@ -35,11 +30,69 @@ extends CanvasLayer
 @onready var scan_action_lbl: Label = get_node_or_null("%ScanActionLabel")
 
 @onready var ship_schematic: Control = get_node_or_null("ShipSchematic")
+@onready var pause_menu: PauseMenu = get_node_or_null("PauseMenu")
 
-# Tutorial UI
-@onready var tutorial_margin: MarginContainer = get_node_or_null("%TutorialMargin")
-@onready var tutorial_title_lbl: Label = get_node_or_null("%TutorialTitleLabel")
-@onready var tutorial_desc_lbl: Label = get_node_or_null("%TutorialDescLabel")
+# Legacy compatibility properties for tests or direct references
+var o2_bar: ProgressBar:
+	get:
+		if pause_menu != null and "o2_bar" in pause_menu:
+			return pause_menu.o2_bar
+		return null
+var o2_status_lbl: Label:
+	get:
+		if pause_menu != null and "o2_status_lbl" in pause_menu:
+			return pause_menu.o2_status_lbl
+		return null
+var inventory_lbl: Label:
+	get:
+		if pause_menu != null and "inventory_lbl" in pause_menu:
+			return pause_menu.inventory_lbl
+		return null
+var location_lbl: Label:
+	get:
+		if pause_menu != null and "location_lbl" in pause_menu:
+			return pause_menu.location_lbl
+		return null
+var co2_status_lbl: Label:
+	get:
+		if pause_menu != null and "co2_status_lbl" in pause_menu:
+			return pause_menu.co2_status_lbl
+		return null
+var metrics_lbl: Label:
+	get:
+		if pause_menu != null and "metrics_lbl" in pause_menu:
+			return pause_menu.metrics_lbl
+		return null
+var hazard_lbl: Label:
+	get:
+		if pause_menu != null and "hazard_lbl" in pause_menu:
+			return pause_menu.hazard_lbl
+		return null
+var equipped_tool_lbl: Label:
+	get:
+		if pause_menu != null and "equipped_tool_lbl" in pause_menu:
+			return pause_menu.equipped_tool_lbl
+		return null
+var scanner_charge_bar: ProgressBar:
+	get:
+		if pause_menu != null and "scanner_charge_bar" in pause_menu:
+			return pause_menu.scanner_charge_bar
+		return null
+var scanner_charge_lbl: Label:
+	get:
+		if pause_menu != null and "scanner_charge_lbl" in pause_menu:
+			return pause_menu.scanner_charge_lbl
+		return null
+var resource_tally_lbl: Label:
+	get:
+		if pause_menu != null and "resource_tally_lbl" in pause_menu:
+			return pause_menu.resource_tally_lbl
+		return null
+var quick_slots_lbl: Label:
+	get:
+		if pause_menu != null and "quick_slots_lbl" in pause_menu:
+			return pause_menu.quick_slots_lbl
+		return null
 
 var _notif_timer: SceneTreeTimer
 var _notif_seq: int = 0
@@ -50,6 +103,9 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	prompt_label.text = ""
 	notification_lbl.text = ""
+	
+	if info_btn != null:
+		info_btn.pressed.connect(toggle_info)
 	
 	# Connect to MissionManager signals
 	MissionManager.objective_updated.connect(_on_objective_updated)
@@ -87,13 +143,20 @@ func _ready() -> void:
 	
 	# Initial mission sync
 	var cur_obj := MissionManager.get_current_objective()
-	_on_objective_updated(MissionManager.current_objective_index, cur_obj["title"], cur_obj["desc"])
+	_on_objective_updated(MissionManager.current_objective_index, cur_obj.get("title", ""), cur_obj.get("desc", ""))
 	_on_inventory_changed(MissionManager.inventory)
 
-
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_M:
-		toggle_schematic()
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_M:
+			toggle_schematic()
+		elif event.keycode == KEY_TAB or event.keycode == KEY_I:
+			get_viewport().set_input_as_handled()
+			toggle_info()
+
+func toggle_info() -> void:
+	if pause_menu != null and pause_menu.has_method("toggle_pause"):
+		pause_menu.toggle_pause()
 
 func toggle_schematic() -> void:
 	if ship_schematic != null:
@@ -103,7 +166,6 @@ func toggle_schematic() -> void:
 			else:
 				ship_schematic.visible = false
 		else:
-			var pause_menu = get_node_or_null("PauseMenu")
 			var terminal_dialog = get_node_or_null("TerminalDialog")
 			if (pause_menu == null or not pause_menu.visible) and (terminal_dialog == null or not terminal_dialog.visible):
 				if ship_schematic.has_method("open_schematic"):
@@ -115,59 +177,21 @@ func set_prompt(text: String) -> void:
 	prompt_label.text = text
 
 func update_oxygen(level: float, is_depleting: bool) -> void:
-	o2_bar.value = level
-	if is_depleting:
-		o2_status_lbl.text = "O2 LEVEL: %d%% [VENTING - SCRUBBER OFFLINE]" % int(level)
-		if level < 25.0:
-			o2_status_lbl.add_theme_color_override("font_color", Color(1.0, 0.1, 0.1))
-		else:
-			o2_status_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.2))
-	else:
-		o2_status_lbl.text = "O2 LEVEL: %d%% [STABLE - SCRUBBER NOMINAL]" % int(level)
-		o2_status_lbl.add_theme_color_override("font_color", Color(0.2, 0.9, 0.4))
+	if pause_menu != null and pause_menu.has_method("update_oxygen"):
+		pause_menu.update_oxygen(level, is_depleting)
 
 func update_player_status(afflictions: Array[String], telem: Dictionary) -> void:
-	# 1. Location badge
-	if location_lbl != null:
-		var cname: String = str(telem.get("compartment_name", "Ship Interior")).to_upper()
-		location_lbl.text = "LOCATION: %s" % cname
+	if pause_menu != null and pause_menu.has_method("update_player_status"):
+		pause_menu.update_player_status(afflictions, telem)
 	
-	# 2. CO2 readout
-	var co2: float = float(telem.get("co2_ppm", 420.0))
-	if co2_status_lbl != null:
-		if co2 > 2500.0:
-			co2_status_lbl.text = "CO2: %d ppm [CRITICAL TOXICITY]" % int(co2)
-			co2_status_lbl.add_theme_color_override("font_color", Color(1.0, 0.2, 0.1))
-		elif co2 > 1200.0:
-			co2_status_lbl.text = "CO2: %d ppm [ELEVATED / CAUTION]" % int(co2)
-			co2_status_lbl.add_theme_color_override("font_color", Color(1.0, 0.75, 0.2))
-		else:
-			co2_status_lbl.text = "CO2: %d ppm [NOMINAL]" % int(co2)
-			co2_status_lbl.add_theme_color_override("font_color", Color(0.2, 0.9, 0.4))
-	
-	# 3. Temp & Pressure
-	var temp_c: float = float(telem.get("temperature_c", 21.0))
-	var press: float = float(telem.get("pressure_kpa", 101.3))
-	if metrics_lbl != null:
-		metrics_lbl.text = "TEMP: %.1f°C | PRESS: %.1f kPa" % [temp_c, press]
-		if temp_c < 10.0 or temp_c > 38.0 or press < 75.0:
-			metrics_lbl.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2))
-		else:
-			metrics_lbl.add_theme_color_override("font_color", Color(0.8, 0.85, 0.95))
-	
-	# 4. Hazard badge
-	if hazard_lbl != null:
+	if info_btn != null:
 		if afflictions.is_empty():
-			hazard_lbl.text = "STATUS: SAFE [ALL NOMINAL]"
-			hazard_lbl.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
+			info_btn.text = "[TAB] INFO"
+			info_btn.add_theme_color_override("font_color", Color(0.3, 0.85, 1.0))
 		else:
-			var hazard_names := []
-			for aff in afflictions:
-				hazard_names.append("[%s]" % aff)
-			hazard_lbl.text = "HAZARD: " + " ".join(hazard_names)
-			hazard_lbl.add_theme_color_override("font_color", Color(1.0, 0.2, 0.1))
+			info_btn.text = "[TAB] INFO [!]"
+			info_btn.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2))
 	
-	# 5. Vignette & Status Effect Shader Overlay
 	_update_status_overlay(afflictions)
 
 func _update_status_overlay(afflictions: Array[String]) -> void:
@@ -184,7 +208,6 @@ func _update_status_overlay(afflictions: Array[String]) -> void:
 		mat.set_shader_parameter("pulse_speed", 0.0)
 		return
 	
-	# Prioritized affliction presentation
 	if afflictions.has("DECOMPRESSION"):
 		mat.set_shader_parameter("strength", 0.72)
 		mat.set_shader_parameter("tint_color", Color(0.85, 0.1, 0.1, 0.85))
@@ -212,26 +235,25 @@ func _update_status_overlay(afflictions: Array[String]) -> void:
 		mat.set_shader_parameter("distortion", 0.0)
 
 func _on_objective_updated(idx: int, title: String, desc: String) -> void:
-	objective_title_lbl.text = "MISSION %d: %s" % [idx + 1, title.to_upper()]
-	objective_desc_lbl.text = desc
+	if objective_title_lbl != null:
+		objective_title_lbl.text = "MISSION %d: %s" % [idx + 1, title.to_upper()]
+	
+	var cur_obj := MissionManager.get_current_objective()
+	var immediate_task: String = str(cur_obj.get("immediate_task", "Follow Mission Directives"))
+	if immediate_task_lbl != null:
+		immediate_task_lbl.text = "IMMEDIATE TASK: %s" % immediate_task
+	if objective_desc_lbl != null:
+		objective_desc_lbl.text = immediate_task
+	
+	if pause_menu != null and pause_menu.has_method("update_mission"):
+		pause_menu.update_mission(idx, title, immediate_task, desc)
 
-func _on_objective_completed(idx: int, title: String) -> void:
+func _on_objective_completed(_idx: int, title: String) -> void:
 	show_notification("OBJECTIVE COMPLETED: %s" % title, 4.0)
 
 func _on_inventory_changed(items: Array[String]) -> void:
-	if items.is_empty():
-		inventory_lbl.text = "INVENTORY: [ Empty ]"
-	else:
-		var display_names := []
-		for item in items:
-			match item:
-				"coolant_coupler":
-					display_names.append("Coolant Coupler")
-				"scrubber_cartridge":
-					display_names.append("Scrubber Cartridge")
-				_:
-					display_names.append(item)
-		inventory_lbl.text = "INVENTORY: [ " + ", ".join(display_names) + " ]"
+	if pause_menu != null and pause_menu.has_method("update_inventory"):
+		pause_menu.update_inventory(items)
 
 func show_notification(msg: String, duration: float = 3.0) -> void:
 	notification_lbl.text = msg
@@ -264,12 +286,8 @@ func hide_tutorial() -> void:
 	if tutorial_margin != null:
 		tutorial_margin.visible = false
 
-func _on_battery_changed(cur: float, max_charge: float) -> void:
-	if scanner_charge_bar != null:
-		scanner_charge_bar.max_value = max_charge
-		scanner_charge_bar.value = cur
-	if scanner_charge_lbl != null:
-		scanner_charge_lbl.text = "SCANNER: %d%%" % int(cur)
+func _on_battery_changed(cur: float, _max_charge: float) -> void:
+	_update_tool_and_resource_hud()
 
 func _on_multitool_mode_changed(_mode: String) -> void:
 	_update_tool_and_resource_hud()
@@ -279,45 +297,30 @@ func _update_tool_and_resource_hud() -> void:
 		return
 	var im = get_node("/root/InventoryManager")
 	var equipped: String = im.get_equipped_item_id()
+	var battery: float = im.get_scanner_battery()
+	var mode: String = im.get_multitool_mode().capitalize()
 	
-	if equipped_tool_lbl != null:
+	if compact_gear_lbl != null:
 		match equipped:
 			"diagnostic_scanner":
-				equipped_tool_lbl.text = "EQUIPPED: [1] Diagnostic Scanner [Charge: %d%%]" % int(im.get_scanner_battery())
-				equipped_tool_lbl.add_theme_color_override("font_color", Color(0.2, 0.85, 1.0))
+				compact_gear_lbl.text = "[1] SCANNER (%d%%)  [2] Multitool  |  [TAB] Full Info" % int(battery)
 			"multitool":
-				var mode: String = im.get_multitool_mode()
-				equipped_tool_lbl.text = "EQUIPPED: [2] Multitool / Welder [%s MODE]" % mode
-				equipped_tool_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.2))
+				compact_gear_lbl.text = "[1] Scanner  [2] MULTITOOL (%s)  |  [TAB] Full Info" % mode
 			"spare_fuse":
-				equipped_tool_lbl.text = "EQUIPPED: [3] Spare Fuse Pack (Qty: %d)" % im.get_item_count("spare_fuse")
-				equipped_tool_lbl.add_theme_color_override("font_color", Color(0.9, 0.9, 0.3))
+				compact_gear_lbl.text = "[3] FUSE PACK (Qty: %d)  |  [TAB] Full Info" % im.get_item_count("spare_fuse")
 			"battery_cell":
-				equipped_tool_lbl.text = "EQUIPPED: [4] Portable Battery Cell (Qty: %d)" % im.get_item_count("battery_cell")
-				equipped_tool_lbl.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+				compact_gear_lbl.text = "[4] BATTERY CELL (Qty: %d)  |  [TAB] Full Info" % im.get_item_count("battery_cell")
 			_:
-				equipped_tool_lbl.text = "EQUIPPED: [ Hands / Unequipped ]"
-				equipped_tool_lbl.add_theme_color_override("font_color", Color(0.7, 0.75, 0.8))
+				compact_gear_lbl.text = "[1] Scanner  [2] Multitool (%s)  |  [TAB] Full Info & Gear" % mode
 	
-	if scanner_charge_bar != null:
-		scanner_charge_bar.value = im.get_scanner_battery()
-		scanner_charge_bar.visible = (equipped == "diagnostic_scanner")
-	if scanner_charge_lbl != null:
-		scanner_charge_lbl.visible = (equipped == "diagnostic_scanner")
-		scanner_charge_lbl.text = "SCANNER: %d%%" % int(im.get_scanner_battery())
-	
-	if resource_tally_lbl != null:
-		resource_tally_lbl.text = "FUSES: %d | COOLANT: %d | FILTERS: %d | CELLS: %d" % [
-			im.get_item_count("spare_fuse"),
-			im.get_item_count("coolant_canister"),
-			im.get_item_count("scrubber_cartridge"),
-			im.get_item_count("battery_cell")
-		]
-	
-	if quick_slots_lbl != null:
-		var mode_str: String = str(im.get_multitool_mode()).capitalize()
-		quick_slots_lbl.text = "[1] Scanner  [2] Multitool (%s)  [3] Parts  [4] Recharge" % mode_str
-
+	if pause_menu != null and pause_menu.has_method("update_gear"):
+		var res: Dictionary = {
+			"spare_fuse": im.get_item_count("spare_fuse"),
+			"coolant_canister": im.get_item_count("coolant_canister"),
+			"scrubber_cartridge": im.get_item_count("scrubber_cartridge"),
+			"battery_cell": im.get_item_count("battery_cell")
+		}
+		pause_menu.update_gear(equipped, battery, res)
 
 func display_scan_telemetry(data: Dictionary) -> void:
 	if scan_telemetry_margin == null:
@@ -372,4 +375,3 @@ func display_scan_telemetry(data: Dictionary) -> void:
 		if is_instance_valid(scan_telemetry_margin):
 			scan_telemetry_margin.visible = false
 	)
-
