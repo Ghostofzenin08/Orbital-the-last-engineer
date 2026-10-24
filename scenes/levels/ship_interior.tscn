@@ -2010,6 +2010,12 @@ stored_items = {
 "battery_cell": 2
 }
 
+[node name="DecontaminationPoisonGasValve" parent="Compartments/AirlockChamber" instance=ExtResource("12_valve")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 13.7, 1.4, 6.5)
+valve_type = "poison_gas"
+valve_name = "Decontamination Poison Gas Valve"
+device_id = "decon_poison_valve"
+
 [node name="Lights" type="Node3D" parent="Compartments/AirlockChamber"]
 
 [node name="LightAirlock" type="OmniLight3D" parent="Compartments/AirlockChamber/Lights"]
