@@ -1,4 +1,4 @@
-[gd_scene load_steps=76 format=3]
+[gd_scene load_steps=77 format=3]
 
 [ext_resource type="Script" path="res://scripts/levels/ship_interior.gd" id="1_level"]
 [ext_resource type="Script" path="res://scripts/systems/environmental_manager.gd" id="2_env"]
@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" path="res://scenes/interactables/airlock_controller.tscn" id="16_airlock"]
 [ext_resource type="PackedScene" path="res://scenes/interactables/salvage_crate.tscn" id="17_crate"]
 [ext_resource type="PackedScene" path="res://scenes/interactables/hull_breach_seal.tscn" id="18_breach"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/datapad_pickup.tscn" id="19_datapad"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.18, 0.2, 0.24, 1)
@@ -2220,3 +2221,74 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.4, 18)
 light_color = Color(1, 0.1, 0.1, 1)
 light_energy = 1.0
 omni_range = 6.0
+
+[node name="DatapadEngVasquez" parent="Compartments/EngineeringBay" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 1.0, 14.2)
+datapad_id = "datapad_eng_vasquez"
+datapad_title = "Vasquez's Harmonic Log Slate"
+is_encrypted = false
+requires_scanner_to_decrypt = false
+
+[node name="DatapadSubdeckThrottle" parent="Compartments/ReactorSubdeck" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2, -1.5, 26.5)
+datapad_id = "datapad_subdeck_throttle"
+datapad_title = "Subdeck Throttle Override Slate"
+is_encrypted = false
+requires_scanner_to_decrypt = false
+
+[node name="DatapadAvionicsTelemetry" parent="Compartments/AvionicsBay" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 1.0, -16.0)
+datapad_id = "datapad_avionics_telemetry"
+datapad_title = "Encrypted Avionics Telemetry Slate"
+is_encrypted = true
+requires_scanner_to_decrypt = true
+
+[node name="DatapadLsContamination" parent="Compartments/LifeSupport" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1.0, 1.8)
+datapad_id = "datapad_ls_contamination"
+datapad_title = "Spore Filter Bio-Scan Slate"
+is_encrypted = false
+requires_scanner_to_decrypt = false
+
+[node name="DatapadCrewQuarantine" parent="Compartments/CrewQuarters" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 1.0, -6.5)
+datapad_id = "datapad_crew_quarantine"
+datapad_title = "Habitation Quarantine Notice Slate"
+is_encrypted = false
+requires_scanner_to_decrypt = false
+
+[node name="DatapadMedbayAutopsy" parent="Compartments/Medbay" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 1.0, -10.5)
+datapad_id = "datapad_medbay_autopsy"
+datapad_title = "Encrypted Autopsy & Triage Slate"
+is_encrypted = true
+requires_scanner_to_decrypt = true
+
+[node name="DatapadCargoManifest" parent="Compartments/CargoBay" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.5, 1.0, 10.5)
+datapad_id = "datapad_cargo_manifest"
+datapad_title = "Classified Payload Manifest Slate"
+is_encrypted = false
+requires_scanner_to_decrypt = false
+
+[node name="DatapadCrawlwayBlackbox" parent="Compartments/MaintenanceCrawlway" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, -0.6, 19.2)
+datapad_id = "datapad_crawlway_blackbox"
+datapad_title = "Jettisoned Blackbox Fragment Slate"
+is_encrypted = false
+requires_scanner_to_decrypt = false
+
+[node name="DatapadAirlockJettison" parent="Compartments/AirlockChamber" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 1.0, 11.8)
+datapad_id = "datapad_airlock_jettison"
+datapad_title = "Airlock Pod Jettison Slate"
+is_encrypted = false
+requires_scanner_to_decrypt = false
+
+[node name="DatapadBridgeDirective" parent="Compartments/Bridge" instance=ExtResource("19_datapad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 1.05, -15.0)
+datapad_id = "datapad_bridge_directive"
+datapad_title = "Encrypted Omega-9 Directive Slate"
+is_encrypted = true
+requires_scanner_to_decrypt = true
+
