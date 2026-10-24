@@ -1,0 +1,722 @@
+{
+  "reactor_primary": {
+    "name": "Fusion Turbine Generator",
+    "subsystem": "power",
+    "compartment": "engineering_bay",
+    "power_draw": 0.0,
+    "power_generation": 150.0,
+    "criticality": 1,
+    "health": 100.0,
+    "description": "Main fusion turbine delivering electrical potential to shipboard busses."
+  },
+  "distribution_bus": {
+    "name": "Main Electrical Distribution Bus",
+    "subsystem": "power",
+    "compartment": "engineering_bay",
+    "power_draw": 5.0,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 100.0,
+    "description": "High-voltage routing conduits powering life support, doors, and consoles."
+  },
+  "life_support_scrubber": {
+    "name": "Atmospheric Scrubber & Circulation Loop",
+    "subsystem": "life_support",
+    "compartment": "life_support",
+    "power_draw": 25.0,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 40.0,
+    "description": "Circulates and scrubs CO2, maintaining 1.0 ATM breathable atmosphere."
+  },
+  "coolant_pump": {
+    "name": "Coolant Circulation Manifold",
+    "subsystem": "coolant",
+    "compartment": "life_support",
+    "power_draw": 6.0,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 35.0,
+    "description": "Circulates liquid coolant between atmospheric heat exchangers and reactor core."
+  },
+  "door_aft": {
+    "name": "Engineering Bulkhead Door",
+    "subsystem": "doors",
+    "compartment": "corridors",
+    "power_draw": 3.0,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized pressure door between Engineering Bay and Central Corridor."
+  },
+  "door_fwd": {
+    "name": "Bridge Bulkhead Door",
+    "subsystem": "doors",
+    "compartment": "corridors",
+    "power_draw": 3.0,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized pressure door between Central Corridor and Bridge."
+  },
+  "door_wing_port": {
+    "name": "Port Wing Bulkhead Door",
+    "subsystem": "doors",
+    "compartment": "corridors",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Bulkhead door isolating port wing modules (Crew Quarters & Cargo Bay)."
+  },
+  "door_wing_starboard": {
+    "name": "Starboard Wing Bulkhead Door",
+    "subsystem": "doors",
+    "compartment": "corridors",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Bulkhead door isolating starboard wing modules (Medbay & Airlock)."
+  },
+  "door_avionics": {
+    "name": "Avionics Server Vault Door",
+    "subsystem": "doors",
+    "compartment": "avionics_bay",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Heavy hermetic door isolating server core and avionics bay from bridge."
+  },
+  "door_crew": {
+    "name": "Crew Quarters Bulkhead Door",
+    "subsystem": "doors",
+    "compartment": "crew_quarters",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized acoustic pressure door to crew habitation quarters."
+  },
+  "door_medbay": {
+    "name": "Medbay Infirmary Door",
+    "subsystem": "doors",
+    "compartment": "medbay",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Sanitized hermetic door to medical infirmary."
+  },
+  "door_cargo": {
+    "name": "Cargo Bay Staging Door",
+    "subsystem": "doors",
+    "compartment": "cargo_bay",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Reinforced sliding cargo bulkhead door."
+  },
+  "airlock_inner": {
+    "name": "Airlock Inner Bulkhead Door",
+    "subsystem": "doors",
+    "compartment": "airlock_chamber",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 100.0,
+    "description": "Inner interlocking pressure door connecting airlock chamber to corridors."
+  },
+  "airlock_outer": {
+    "name": "Airlock Outer EVA Door",
+    "subsystem": "doors",
+    "compartment": "airlock_chamber",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 100.0,
+    "description": "Outer vacuum-rated EVA ingress/egress airlock door."
+  },
+  "door_subdeck": {
+    "name": "Reactor Subdeck Access Hatch",
+    "subsystem": "doors",
+    "compartment": "reactor_subdeck",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized deck hatch leading to reactor subdeck and fuel vault."
+  },
+  "door_crawlway_cargo": {
+    "name": "Cargo Bay Maintenance Crawlway Hatch",
+    "subsystem": "doors",
+    "compartment": "maintenance_crawlway",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Sealed utility hatch accessing maintenance crawlway from cargo bay."
+  },
+  "door_crawlway_eng": {
+    "name": "Engineering Maintenance Crawlway Hatch",
+    "subsystem": "doors",
+    "compartment": "maintenance_crawlway",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Sealed utility hatch accessing maintenance crawlway from engineering."
+  },
+  "eng_terminal": {
+    "name": "Engineering Diagnostics Console",
+    "subsystem": "computer_network",
+    "compartment": "engineering_bay",
+    "power_draw": 3.0,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Local workstation for engineering diagnostics and breaker telemetry."
+  },
+  "ls_terminal": {
+    "name": "Atmospheric Diagnostics Console",
+    "subsystem": "computer_network",
+    "compartment": "life_support",
+    "power_draw": 3.0,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental monitoring console for oxygen and scrubber status."
+  },
+  "bridge_terminal": {
+    "name": "Bridge Communications Console",
+    "subsystem": "computer_network",
+    "compartment": "bridge",
+    "power_draw": 3.0,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Command terminal managing crew logs and long-range communications."
+  },
+  "comms_array": {
+    "name": "Sub-Space Transceiver Array",
+    "subsystem": "communications",
+    "compartment": "bridge",
+    "power_draw": 15.0,
+    "power_generation": 0.0,
+    "criticality": 3,
+    "health": 75.0,
+    "description": "Quantum communications transceiver and distress beacon transmitter."
+  },
+  "ion_propulsion": {
+    "name": "Sub-Orbital Ion Thruster Bank",
+    "subsystem": "propulsion",
+    "compartment": "bridge",
+    "power_draw": 60.0,
+    "power_generation": 0.0,
+    "criticality": 3,
+    "health": 100.0,
+    "description": "Reaction mass thrusters required for orbital escape trajectory."
+  },
+  "lighting_engineering": {
+    "name": "Engineering Compartment Lighting",
+    "subsystem": "power",
+    "compartment": "engineering_bay",
+    "power_draw": 0.8,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Overhead illumination for reactor bay."
+  },
+  "lighting_corridor": {
+    "name": "Corridor Compartment Lighting",
+    "subsystem": "power",
+    "compartment": "corridors",
+    "power_draw": 0.8,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Overhead illumination for connecting corridors."
+  },
+  "lighting_life_support": {
+    "name": "Life Support Compartment Lighting",
+    "subsystem": "power",
+    "compartment": "life_support",
+    "power_draw": 0.8,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Overhead illumination for atmospheric scrubber chamber."
+  },
+  "lighting_bridge": {
+    "name": "Bridge Compartment Lighting",
+    "subsystem": "power",
+    "compartment": "bridge",
+    "power_draw": 0.8,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Overhead illumination and holotable projector."
+  },
+  "lighting_avionics": {
+    "name": "Avionics Bay Lighting",
+    "subsystem": "power",
+    "compartment": "avionics_bay",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Deep blue overhead illumination for optical server racks."
+  },
+  "lighting_crew": {
+    "name": "Crew Quarters Lighting",
+    "subsystem": "power",
+    "compartment": "crew_quarters",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Warm amber overhead illumination for crew habitation bunks."
+  },
+  "lighting_medbay": {
+    "name": "Medbay Infirmary Lighting",
+    "subsystem": "power",
+    "compartment": "medbay",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Clean white surgical illumination for infirmary and trauma beds."
+  },
+  "lighting_cargo": {
+    "name": "Cargo Bay Lighting",
+    "subsystem": "power",
+    "compartment": "cargo_bay",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Industrial orange floodlights for cargo staging and hoist."
+  },
+  "lighting_airlock": {
+    "name": "Airlock Chamber Lighting",
+    "subsystem": "power",
+    "compartment": "airlock_chamber",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "High-contrast hazard yellow/black illumination for EVA staging."
+  },
+  "lighting_subdeck": {
+    "name": "Reactor Subdeck Lighting",
+    "subsystem": "power",
+    "compartment": "reactor_subdeck",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Crimson illumination for auxiliary fuel manifold and battery vaults."
+  },
+  "lighting_crawlway": {
+    "name": "Maintenance Crawlway Hazard Beacon",
+    "subsystem": "power",
+    "compartment": "maintenance_crawlway",
+    "power_draw": 0.1,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Flashing red warning beacons along breached maintenance crawlway."
+  },
+  "ls_o2_generator": {
+    "name": "Solid-State Oxygen Generator",
+    "subsystem": "life_support",
+    "compartment": "life_support",
+    "power_draw": 2.5,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 100.0,
+    "description": "Electrolysis and chemical oxygen candle generator maintaining cabin partial pressure."
+  },
+  "ls_scrubber_aux": {
+    "name": "Secondary CO2 Scrubber Bank",
+    "subsystem": "life_support",
+    "compartment": "life_support",
+    "power_draw": 2.0,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 100.0,
+    "description": "Auxiliary amine absorption bed scrubbing carbon dioxide."
+  },
+  "climate_thermal_exchanger": {
+    "name": "Atmospheric Climate Heat Exchanger",
+    "subsystem": "coolant",
+    "compartment": "life_support",
+    "power_draw": 2.0,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 100.0,
+    "description": "Circulates heating and cooling fluids through cabin ventilation ducts to maintain 21°C."
+  },
+  "atmospheric_pressure_regulator": {
+    "name": "Cabin Pressure Regulator & Manifold",
+    "subsystem": "life_support",
+    "compartment": "life_support",
+    "power_draw": 1.5,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 100.0,
+    "description": "Regulates total cabin atmospheric pressure to nominal 101.3 kPa."
+  },
+  "pressure_relief_valve": {
+    "name": "Emergency Atmospheric Isolation Valve",
+    "subsystem": "life_support",
+    "compartment": "life_support",
+    "power_draw": 0.0,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Manual shutoff valve to isolate ruptured pressure lines."
+  },
+  "radiator_bypass_valve": {
+    "name": "Radiator Cooling Bypass Valve",
+    "subsystem": "coolant",
+    "compartment": "life_support",
+    "power_draw": 0.0,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Manual mechanical valve to reset cooling loops during thermal runaway."
+  },
+  "vent_damper_eng": {
+    "name": "Engineering Bay Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "engineering_bay",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized airflow damper regulating ventilation between Engineering Bay and ducts."
+  },
+  "vent_damper_corr": {
+    "name": "Corridor Bulkhead Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "corridors",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized airflow damper regulating ventilation in connecting corridors."
+  },
+  "vent_damper_ls": {
+    "name": "Life Support Module Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "life_support",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized airflow damper regulating ventilation in Life Support module."
+  },
+  "vent_damper_bridge": {
+    "name": "Bridge Command Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "bridge",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized airflow damper regulating ventilation to Bridge avionics and helm."
+  },
+  "vent_damper_avionics": {
+    "name": "Avionics Bay Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "avionics_bay",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized airflow damper cooling optical avionics server core."
+  },
+  "vent_damper_crew": {
+    "name": "Crew Quarters Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "crew_quarters",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized airflow damper regulating ventilation to crew habitation quarters."
+  },
+  "vent_damper_medbay": {
+    "name": "Medbay Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "medbay",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized airflow damper regulating filtered ventilation to medical infirmary."
+  },
+  "vent_damper_cargo": {
+    "name": "Cargo Bay Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "cargo_bay",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized airflow damper regulating ventilation in cargo hold."
+  },
+  "vent_damper_airlock": {
+    "name": "Airlock Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "airlock_chamber",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Airflow damper isolating airlock chamber from shipboard ventilation."
+  },
+  "vent_damper_subdeck": {
+    "name": "Reactor Subdeck Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "reactor_subdeck",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Motorized airflow damper regulating ventilation in reactor subdeck."
+  },
+  "vent_damper_crawlway": {
+    "name": "Maintenance Crawlway Vent Damper",
+    "subsystem": "life_support",
+    "compartment": "maintenance_crawlway",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Damper isolating breached crawlway from main air duct distribution."
+  },
+  "env_sensor_eng": {
+    "name": "Engineering Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "engineering_bay",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_corr": {
+    "name": "Corridor Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "corridors",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_ls": {
+    "name": "Life Support Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "life_support",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_bridge": {
+    "name": "Bridge Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "bridge",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_avionics": {
+    "name": "Avionics Bay Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "avionics_bay",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_crew": {
+    "name": "Crew Quarters Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "crew_quarters",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_medbay": {
+    "name": "Medbay Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "medbay",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_cargo": {
+    "name": "Cargo Bay Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "cargo_bay",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_airlock": {
+    "name": "Airlock Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "airlock_chamber",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_subdeck": {
+    "name": "Reactor Subdeck Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "reactor_subdeck",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "env_sensor_crawlway": {
+    "name": "Maintenance Crawlway Atmospheric Sensor",
+    "subsystem": "computer_network",
+    "compartment": "maintenance_crawlway",
+    "power_draw": 0.05,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 100.0,
+    "description": "Environmental sensor array measuring O2, CO2, temperature, and barometric pressure."
+  },
+  "training_power_conduit": {
+    "name": "Auxiliary Power Conduit Manifold",
+    "subsystem": "power",
+    "compartment": "engineering_bay",
+    "power_draw": 0.5,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 25.0,
+    "description": "Auxiliary power distribution circuit and fuse junction in Engineering Bay."
+  },
+  "coolant_distribution_manifold": {
+    "name": "Coolant Distribution Manifold",
+    "subsystem": "coolant",
+    "compartment": "life_support",
+    "power_draw": 0.5,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 30.0,
+    "description": "High-pressure coolant routing header with pneumatic clamp fittings."
+  },
+  "avionics_relay_bank": {
+    "name": "Flight Avionics Relay Bank",
+    "subsystem": "computer_network",
+    "compartment": "avionics_bay",
+    "power_draw": 0.5,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 35.0,
+    "description": "Avionics switching matrix and flight computer isolation relays."
+  },
+  "water_recycler_pump": {
+    "name": "Hydroponic Water Recycler Pump",
+    "subsystem": "life_support",
+    "compartment": "crew_quarters",
+    "power_draw": 0.5,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 80.0,
+    "description": "Hydroponic greywater recycler and hydration dispenser pump in Crew Quarters."
+  },
+  "medical_oxygen_booster": {
+    "name": "Medical Oxygen Booster Unit",
+    "subsystem": "life_support",
+    "compartment": "medbay",
+    "power_draw": 0.5,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 85.0,
+    "description": "Hyperbaric synthesis manifold dispensing high-purity medical oxygen."
+  },
+  "cargo_hoist_junction": {
+    "name": "Hydraulic Cargo Hoist Junction",
+    "subsystem": "power",
+    "compartment": "cargo_bay",
+    "power_draw": 0.5,
+    "power_generation": 0.0,
+    "criticality": 2,
+    "health": 70.0,
+    "description": "Overhead gantry crane hydraulic actuator and high-voltage circuit box."
+  },
+  "salvage_crate": {
+    "name": "Sealed Salvage Container",
+    "subsystem": "structural",
+    "compartment": "cargo_bay",
+    "power_draw": 0.0,
+    "power_generation": 0.0,
+    "criticality": 3,
+    "health": 50.0,
+    "description": "Sealed titanium salvage container with weld-cutting seams."
+  },
+  "airlock_cycle_controller": {
+    "name": "Airlock Pressure Cycle Controller",
+    "subsystem": "life_support",
+    "compartment": "airlock_chamber",
+    "power_draw": 0.5,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 100.0,
+    "description": "Dual-chamber pressure cycling controller with safety interlocks."
+  },
+  "aux_fuel_valve": {
+    "name": "Auxiliary Fuel Flow Valve",
+    "subsystem": "fuel",
+    "compartment": "reactor_subdeck",
+    "power_draw": 0.2,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 90.0,
+    "description": "Manual deuterium-helium3 auxiliary flow manifold bypass valve."
+  },
+  "aux_battery_bank": {
+    "name": "Auxiliary Battery Reserve Bank",
+    "subsystem": "power",
+    "compartment": "reactor_subdeck",
+    "power_draw": 0.0,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 95.0,
+    "description": "Secondary solid-state energy storage cells supplying backup power."
+  },
+  "hull_breach_seal": {
+    "name": "Maintenance Crawlway Hull Breach",
+    "subsystem": "structural",
+    "compartment": "maintenance_crawlway",
+    "power_draw": 0.0,
+    "power_generation": 0.0,
+    "criticality": 1,
+    "health": 20.0,
+    "description": "Fractured titanium hull seam venting atmospheric pressure into space."
+  }
+}
