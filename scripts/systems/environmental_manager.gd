@@ -233,6 +233,38 @@ func initialize_atmosphere() -> void:
 			"scrubbers_active": true,
 			"o2_generators_active": true,
 			"active_hazards": []
+		},
+		"specimen_vault": {
+			"id": "specimen_vault",
+			"name": "Deep Specimen Containment Vault",
+			"volume_m3": 280.0,
+			"o2_level": 94.0,
+			"co2_ppm": 850.0,
+			"temperature": 288.15,
+			"pressure": 99.8,
+			"vents_open": true,
+			"leak_rate": 0.0,
+			"heaters_active": true,
+			"cooling_active": true,
+			"scrubbers_active": true,
+			"o2_generators_active": true,
+			"active_hazards": []
+		},
+		"research_observatory": {
+			"id": "research_observatory",
+			"name": "Bio-Research Observatory Dome",
+			"volume_m3": 340.0,
+			"o2_level": 100.0,
+			"co2_ppm": 410.0,
+			"temperature": 294.15,
+			"pressure": 101.3,
+			"vents_open": true,
+			"leak_rate": 0.0,
+			"heaters_active": true,
+			"cooling_active": true,
+			"scrubbers_active": true,
+			"o2_generators_active": true,
+			"active_hazards": []
 		}
 	}
 	
@@ -698,6 +730,14 @@ func get_compartment_for_position(pos: Vector3) -> String:
 	var x := pos.x
 	var z := pos.z
 	
+	# Specimen vault: z >= 34.0, x in [-10.0, 10.0]
+	if z >= 34.0 and x >= -10.0 and x <= 10.0:
+		return "specimen_vault"
+	
+	# Research observatory: z in [-28.0, -13.5], x <= -6.5
+	if z >= -28.0 and z <= -13.5 and x <= -6.5:
+		return "research_observatory"
+	
 	# Maintenance crawlway connects Cargo (x ≈ -10, z ≈ 14) to Subdeck/Eng (x ≈ -5, z ≈ 22)
 	# Evaluated before reactor_subdeck to correctly handle the west bypass entrance at z in [13.8, 23.0]
 	if z >= 13.8 and z <= 23.0 and x <= -3.0:
@@ -857,9 +897,15 @@ func reset_atmosphere() -> void:
 func get_compartment_atmosphere(cid: String) -> Dictionary:
 	return compartments.get(cid, {})
 
-func get_all_compartments(include_all: bool = false) -> Dictionary:
-	if include_all:
+func get_all_compartments(include_all: bool = false, include_m7: bool = false) -> Dictionary:
+	if include_all and include_m7:
 		return compartments
+	if include_all:
+		var m4_comps: Dictionary = {}
+		for cid in ["engineering_bay", "corridors", "life_support", "bridge", "avionics_bay", "crew_quarters", "medbay", "cargo_bay", "airlock_chamber", "reactor_subdeck", "maintenance_crawlway"]:
+			if compartments.has(cid):
+				m4_comps[cid] = compartments[cid]
+		return m4_comps
 	var core_comps: Dictionary = {}
 	for cid in ["engineering_bay", "corridors", "life_support", "bridge"]:
 		if compartments.has(cid):
