@@ -28,6 +28,15 @@ var power_routes: Dictionary = {} # destination: source
 var coolant_bypass_active: bool = false
 var manual_overrides: Dictionary = {}
 
+# Milestone 5: Narrative Revelation Gameplay Consequences
+var has_revelation_anomaly: bool = false
+var has_revelation_quarantine: bool = false
+var has_revelation_directive: bool = false
+var scrubber_efficiency_multiplier: float = 1.0
+var commander_override_code: String = ""
+var quarantine_lockout_cleared: bool = false
+var thruster_efficiency_boost: float = 1.0
+
 
 # Compartment definitions
 const COMPARTMENTS: Dictionary = {
@@ -112,6 +121,13 @@ func initialize_ship() -> void:
 	power_routes.clear()
 	coolant_bypass_active = false
 	manual_overrides.clear()
+	has_revelation_anomaly = false
+	has_revelation_quarantine = false
+	has_revelation_directive = false
+	scrubber_efficiency_multiplier = 1.0
+	commander_override_code = ""
+	quarantine_lockout_cleared = false
+	thruster_efficiency_boost = 1.0
 
 	
 	_create_subsystems()
@@ -824,9 +840,56 @@ func get_schematic_data() -> Dictionary:
 		"compartments": comp_statuses,
 		"active_faults_count": active_faults.size(),
 		"auxiliary_scrubber_active": auxiliary_scrubber_active,
+		"has_revelation_anomaly": has_revelation_anomaly,
+		"has_revelation_quarantine": has_revelation_quarantine,
+		"has_revelation_directive": has_revelation_directive,
+		"commander_override_code": commander_override_code,
 		"primary_warning": primary_warning,
 		"primary_action": primary_action
 	}
+
+func get_scrubber_efficiency_multiplier() -> float:
+	return scrubber_efficiency_multiplier
+
+func apply_revelation_bonus(revelation_id: String) -> Dictionary:
+	match revelation_id:
+		"revelation_anomaly":
+			has_revelation_anomaly = true
+			if power_system != null and power_system.has_method("set_harmonic_damping"):
+				power_system.set_harmonic_damping(true)
+			tick_systems(0.0)
+			return {
+				"ok": true,
+				"revelation_id": revelation_id,
+				"thermal_accumulation_multiplier": 0.85,
+				"auxiliary_headroom_kw": 10.0
+			}
+		"revelation_quarantine":
+			has_revelation_quarantine = true
+			scrubber_efficiency_multiplier = 1.20
+			tick_systems(0.0)
+			return {
+				"ok": true,
+				"revelation_id": revelation_id,
+				"scrubber_efficiency_multiplier": scrubber_efficiency_multiplier
+			}
+		"revelation_directive":
+			has_revelation_directive = true
+			commander_override_code = "7394-OMEGA"
+			quarantine_lockout_cleared = true
+			thruster_efficiency_boost = 1.25
+			var prop_dev = devices.get("ion_propulsion", null)
+			if prop_dev != null and "power_draw" in prop_dev:
+				prop_dev.power_draw = 48.0
+			tick_systems(0.0)
+			return {
+				"ok": true,
+				"revelation_id": revelation_id,
+				"commander_override_code": commander_override_code,
+				"quarantine_lockout_cleared": quarantine_lockout_cleared,
+				"thruster_efficiency_boost": thruster_efficiency_boost
+			}
+	return {"ok": false, "revelation_id": revelation_id}
 
 func reset_to_defaults() -> void:
 	initialize_ship()
@@ -864,7 +927,14 @@ func export_save_data() -> Dictionary:
 		"power_rerouted": power_rerouted,
 		"power_routes": power_routes.duplicate(),
 		"coolant_bypass_active": coolant_bypass_active,
-		"manual_overrides": manual_overrides.duplicate()
+		"manual_overrides": manual_overrides.duplicate(),
+		"has_revelation_anomaly": has_revelation_anomaly,
+		"has_revelation_quarantine": has_revelation_quarantine,
+		"has_revelation_directive": has_revelation_directive,
+		"scrubber_efficiency_multiplier": scrubber_efficiency_multiplier,
+		"commander_override_code": commander_override_code,
+		"quarantine_lockout_cleared": quarantine_lockout_cleared,
+		"thruster_efficiency_boost": thruster_efficiency_boost
 	}
 
 func import_save_data(data: Dictionary) -> void:
@@ -904,6 +974,18 @@ func import_save_data(data: Dictionary) -> void:
 		manual_overrides = data["manual_overrides"].duplicate()
 		for sub_id in manual_overrides.keys():
 			manual_override_subsystem(sub_id, bool(manual_overrides[sub_id]))
+	
+	has_revelation_anomaly = bool(data.get("has_revelation_anomaly", false))
+	if has_revelation_anomaly:
+		apply_revelation_bonus("revelation_anomaly")
+	
+	has_revelation_quarantine = bool(data.get("has_revelation_quarantine", false))
+	if has_revelation_quarantine:
+		apply_revelation_bonus("revelation_quarantine")
+	
+	has_revelation_directive = bool(data.get("has_revelation_directive", false))
+	if has_revelation_directive:
+		apply_revelation_bonus("revelation_directive")
 	
 	if data.has("active_fault_ids"):
 		var f_ids: Array = data["active_fault_ids"]
