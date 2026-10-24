@@ -19,6 +19,9 @@ extends Node3D
 @onready var airlock_lights: Node3D = get_node_or_null("Compartments/AirlockChamber/Lights")
 @onready var subdeck_lights: Node3D = get_node_or_null("Compartments/ReactorSubdeck/Lights")
 @onready var crawlway_lights: Node3D = get_node_or_null("Compartments/MaintenanceCrawlway/Lights")
+@onready var specimen_lights: Node3D = get_node_or_null("Compartments/SpecimenVault/Lights")
+@onready var observatory_lights: Node3D = get_node_or_null("Compartments/ResearchObservatory/Lights")
+@onready var alien_stalker: Node = get_node_or_null("Compartments/SpecimenVault/AlienStalker")
 
 # Doors
 @onready var door_eng_to_ls: BulkheadDoor = $Compartments/Corridors/DoorAft
@@ -55,11 +58,19 @@ func _ready() -> void:
 		var tut = DiagnosticTutorial.new()
 		tut.setup_in_game(self, player)
 	
-	# Milestone 6: Trigger in-game creature hunt crisis upon reaching Objective 4 during live playthrough
+	# Milestone 7: Connect AlienStalker to ShipState CrisisManager and player
+	if alien_stalker != null and ShipState != null and ShipState.crisis_manager != null:
+		ShipState.crisis_manager.register_stalker(alien_stalker)
+	
+	# Milestone 6 & 7: Trigger in-game creature hunt crisis upon reaching Objective 4 during live playthrough
 	if DisplayServer.get_name() != "headless":
 		MissionManager.objective_completed.connect(func(idx: int, _title: String):
 			if idx == 3 and ShipState != null and ShipState.crisis_manager != null:
 				ShipState.start_crisis(CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT)
+				if alien_stalker != null and player != null:
+					get_tree().create_timer(1.0).timeout.connect(func():
+						alien_stalker.zoom_near_player(player, 1.2)
+					)
 		)
 	
 	_refresh_environment_lighting()
@@ -161,3 +172,17 @@ func _refresh_environment_lighting() -> void:
 		for light in crawlway_lights.get_children():
 			if light is OmniLight3D or light is SpotLight3D:
 				light.light_color = Color(1.0, 0.1, 0.1)
+	
+	# Specimen Vault lights: Amber when powered, deep crimson emergency glow when unpowered
+	if specimen_lights != null:
+		for light in specimen_lights.get_children():
+			if light is OmniLight3D or light is SpotLight3D:
+				light.light_color = Color(1.0, 0.45, 0.15) if bus_online else Color(0.6, 0.05, 0.05)
+				light.light_energy = 1.3 if bus_online else 0.35
+	
+	# Research Observatory lights: Starlight Cyan when powered, dim standby blue when unpowered
+	if observatory_lights != null:
+		for light in observatory_lights.get_children():
+			if light is OmniLight3D or light is SpotLight3D:
+				light.light_color = Color(0.2, 0.85, 1.0) if bus_online else Color(0.1, 0.2, 0.4)
+				light.light_energy = 1.4 if bus_online else 0.3
