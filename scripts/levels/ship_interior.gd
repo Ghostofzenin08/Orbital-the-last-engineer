@@ -55,6 +55,13 @@ func _ready() -> void:
 		var tut = DiagnosticTutorial.new()
 		tut.setup_in_game(self, player)
 	
+	# Milestone 6: Trigger in-game creature hunt crisis upon reaching Objective 4 during live playthrough
+	if DisplayServer.get_name() != "headless":
+		MissionManager.objective_completed.connect(func(idx: int, _title: String):
+			if idx == 3 and ShipState != null and ShipState.crisis_manager != null:
+				ShipState.start_crisis(CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT)
+		)
+	
 	_refresh_environment_lighting()
 
 func _process(delta: float) -> void:
