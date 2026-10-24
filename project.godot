@@ -23,7 +23,6 @@ MissionManager="*res://scripts/missions/mission_manager.gd"
 SaveManager="*res://services/save_manager.gd"
 InventoryManager="*res://scripts/inventory/inventory_manager.gd"
 
-
 [display]
 
 window/size/viewport_width=1280
