@@ -250,14 +250,20 @@ func load_game(player: Node3D = null, environmental_mgr: Node = null) -> bool:
 			if bdata.has(key):
 				b.import_save_data(bdata[key])
 
-	if data.has("datapads"):
-		var root := get_tree().root
-		var dpdata: Dictionary = data["datapads"]
-		var datapads = root.find_children("*", "DatapadPickup", true, false)
-		for dp in datapads:
-			var key = dp.datapad_id if dp.datapad_id != "" else dp.name
-			if dpdata.has(key):
-				dp.import_save_data(dpdata[key])
+	var root_for_dp := get_tree().root
+	var dpdata: Dictionary = data.get("datapads", {}) if data.get("datapads", {}) is Dictionary else {}
+	var datapads = root_for_dp.find_children("*", "DatapadPickup", true, false)
+	for dp in datapads:
+		var key = dp.datapad_id if dp.datapad_id != "" else dp.name
+		if dpdata.has(key):
+			dp.import_save_data(dpdata[key])
+		else:
+			var col: bool = MissionManager.is_datapad_collected(dp.datapad_id)
+			var dec: bool = MissionManager.is_datapad_decrypted(dp.datapad_id) if col else (not dp.is_encrypted)
+			dp.import_save_data({
+				"is_collected": col,
+				"is_decrypted": dec
+			})
 
 
 	
