@@ -1,22 +1,48 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/interactables/scrubber_panel.gd" id="1_scrub"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_col"]
-size = Vector3(0.6, 0.8, 0.3)
+size = Vector3(0.65, 0.85, 0.35)
 
 [sub_resource type="BoxMesh" id="BoxMesh_casing"]
-size = Vector3(0.5, 0.7, 0.2)
+size = Vector3(0.55, 0.75, 0.22)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_casing"]
-albedo_color = Color(0.18, 0.25, 0.28, 1)
-metallic = 0.8
-roughness = 0.35
+albedo_color = Color(0.14, 0.18, 0.22, 1)
+metallic = 0.85
+roughness = 0.32
+
+[sub_resource type="BoxMesh" id="BoxMesh_bezel"]
+size = Vector3(0.58, 0.78, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bezel"]
+albedo_color = Color(0.22, 0.28, 0.32, 1)
+metallic = 0.9
+roughness = 0.25
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_cartridge"]
-top_radius = 0.1
-bottom_radius = 0.1
-height = 0.4
+top_radius = 0.09
+bottom_radius = 0.09
+height = 0.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cartridge"]
+albedo_color = Color(0.25, 0.32, 0.38, 1)
+metallic = 0.75
+roughness = 0.28
+
+[sub_resource type="BoxMesh" id="BoxMesh_grill_slat"]
+size = Vector3(0.38, 0.02, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grill"]
+albedo_color = Color(0.08, 0.1, 0.12, 1)
+metallic = 0.95
+roughness = 0.2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_led"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.03
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_led"]
 albedo_color = Color(0.1, 0.8, 0.7, 1)
@@ -36,18 +62,43 @@ shape = SubResource("BoxShape3D_col")
 mesh = SubResource("BoxMesh_casing")
 surface_material_override/0 = SubResource("StandardMaterial3D_casing")
 
+[node name="FrameBezel" type="MeshInstance3D" parent="CasingMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.09)
+mesh = SubResource("BoxMesh_bezel")
+surface_material_override/0 = SubResource("StandardMaterial3D_bezel")
+
 [node name="CartridgeMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0.08)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12, -0.06, 0.11)
 mesh = SubResource("CylinderMesh_cartridge")
-surface_material_override/0 = SubResource("StandardMaterial3D_casing")
+surface_material_override/0 = SubResource("StandardMaterial3D_cartridge")
+
+[node name="SecondaryCartridge" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, -0.06, 0.11)
+mesh = SubResource("CylinderMesh_cartridge")
+surface_material_override/0 = SubResource("StandardMaterial3D_cartridge")
+
+[node name="VentGrillTop" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0.115)
+mesh = SubResource("BoxMesh_grill_slat")
+surface_material_override/0 = SubResource("StandardMaterial3D_grill")
+
+[node name="VentGrillMid" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.20, 0.115)
+mesh = SubResource("BoxMesh_grill_slat")
+surface_material_override/0 = SubResource("StandardMaterial3D_grill")
+
+[node name="VentGrillBot" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0.115)
+mesh = SubResource("BoxMesh_grill_slat")
+surface_material_override/0 = SubResource("StandardMaterial3D_grill")
 
 [node name="StatusLED" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0.11)
-mesh = SubResource("CylinderMesh_cartridge")
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.31, 0.115)
+mesh = SubResource("CylinderMesh_led")
 surface_material_override/0 = SubResource("StandardMaterial3D_led")
 
 [node name="StatusLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.31, 0.25)
 light_color = Color(0.1, 0.8, 0.7, 1)
-light_energy = 0.8
+light_energy = 0.9
 omni_range = 2.5
