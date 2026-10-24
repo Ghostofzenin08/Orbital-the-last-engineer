@@ -1,0 +1,1879 @@
+extends Node
+
+# Scene-based test runner that runs with full Autoloads active
+
+const ShipSystemClass = preload("res://scripts/systems/ship_system.gd")
+const EnvManagerScript = preload("res://scripts/systems/environmental_manager.gd")
+const StorageLockerClass = preload("res://scripts/interactables/storage_locker.gd")
+const WorkbenchStationClass = preload("res://scripts/interactables/workbench_station.gd")
+const MultiStepRepairClass = preload("res://scripts/interactables/multi_step_repair.gd")
+const DiagnosticTutorialClass = preload("res://scripts/missions/diagnostic_tutorial.gd")
+const AirlockControllerClass = preload("res://scripts/interactables/airlock_controller.gd")
+const SalvageCrateClass = preload("res://scripts/interactables/salvage_crate.gd")
+const HullBreachSealClass = preload("res://scripts/interactables/hull_breach_seal.gd")
+const DoorClass = preload("res://scripts/interactables/door.gd")
+
+var tests_passed: int = 0
+var tests_failed: int = 0
+
+func _ready() -> void:
+	print("\n=======================================================")
+	print("   ORBITAL: The Last Engineer - FULL TEST SUITE")
+	print("=======================================================\n")
+	
+	_run_suite("Ship Systems Simulation", _test_ship_systems)
+	_run_suite("Mission Progression & Narrative", _test_missions)
+	_run_suite("Environmental Life Support", _test_environmental)
+	_run_suite("Save / Load Persistence & 3D Scene Synchronization", _test_save_load)
+	_run_suite("Door Mechanics & Collision Clearing", _test_door_mechanics)
+	_run_suite("Player Movement & Input Control", _test_player_input)
+	_run_suite("Audio Engine Lifecycle", _test_audio_lifecycle)
+	_run_suite("Scene Instantiation Integrity", _test_scenes)
+	_run_suite("End-to-End 3D Level Gameplay Flow", _test_end_to_end_level_flow)
+	_run_suite("Milestone 1: Central ShipState & Device/Subsystem/Fault Architecture", _test_ship_state_architecture)
+	_run_suite("Milestone 1: Power System Generation, Storage, Distribution & Priority Simulation", _test_power_system_simulation)
+	_run_suite("Milestone 1: Chamber Devices Connected to Power Network", _test_chamber_devices_connected_to_power)
+	_run_suite("Milestone 1: Ship Schematic & Diagnostic Advisory UI", _test_ship_schematic_ui)
+	_run_suite("Milestone 1: Robustness, Thermal Throttling & Bidirectional Sync", _test_robustness_and_thermal)
+	_run_suite("Milestone 2: Multi-Compartment Dynamic Atmospheric Physics", _test_multi_compartment_simulation)
+	_run_suite("Milestone 2: Inter-Compartment Gas Diffusion & Vent Dampers", _test_inter_compartment_diffusion)
+	_run_suite("Milestone 2: 3D Interactive Devices & Sensors", _test_3d_interactive_devices)
+	_run_suite("Milestone 2: Dynamic Failure Scenarios & Multi-Path Resolutions", _test_failure_scenarios_and_resolutions)
+	_run_suite("Milestone 2: Player Environmental Afflictions & Movement Penalties", _test_player_afflictions)
+	_run_suite("Milestone 2: Save / Load Serialization of Atmospheric State", _test_environmental_save_load)
+	_run_suite("Milestone 2: Ship Schematic & Terminal UI Environmental Telemetry", _test_schematic_and_terminal_environmental_ui)
+	_run_suite("Milestone 2: Interconnected Cascades, Dynamic Fault Persistence & Diagnostic Controls", _test_m2_interconnection_persistence_and_diagnostics)
+	_run_suite("Milestone 3: Inventory Management & Resource Constraints", _test_m3_inventory_and_resources)
+	_run_suite("Milestone 3: Handheld Engineering Tools & Modes", _test_m3_handheld_tools)
+	_run_suite("Milestone 3: Physical Workstations & Storage Lockers", _test_m3_workstations_and_lockers)
+	_run_suite("Milestone 3: Deepened Multi-Step Device Repair", _test_m3_deepened_multi_step_repair)
+	_run_suite("Milestone 3: Subsystem Power & Coolant Rerouting", _test_m3_rerouting_and_overrides)
+	_run_suite("Milestone 3: In-Game Tactile Diagnostic Tutorial", _test_m3_diagnostic_tutorial)
+	_run_suite("Milestone 3: Save / Load Persistence of Tools & Repair State", _test_m3_save_load_persistence)
+	_run_suite("Milestone 3: Deep Verification, Multitool Modes, Reroute Ticks & Tutorial Reactive Flow", _test_m3_deep_verification_and_edge_cases)
+	_run_suite("Milestone 4: 11-Compartment Environmental & Atmospheric Simulation", _test_m4_environmental_simulation)
+	_run_suite("Milestone 4: Airlock Safety Interlocks & Pressure Cycling", _test_m4_airlock_interlocks_and_cycling)
+	_run_suite("Milestone 4: Tactical Ship Schematic Map & Direct Power Rerouting", _test_m4_ship_schematic_overhaul)
+	_run_suite("Milestone 4: Breach Sealing, Salvage Cutting & Shortcut Traversal", _test_m4_breach_salvage_shortcuts)
+	_run_suite("Milestone 4: Save / Load Persistence of Expanded Vessel", _test_m4_save_load_persistence)
+	_run_suite("Milestone 4: Narrative Crew Logs & Objective Exploration Tracking", _test_m4_narrative_logs_and_exploration)
+	
+	print("\n=======================================================")
+	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
+	print("=======================================================\n")
+	
+	AudioManager.stop_all()
+	for i in range(3):
+		await get_tree().process_frame
+	if tests_failed > 0:
+		get_tree().quit(1)
+	else:
+		get_tree().quit(0)
+
+func _run_suite(suite_name: String, test_func: Callable) -> void:
+	print("--> Running Suite: %s" % suite_name)
+	test_func.call()
+
+func _assert_true(condition: bool, message: String) -> void:
+	if condition:
+		tests_passed += 1
+		print("  [PASS] %s" % message)
+	else:
+		tests_failed += 1
+		print("  [FAIL] %s" % message)
+
+func _test_ship_systems() -> void:
+	ShipSystemManager.reset_to_defaults()
+	
+	_assert_true(ShipSystemManager.get_system_state("primary_power") == ShipSystemClass.State.OFFLINE, "Initial primary_power is OFFLINE")
+	_assert_true(ShipSystemManager.get_system_state("power_distribution") == ShipSystemClass.State.OFFLINE, "Initial power_distribution is OFFLINE")
+	_assert_true(ShipSystemManager.get_system_state("life_support") == ShipSystemClass.State.FAILED, "Initial life_support is FAILED")
+	_assert_true(ShipSystemManager.get_system_state("communications") == ShipSystemClass.State.OFFLINE, "Initial communications is OFFLINE")
+	_assert_true(ShipSystemManager.get_system_state("propulsion") == ShipSystemClass.State.OFFLINE, "Initial propulsion is OFFLINE")
+	
+	var bus_res := ShipSystemManager.set_power_distribution(true)
+	_assert_true(not bus_res.get("ok", false), "Bus cannot energize while primary_power is OFFLINE")
+	_assert_true(not ShipSystemManager.is_system_online("power_distribution"), "Bus remains OFFLINE")
+	_assert_true(not ShipSystemManager.bus_relay_closed, "bus_relay_closed stays false on failure")
+	
+	var comms_res := ShipSystemManager.align_comms_array()
+	_assert_true(not comms_res.get("ok", false), "Comms cannot align while bus is OFFLINE")
+	
+	var gen_res := ShipSystemManager.set_generator_breaker(true)
+	_assert_true(gen_res.get("ok", false) and ShipSystemManager.is_system_online("primary_power"), "Generator breaker closes -> primary_power ONLINE")
+	
+	bus_res = ShipSystemManager.set_power_distribution(true)
+	_assert_true(bus_res.get("ok", false) and ShipSystemManager.is_system_online("power_distribution"), "Bus energizes successfully -> power_distribution ONLINE")
+	
+	_assert_true(not ShipSystemManager.is_system_online("life_support"), "Life support still unsealed without coupler")
+	
+	var ls_res := ShipSystemManager.install_coolant_coupler()
+	_assert_true(ls_res.get("ok", false) and ShipSystemManager.is_system_online("life_support"), "Coupler installed with bus live -> life_support ONLINE")
+	
+	comms_res = ShipSystemManager.align_comms_array()
+	_assert_true(comms_res.get("ok", false) and ShipSystemManager.is_system_online("communications"), "Comms array aligned with bus live -> communications ONLINE")
+	
+	var prop_res := ShipSystemManager.engage_propulsion()
+	_assert_true(prop_res.get("ok", false) and ShipSystemManager.is_system_online("propulsion"), "Propulsion engaged with all prereqs online -> propulsion ONLINE")
+	
+	# Test cascade failure and breaker trip
+	ShipSystemManager.set_generator_breaker(false)
+	_assert_true(not ShipSystemManager.is_system_online("primary_power"), "Generator tripped -> OFFLINE")
+	_assert_true(not ShipSystemManager.is_system_online("power_distribution"), "Cascaded power loss -> power_distribution OFFLINE")
+	_assert_true(not ShipSystemManager.bus_relay_closed, "Bus relay breaker tripped open upon generator power loss")
+	_assert_true(not ShipSystemManager.is_system_online("communications"), "Cascaded power loss -> communications OFFLINE")
+	_assert_true(not ShipSystemManager.is_system_online("propulsion"), "Cascaded power loss -> propulsion OFFLINE")
+	_assert_true(not ShipSystemManager.propulsion_primed, "Propulsion primed state reset upon power cascade")
+
+func _test_missions() -> void:
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+	
+	_assert_true(MissionManager.current_objective_index == 0, "Mission starts at Objective 0")
+	_assert_true(MissionManager.get_objective_count() == 5, "Total 5 sequential objectives defined")
+	
+	_assert_true(not MissionManager.has_item("coolant_coupler"), "Inventory starts empty")
+	MissionManager.add_inventory_item("coolant_coupler")
+	_assert_true(MissionManager.has_item("coolant_coupler"), "Item added to inventory")
+	var removed := MissionManager.remove_inventory_item("coolant_coupler")
+	_assert_true(removed and not MissionManager.has_item("coolant_coupler"), "Item removed from inventory")
+	
+	_assert_true(MissionManager.CREW_LOGS.size() == 10, "Exactly 10 narrative crew logs exist")
+	for i in range(MissionManager.CREW_LOGS.size()):
+		var log: Dictionary = MissionManager.CREW_LOGS[i]
+		_assert_true(log.has("title") and str(log["title"]).length() > 0, "Log %d has valid title" % (i + 1))
+		_assert_true(log.has("content") and str(log["content"]).length() > 30, "Log %d has detailed content" % (i + 1))
+	
+	ShipSystemManager.set_generator_breaker(true)
+	_assert_true(MissionManager.current_objective_index == 1, "Obj 1 completes when primary_power ONLINE -> advanced to 1")
+	
+	ShipSystemManager.set_power_distribution(true)
+	_assert_true(MissionManager.current_objective_index == 2, "Obj 2 completes when bus ONLINE -> advanced to 2")
+	
+	ShipSystemManager.install_coolant_coupler()
+	_assert_true(MissionManager.current_objective_index == 3, "Obj 3 completes when life_support ONLINE -> advanced to 3")
+	
+	ShipSystemManager.align_comms_array()
+	_assert_true(MissionManager.current_objective_index == 4, "Obj 4 completes when communications ONLINE -> advanced to 4")
+	
+	ShipSystemManager.engage_propulsion()
+	_assert_true(MissionManager.current_objective_index == 5, "Obj 5 completes when propulsion ONLINE -> all completed")
+
+func _test_environmental() -> void:
+	var env = EnvManagerScript.new()
+	env.oxygen_level = 100.0
+	
+	ShipSystemManager.reset_to_defaults()
+	env._process(10.0)
+	_assert_true(env.oxygen_level < 100.0, "Oxygen depletes when life support is offline (level: %.1f%%)" % env.oxygen_level)
+	
+	ShipSystemManager.set_generator_breaker(true)
+	ShipSystemManager.set_power_distribution(true)
+	ShipSystemManager.install_coolant_coupler()
+	
+	var depleted_val: float = env.oxygen_level
+	env._process(5.0)
+	_assert_true(env.oxygen_level > depleted_val, "Oxygen replenishes when life support is online (level: %.1f%%)" % env.oxygen_level)
+	env.free()
+
+func _test_save_load() -> void:
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+	ShipSystemManager.set_generator_breaker(true)
+	ShipSystemManager.set_power_distribution(true)
+	MissionManager.add_inventory_item("coolant_coupler")
+	
+	var level_scene = load("res://scenes/levels/ship_interior.tscn")
+	var level = level_scene.instantiate()
+	add_child(level)
+	
+	var door_aft: BulkheadDoor = level.get_node("Compartments/Corridors/DoorAft")
+	door_aft.set_door_state(true)
+	
+	var save_ok := SaveManager.save_game(level.get_node("Player"), level.get_node("EnvironmentalManager"))
+	_assert_true(save_ok and SaveManager.has_save_file(), "Save file successfully written")
+	level.free()
+	
+	# Reset state before load
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+	_assert_true(not ShipSystemManager.is_system_online("primary_power"), "State cleared before load")
+	_assert_true(not MissionManager.has_item("coolant_coupler"), "Inventory cleared before load")
+	
+	# Instantiate fresh level with pending load
+	SaveManager.set_meta("pending_load", true)
+	var loaded_level = level_scene.instantiate()
+	add_child(loaded_level)
+	
+	_assert_true(ShipSystemManager.is_system_online("primary_power"), "Loaded primary_power state restored")
+	_assert_true(ShipSystemManager.is_system_online("power_distribution"), "Loaded power_distribution state restored")
+	_assert_true(MissionManager.has_item("coolant_coupler"), "Loaded inventory item restored")
+	
+	var gen_breaker: BreakerSwitch = loaded_level.get_node("Compartments/EngineeringBay/GeneratorBreaker")
+	var bus_breaker: BreakerSwitch = loaded_level.get_node("Compartments/EngineeringBay/BusBreaker")
+	_assert_true(gen_breaker.is_on, "3D Generator breaker is_on synced after scene load")
+	_assert_true(bus_breaker.is_on, "3D Bus breaker is_on synced after scene load")
+	
+	var loaded_door_aft: BulkheadDoor = loaded_level.get_node("Compartments/Corridors/DoorAft")
+	_assert_true(loaded_door_aft.is_open, "Loaded door state restored as open")
+	_assert_true(loaded_door_aft.is_powered(), "Loaded door is powered")
+	
+	loaded_level.free()
+	SaveManager.delete_save()
+	_assert_true(not SaveManager.has_save_file(), "Save file cleanly deleted after test")
+
+func _test_door_mechanics() -> void:
+	ShipSystemManager.reset_to_defaults()
+	var door_scene = load("res://scenes/interactables/door.tscn")
+	var door: BulkheadDoor = door_scene.instantiate()
+	add_child(door)
+	
+	_assert_true(not door.is_open, "Door initially closed")
+	_assert_true(not door.is_powered(), "Door initially unpowered")
+	
+	var col: CollisionShape3D = door.get_node("InteractionCollision")
+	var initial_y: float = col.position.y
+	
+	# Energize bus and test door
+	ShipSystemManager.set_generator_breaker(true)
+	ShipSystemManager.set_power_distribution(true)
+	_assert_true(door.is_powered(), "Door becomes powered upon bus activation")
+	
+	door.set_door_state(true, true)
+	_assert_true(door.is_open, "Door state set to open")
+	_assert_true(col.position.y > initial_y, "Doorway collision clears upward when door opens")
+	
+	door.free()
+	ShipSystemManager.reset_to_defaults()
+
+func _test_player_input() -> void:
+	var player_scene = load("res://scenes/player/player.tscn")
+	var player: PlayerController = player_scene.instantiate()
+	add_child(player)
+	
+	player.velocity = Vector3(5, 0, 5)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	player._physics_process(0.1)
+	_assert_true(player.velocity.x < 5.0 and player.velocity.z < 5.0, "Player decelerates when mouse is visible (in menus)")
+	
+	player.free()
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _test_audio_lifecycle() -> void:
+	AudioManager.play_ambient("generator_hum")
+	AudioManager.play_alarm_loop("alarm")
+	_assert_true(AudioManager._ambient_player.playing, "Ambient hum is playing")
+	_assert_true(AudioManager._alarm_player.playing, "Alarm is playing")
+	
+	AudioManager.stop_all()
+	_assert_true(not AudioManager._ambient_player.playing, "Ambient hum stopped after stop_all")
+	_assert_true(not AudioManager._alarm_player.playing, "Alarm stopped after stop_all")
+
+func _test_scenes() -> void:
+	var scenes_to_test := [
+		"res://scenes/ui/main_menu.tscn",
+		"res://scenes/ui/pause_menu.tscn",
+		"res://scenes/ui/terminal_dialog.tscn",
+		"res://scenes/ui/hud.tscn",
+		"res://scenes/ui/mission_complete.tscn",
+		"res://scenes/ui/game_over.tscn",
+		"res://scenes/interactables/switch.tscn",
+		"res://scenes/interactables/door.tscn",
+		"res://scenes/interactables/repair_panel.tscn",
+		"res://scenes/interactables/terminal.tscn",
+		"res://scenes/interactables/pickup.tscn",
+		"res://scenes/player/player.tscn",
+		"res://scenes/levels/engineering_bay.tscn",
+		"res://scenes/levels/life_support.tscn",
+		"res://scenes/levels/bridge.tscn",
+		"res://scenes/levels/ship_interior.tscn",
+		"res://scenes/ui/ship_schematic.tscn"
+	]
+	
+	for path in scenes_to_test:
+		var scene_res = load(path)
+		_assert_true(scene_res != null, "Scene resource loaded: %s" % path)
+		if scene_res is PackedScene:
+			var instance = scene_res.instantiate()
+			_assert_true(instance != null, "Scene instantiated cleanly: %s" % path)
+			if instance != null:
+				instance.free()
+
+func _test_end_to_end_level_flow() -> void:
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+	
+	var level_scene = load("res://scenes/levels/ship_interior.tscn")
+	_assert_true(level_scene != null, "ship_interior.tscn loads")
+	var level: Node3D = level_scene.instantiate()
+	add_child(level)
+	
+	var player = level.get_node("Player")
+	_assert_true(player != null, "Player exists in level")
+	
+	# Objective 1: Flip generator breaker
+	var gen_breaker: BreakerSwitch = level.get_node("Compartments/EngineeringBay/GeneratorBreaker")
+	_assert_true(gen_breaker != null, "Generator breaker found in Engineering Bay")
+	gen_breaker.interact(player)
+	_assert_true(ShipSystemManager.is_system_online("primary_power"), "Generator breaker interaction powers primary_power")
+	_assert_true(gen_breaker.is_on, "Generator breaker 3D switch is_on true")
+	_assert_true(MissionManager.current_objective_index == 1, "Mission advanced to Objective 1 (Energize Bus)")
+	
+	# Objective 2: Flip bus breaker
+	var bus_breaker: BreakerSwitch = level.get_node("Compartments/EngineeringBay/BusBreaker")
+	_assert_true(bus_breaker != null, "Bus breaker found in Engineering Bay")
+	bus_breaker.interact(player)
+	_assert_true(ShipSystemManager.is_system_online("power_distribution"), "Bus breaker interaction energizes distribution bus")
+	_assert_true(bus_breaker.is_on, "Bus breaker 3D switch is_on true")
+	_assert_true(MissionManager.current_objective_index == 2, "Mission advanced to Objective 2 (Life Support)")
+	
+	# Check door is now unlocked
+	var door_aft: BulkheadDoor = level.get_node("Compartments/Corridors/DoorAft")
+	_assert_true(door_aft.is_powered(), "Door Aft is powered after bus energized")
+	door_aft.interact(player)
+	_assert_true(door_aft.is_open, "Door Aft opened on interaction")
+	
+	# Objective 3: Pick up spare coolant coupler and repair manifold
+	var pickup = level.get_node_or_null("Compartments/EngineeringBay/SpareCouplerPickup")
+	_assert_true(pickup != null, "Spare coupler pickup found on workbench")
+	pickup.interact(player)
+	_assert_true(MissionManager.has_item("coolant_coupler"), "Player acquired coolant coupler in inventory")
+	
+	var repair_panel: RepairPanel = level.get_node("Compartments/LifeSupport/CoolantRepairPanel")
+	_assert_true(repair_panel != null, "Coolant repair panel found in Life Support")
+	repair_panel.interact(player)
+	_assert_true(ShipSystemManager.is_system_online("life_support"), "Life Support restored to ONLINE after repair")
+	_assert_true(repair_panel.is_repaired, "Repair panel is_repaired is true")
+	_assert_true(MissionManager.current_objective_index == 3, "Mission advanced to Objective 3 (Comms)")
+	
+	# Objective 4: Align comms array
+	var comms_term: TerminalConsole = level.get_node("Compartments/Bridge/BridgeCommsTerminal")
+	_assert_true(comms_term != null, "Bridge Comms Terminal found")
+	var align_res := ShipSystemManager.align_comms_array()
+	_assert_true(align_res.get("ok", false) and ShipSystemManager.is_system_online("communications"), "Comms array aligned")
+	_assert_true(MissionManager.current_objective_index == 4, "Mission advanced to Objective 4 (Propulsion)")
+	
+	# Objective 5: Engage departure switch
+	var departure_switch: BreakerSwitch = level.get_node("Compartments/Bridge/DepartureSwitch")
+	_assert_true(departure_switch != null, "Departure switch found at Helm Console")
+	departure_switch.interact(player)
+	_assert_true(ShipSystemManager.is_system_online("propulsion"), "Propulsion engaged -> ONLINE")
+	_assert_true(departure_switch.is_on, "Departure switch is_on true")
+	_assert_true(MissionManager.current_objective_index == 5, "All 5 missions completed successfully!")
+	
+	level.free()
+
+func _test_ship_state_architecture() -> void:
+	ShipState.reset_to_defaults()
+	_assert_true(ShipState != null, "ShipState central manager autoload initialized")
+	
+	# Verify subsystems
+	_assert_true(ShipState.subsystems.has("power"), "ShipState has power subsystem")
+	_assert_true(ShipState.subsystems.has("coolant"), "ShipState has coolant subsystem")
+	_assert_true(ShipState.subsystems.has("life_support"), "ShipState has life_support subsystem")
+	_assert_true(ShipState.subsystems.has("communications"), "ShipState has communications subsystem")
+	_assert_true(ShipState.subsystems.has("propulsion"), "ShipState has propulsion subsystem")
+	_assert_true(ShipState.subsystems.has("doors"), "ShipState has doors subsystem")
+	_assert_true(ShipState.subsystems.has("computer_network"), "ShipState has computer_network subsystem")
+	_assert_true(ShipState.subsystems.has("structural"), "ShipState has structural subsystem")
+	_assert_true(ShipState.subsystems.has("fuel"), "ShipState has fuel subsystem")
+	
+	# Verify generic Subsystem API
+	var pwr_sub = ShipState.get_subsystem("power")
+	_assert_true(pwr_sub.GetStatus() is Dictionary, "Subsystem API: GetStatus() returns Dictionary")
+	_assert_true(pwr_sub.GetEfficiency() >= 0.0, "Subsystem API: GetEfficiency() returns float >= 0")
+	_assert_true(pwr_sub.GetPowerDraw() >= 0.0, "Subsystem API: GetPowerDraw() returns float >= 0")
+	
+	pwr_sub.ApplyDamage(10.0, "Thermal shock")
+	_assert_true(pwr_sub.GetEfficiency() < 1.0, "Subsystem API: ApplyDamage() reduces efficiency")
+	pwr_sub.Repair(15.0)
+	_assert_true(pwr_sub.GetEfficiency() == 1.0, "Subsystem API: Repair() restores efficiency")
+	
+	# Verify generic Device API
+	var scrubber = ShipState.get_device("life_support_scrubber")
+	_assert_true(scrubber != null, "Device life_support_scrubber registered")
+	_assert_true(scrubber.GetPowerDraw() > 0.0, "Device API: GetPowerDraw() returns valid draw")
+	_assert_true(scrubber.GetStatus() is Dictionary, "Device API: GetStatus() returns status dictionary")
+	_assert_true(scrubber.GetEfficiency() >= 0.0, "Device API: GetEfficiency() returns valid float")
+	_assert_true(ShipState.get_device("coolant_pump") != null, "Device coolant_pump registered")
+	
+	var initial_hp: float = scrubber.health
+	scrubber.ApplyDamage(20.0, "Cavitation damage")
+	_assert_true(scrubber.health < initial_hp, "Device API: ApplyDamage() reduces health")
+	scrubber.Repair(20.0)
+	_assert_true(scrubber.health == initial_hp, "Device API: Repair() restores health")
+	
+	# Verify Fault architecture
+	_assert_true(ShipState.active_faults.has("GENERATOR_TRIP"), "Initial fault GENERATOR_TRIP active")
+	_assert_true(ShipState.active_faults.has("BUS_ISOLATION"), "Initial fault BUS_ISOLATION active")
+	_assert_true(ShipState.active_faults.has("COOLANT_COUPLER_FRACTURE"), "Initial fault COOLANT_COUPLER_FRACTURE active")
+	_assert_true(ShipState.active_faults.has("COMMS_SERVO_DESYNC"), "Initial fault COMMS_SERVO_DESYNC active")
+	
+	var fault: RefCounted = ShipState.active_faults["COOLANT_COUPLER_FRACTURE"]
+	_assert_true(fault.symptoms.size() > 0, "Fault defines symptoms")
+	_assert_true(fault.diagnostic_methods.size() > 0, "Fault defines diagnostic methods")
+	_assert_true(fault.repair_steps.size() > 0, "Fault defines repair steps")
+	_assert_true(fault.required_parts.has("coolant_coupler"), "Fault defines required spare parts")
+	
+	# Test fault ticking & escalation
+	fault.tick(130.0)
+	_assert_true(fault.escalation_stage >= 2, "Fault escalates over time when unresolved")
+
+func _test_power_system_simulation() -> void:
+	ShipState.reset_to_defaults()
+	var pwr: RefCounted = ShipState.power_system
+	_assert_true(pwr != null, "PowerSystem instance exists")
+	
+	# Initial offline state
+	var telem: Dictionary = pwr.get_grid_telemetry()
+	_assert_true(not telem["reactor_online"], "Initial reactor is offline")
+	_assert_true(not telem["bus_relay_closed"], "Initial bus relay is open")
+	_assert_true(not telem["bus_energized"], "Initial bus is not energized")
+	_assert_true(telem["current_generation"] == 0.0, "Initial generation is 0.0 kW")
+	_assert_true(telem["battery_charge"] > 0.0, "Battery holds initial emergency reserve")
+	
+	# Bus cannot energize without generator
+	var fail_bus: Dictionary = pwr.set_bus_relay(true)
+	_assert_true(not fail_bus.get("ok", false), "Bus relay cannot energize while reactor is offline")
+	_assert_true(not pwr.bus_energized, "Bus remains un-energized on invalid close")
+	
+	# Close generator breaker
+	var gen_res: Dictionary = pwr.set_generator(true)
+	_assert_true(gen_res.get("ok", false) and pwr.reactor_online, "Reactor starts upon breaker closure")
+	_assert_true(pwr.current_generation >= 150.0, "Reactor delivers nominal capacity (>= 150 kW)")
+	
+	# Close bus relay
+	var bus_res: Dictionary = pwr.set_bus_relay(true)
+	_assert_true(bus_res.get("ok", false) and pwr.bus_energized, "Bus energizes successfully when generator is active")
+	
+	# Check power allocation to devices
+	pwr.tick(1.0)
+	var active_telem: Dictionary = pwr.get_grid_telemetry()
+	_assert_true(active_telem["current_demand"] > 0.0, "Active devices draw load from power grid")
+	_assert_true(active_telem["net_power"] > 0.0, "Grid operates in positive surplus under nominal generation")
+	_assert_true(active_telem["grid_efficiency"] == 1.0, "Grid efficiency is 100% under nominal supply")
+	
+	# Check battery charging under surplus
+	var initial_charge: float = pwr.battery_charge
+	pwr.tick(3600.0) # 1 hour of surplus
+	_assert_true(pwr.battery_charge > initial_charge, "Battery charges from generation surplus")
+	
+	# Test cascade loss on generator trip
+	pwr.set_generator(false)
+	_assert_true(not pwr.reactor_online, "Generator tripped to offline")
+	_assert_true(not pwr.bus_relay_closed, "Bus relay automatically trips upon generator loss")
+	_assert_true(not pwr.bus_energized, "Bus de-energizes upon generator trip")
+	
+	ShipState.reset_to_defaults()
+
+func _test_chamber_devices_connected_to_power() -> void:
+	ShipState.reset_to_defaults()
+	
+	# Check devices in Engineering Bay
+	var eng_devs: Array = ShipState.get_compartment_devices("engineering_bay")
+	_assert_true(eng_devs.size() >= 3, "Engineering Bay contains generator, bus, and terminal devices")
+	
+	# Check devices in Corridors
+	var corr_devs: Array = ShipState.get_compartment_devices("corridors")
+	_assert_true(corr_devs.size() >= 2, "Corridors contain aft and fwd bulkhead doors")
+	
+	# Check devices in Life Support
+	var ls_devs: Array = ShipState.get_compartment_devices("life_support")
+	_assert_true(ls_devs.size() >= 2, "Life Support contains scrubber and terminal devices")
+	
+	# Check devices in Bridge
+	var bridge_devs: Array = ShipState.get_compartment_devices("bridge")
+	_assert_true(bridge_devs.size() >= 3, "Bridge contains comms, ion propulsion, and terminal devices")
+	
+	# Verify device power states before and after bus energization
+	var door_aft = ShipState.get_device("door_aft")
+	var scrubber = ShipState.get_device("life_support_scrubber")
+	var terminal = ShipState.get_device("eng_terminal")
+	
+	_assert_true(not door_aft.is_powered, "Door Aft is unpowered before bus energized")
+	_assert_true(not scrubber.is_powered, "Scrubber is unpowered before bus energized")
+	_assert_true(not terminal.is_powered, "Terminal is unpowered before bus energized")
+	
+	# Energize grid
+	ShipState.set_generator_breaker(true)
+	ShipState.set_bus_relay(true)
+	
+	_assert_true(door_aft.is_powered, "Door Aft is powered after bus energized")
+	_assert_true(scrubber.is_powered, "Scrubber receives power from energized bus")
+	_assert_true(terminal.is_powered, "Terminal console receives power from energized bus")
+	
+	ShipState.reset_to_defaults()
+
+func _test_ship_schematic_ui() -> void:
+	ShipState.reset_to_defaults()
+	var schematic_scene = load("res://scenes/ui/ship_schematic.tscn")
+	_assert_true(schematic_scene != null, "ship_schematic.tscn loads cleanly")
+	
+	var schematic: Control = schematic_scene.instantiate()
+	add_child(schematic)
+	_assert_true(schematic != null, "ShipSchematic instantiated cleanly")
+	
+	# Test initial schematic data
+	var initial_data: Dictionary = ShipState.get_schematic_data()
+	_assert_true(initial_data.has("power"), "Schematic data includes power telemetry")
+	_assert_true(initial_data.has("compartments"), "Schematic data includes compartment breakdown")
+	_assert_true(initial_data.has("primary_warning"), "Schematic data includes primary warning")
+	_assert_true(initial_data.has("primary_action"), "Schematic data includes recommended action")
+	
+	_assert_true(initial_data["primary_warning"].contains("GENERATOR TRIPPED"), "Initial warning identifies generator trip")
+	
+	# Test UI reflection upon generator start
+	ShipState.set_generator_breaker(true)
+	var gen_data: Dictionary = ShipState.get_schematic_data()
+	_assert_true(gen_data["primary_warning"].contains("MAIN BUS ISOLATED"), "Warning updates to bus isolation once generator is closed")
+	
+	# Test UI reflection upon bus energize
+	ShipState.set_bus_relay(true)
+	var bus_data: Dictionary = ShipState.get_schematic_data()
+	_assert_true(bus_data["power"]["bus_energized"], "Schematic telemetry reflects energized bus")
+	_assert_true(bus_data["primary_warning"].contains("ATMOSPHERIC CAVITATION"), "Warning guides player to Life Support repair")
+	
+	schematic.open_schematic()
+	_assert_true(schematic.visible, "Schematic UI opens and becomes visible")
+	schematic.close_schematic()
+	_assert_true(not schematic.visible, "Schematic UI closes cleanly")
+	
+	schematic.free()
+	ShipState.reset_to_defaults()
+
+func _test_robustness_and_thermal() -> void:
+	ShipState.reset_to_defaults()
+	var pwr = ShipState.power_system
+	
+	# 1. Edge Case: Battery near zero and delta == 0.0
+	pwr.battery_charge = 0.001
+	pwr.set_generator(true)
+	pwr.set_bus_relay(true)
+	pwr.tick(0.0)
+	var telem: Dictionary = pwr.get_grid_telemetry()
+	_assert_true(not is_inf(telem["current_supplied"]) and not is_nan(telem["current_supplied"]), "Zero-delta tick produces no INF or NaN")
+	_assert_true(not is_inf(telem["grid_efficiency"]) and not is_nan(telem["grid_efficiency"]), "Zero-delta grid efficiency is valid number")
+	
+	# Rapid toggles with near-empty battery
+	for i in range(5):
+		pwr.set_generator(false)
+		pwr.set_generator(true)
+		pwr.set_bus_relay(true)
+		pwr.tick(0.05)
+	_assert_true(pwr.battery_charge >= 0.0, "Battery charge stays non-negative after rapid cycles")
+	_assert_true(not is_inf(pwr.battery_charge), "Battery charge is not infinite")
+	
+	# 2. Thermal Simulation & Meltdown Safety Mode
+	ShipState.reset_to_defaults()
+	pwr = ShipState.power_system
+	pwr.set_generator(true)
+	pwr.set_bus_relay(true)
+	pwr.coolant_flow_rate = 0.35
+	pwr.tick(50.0)
+	_assert_true(pwr.reactor_temperature > 320.0, "Reactor core heats up when coolant flow is impaired")
+	
+	pwr.reactor_temperature = 560.0
+	pwr.tick(1.0)
+	_assert_true(pwr.thermal_throttled, "Reactor enters thermal safety throttling at >= 550K")
+	_assert_true(pwr.current_generation <= 60.0, "Thermal throttling reduces generation to avoid meltdown (<= 60 kW)")
+	
+	ShipState.install_coolant_coupler()
+	_assert_true(pwr.coolant_flow_rate == 1.0, "Coolant flow restored after coupler repair")
+	pwr.reactor_temperature = 400.0
+	pwr.tick(1.0)
+	_assert_true(not pwr.thermal_throttled, "Thermal throttling disengages as core cools")
+	_assert_true(pwr.current_generation >= 150.0, "Full 150 kW generation restored after cooldown")
+	
+	# 3. Bidirectional Synchronization
+	ShipState.reset_to_defaults()
+	_assert_true(not ShipSystemManager.is_system_online("primary_power"), "ShipSystemManager primary_power initially offline")
+	ShipState.set_generator_breaker(true)
+	_assert_true(ShipSystemManager.is_system_online("primary_power"), "ShipState breaker flips ShipSystemManager primary_power ONLINE")
+	_assert_true(ShipSystemManager.generator_breaker_closed, "ShipSystemManager flag synced from ShipState")
+	
+	ShipState.set_bus_relay(true)
+	_assert_true(ShipSystemManager.is_system_online("power_distribution"), "ShipState bus relay flips ShipSystemManager power_distribution ONLINE")
+	_assert_true(ShipSystemManager.bus_relay_closed, "ShipSystemManager bus flag synced from ShipState")
+	
+	ShipState.install_coolant_coupler()
+	_assert_true(ShipSystemManager.coolant_coupler_installed, "ShipState install coupler flips ShipSystemManager flag")
+	_assert_true(ShipSystemManager.is_system_online("life_support"), "Life support online across both systems")
+	
+	ShipState.align_comms_array()
+	_assert_true(ShipSystemManager.comms_array_aligned, "ShipState comms alignment flips ShipSystemManager flag")
+	_assert_true(ShipSystemManager.is_system_online("communications"), "Communications online across both systems")
+	
+	ShipState.engage_propulsion()
+	_assert_true(ShipSystemManager.propulsion_primed, "ShipState propulsion engage flips ShipSystemManager flag")
+	_assert_true(ShipSystemManager.is_system_online("propulsion"), "Propulsion online across both systems")
+	
+	ShipSystemManager.set_generator_breaker(false)
+	_assert_true(not ShipState.power_system.reactor_online, "ShipSystemManager breaker open cascades to ShipState")
+	_assert_true(not ShipState.power_system.bus_energized, "ShipState bus de-energized on reverse cascade")
+	
+	# 4. Schematic UI in-place performance
+	var schematic_scene = load("res://scenes/ui/ship_schematic.tscn")
+	var schematic: Control = schematic_scene.instantiate() as Control
+	add_child(schematic)
+	schematic.open_schematic()
+	var dev_container: VBoxContainer = schematic.get_node("%SelectedRoomDevices")
+	var initial_child_count := dev_container.get_child_count()
+	for i in range(10):
+		schematic.refresh_schematic()
+	_assert_true(dev_container.get_child_count() == initial_child_count, "Schematic updates in-place without leaking UI row nodes")
+	schematic.close_schematic()
+	schematic.free()
+	ShipState.reset_to_defaults()
+
+func _test_multi_compartment_simulation() -> void:
+	ShipSystemManager.reset_to_defaults()
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	
+	# Baseline check
+	var comps: Dictionary = env_mgr.get_all_compartments()
+	_assert_true(comps.size() == 4, "All 4 compartments initialized in environmental simulation")
+	
+	var eng = env_mgr.get_compartment_atmosphere("engineering_bay")
+	_assert_true(eng["o2_level"] == 100.0, "Engineering Bay initial O2 is 100%")
+	_assert_true(eng["co2_ppm"] == 420.0, "Engineering Bay initial CO2 is nominal (420 ppm)")
+	_assert_true(eng["pressure"] == 101.3, "Engineering Bay initial pressure is 101.3 kPa")
+	_assert_true(eng["temperature"] > 290.0 and eng["temperature"] < 300.0, "Engineering Bay initial temperature is nominal")
+	
+	# Oxygen depletion under Life Support failure
+	ShipSystemManager.get_system("life_support").state = ShipSystemClass.State.FAILED
+	env_mgr._process(10.0)
+	var eng_depleted = env_mgr.get_compartment_atmosphere("engineering_bay")
+	_assert_true(eng_depleted["o2_level"] < 100.0, "O2 level depletes when Life Support is offline")
+	_assert_true(env_mgr.oxygen_level < 100.0, "Legacy scalar oxygen_level depletes concurrently")
+	var depleted_o2: float = float(eng_depleted["o2_level"])
+	
+	# Oxygen replenishment when Life Support is restored
+	ShipSystemManager.set_generator_breaker(true)
+	ShipSystemManager.set_power_distribution(true)
+	ShipSystemManager.install_coolant_coupler()
+	env_mgr._process(10.0)
+	var eng_replenished = env_mgr.get_compartment_atmosphere("engineering_bay")
+	_assert_true(eng_replenished["o2_level"] > depleted_o2, "O2 level replenishes when Life Support is online")
+	
+	# CO2 buildup from respiration & scrubbing
+	env_mgr.player_compartment_id = "life_support"
+	env_mgr.compartments["life_support"]["co2_ppm"] = 500.0
+	env_mgr.compartments["life_support"]["scrubbers_active"] = false
+	env_mgr._process(1.0)
+	var ls_co2 = env_mgr.get_compartment_atmosphere("life_support")
+	_assert_true(ls_co2["co2_ppm"] > 500.0, "CO2 accumulates in compartment occupied by player when scrubbers inactive")
+	
+	env_mgr.compartments["life_support"]["scrubbers_active"] = true
+	var peak_co2: float = ls_co2["co2_ppm"]
+	env_mgr._process(1.0)
+	var ls_scrubbed = env_mgr.get_compartment_atmosphere("life_support")
+	_assert_true(ls_scrubbed["co2_ppm"] < peak_co2, "Active scrubber loop reduces CO2 concentration")
+	
+	# Barometric decompression leak
+	env_mgr.set_compartment_leak("bridge", 6.0)
+	env_mgr._process(2.0)
+	var bridge_press = env_mgr.get_compartment_atmosphere("bridge")
+	_assert_true(bridge_press["pressure"] < 100.0, "Cabin pressure drops rapidly when leak rate > 0")
+	env_mgr.set_compartment_leak("bridge", 0.0)
+	
+	env_mgr.free()
+	ShipSystemManager.reset_to_defaults()
+
+func _test_inter_compartment_diffusion() -> void:
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	
+	# Set concentration gradient between corridors and bridge
+	env_mgr.compartments["corridors"]["co2_ppm"] = 4000.0
+	env_mgr.compartments["bridge"]["co2_ppm"] = 420.0
+	env_mgr.compartments["corridors"]["vents_open"] = true
+	env_mgr.compartments["bridge"]["vents_open"] = true
+	
+	env_mgr._simulate_diffusion(5.0)
+	var br_co2 = env_mgr.compartments["bridge"]["co2_ppm"]
+	var corr_co2 = env_mgr.compartments["corridors"]["co2_ppm"]
+	_assert_true(br_co2 > 420.0, "CO2 diffuses across open boundary from high to low concentration")
+	_assert_true(corr_co2 < 4000.0, "CO2 gradient dissipates from source compartment during open diffusion")
+	
+	# Test isolation with closed vent damper
+	env_mgr.set_vent_damper("engineering_bay", false)
+	env_mgr.compartments["corridors"]["co2_ppm"] = 5000.0
+	env_mgr.compartments["engineering_bay"]["co2_ppm"] = 420.0
+	var eng_start = env_mgr.compartments["engineering_bay"]["co2_ppm"]
+	env_mgr._simulate_diffusion(4.0)
+	_assert_true(is_equal_approx(env_mgr.compartments["engineering_bay"]["co2_ppm"], eng_start), "Closed vent damper isolates compartment from inter-chamber gas diffusion")
+	
+	env_mgr.free()
+
+func _test_3d_interactive_devices() -> void:
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	
+	# EnvironmentalSensor
+	var sensor_scene = load("res://scenes/interactables/env_sensor.tscn")
+	var sensor = sensor_scene.instantiate()
+	add_child(sensor)
+	sensor.compartment_id = "engineering_bay"
+	var unpowered_prompt = sensor.get_prompt()
+	_assert_true(unpowered_prompt.contains("Offline"), "EnvironmentalSensor reports offline when unpowered")
+	ShipSystemManager.get_system("power_distribution").state = ShipSystemClass.State.ONLINE
+	var telem = sensor.get_telemetry()
+	_assert_true(telem.has("o2_level") and telem.has("co2_ppm"), "EnvironmentalSensor retrieves telemetry dictionary")
+	var prompt = sensor.get_prompt()
+	_assert_true(prompt.contains("Read Atmospheric Sensor"), "EnvironmentalSensor generates formatted telemetry prompt")
+	sensor.interact(self)
+	remove_child(sensor)
+	sensor.queue_free()
+	
+	# VentDamper
+	var damper_scene = load("res://scenes/interactables/vent_damper.tscn")
+	var damper = damper_scene.instantiate()
+	add_child(damper)
+	damper.compartment_id = "life_support"
+	_assert_true(damper.is_open, "VentDamper is initially open")
+	damper.interact(self)
+	_assert_true(not damper.is_open, "VentDamper closes upon player interaction")
+	_assert_true(not env_mgr.compartments["life_support"]["vents_open"], "VentDamper updates EnvironmentalManager vents_open state")
+	damper.interact(self)
+	_assert_true(damper.is_open, "VentDamper re-opens upon second interaction")
+	_assert_true(env_mgr.compartments["life_support"]["vents_open"], "EnvironmentalManager receives re-opened damper state")
+	remove_child(damper)
+	damper.queue_free()
+	
+	# EmergencyValve
+	var valve_scene = load("res://scenes/interactables/emergency_valve.tscn")
+	var valve = valve_scene.instantiate()
+	add_child(valve)
+	valve.valve_type = "pressure"
+	valve.valve_name = "Atmospheric Pressure Isolation Valve"
+	_assert_true(valve.get_prompt().contains("Inspect"), "Nominal valve prompt displays inspect message")
+	valve.interact(self)
+	remove_child(valve)
+	valve.queue_free()
+	
+	# ScrubberPanel
+	var scrub_scene = load("res://scenes/interactables/scrubber_panel.tscn")
+	var scrub = scrub_scene.instantiate()
+	add_child(scrub)
+	_assert_true(not scrub.is_saturated(), "ScrubberPanel is nominal without fault")
+	scrub.interact(self)
+	remove_child(scrub)
+	scrub.queue_free()
+	
+	remove_child(env_mgr)
+	env_mgr.queue_free()
+
+func _test_failure_scenarios_and_resolutions() -> void:
+	ShipState.reset_to_defaults()
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	
+	# --- SCENARIO 1: CO2_SCRUBBER_SATURATION ---
+	var f1 = ShipState.trigger_fault("CO2_SCRUBBER_SATURATION")
+	_assert_true(f1 != null and ShipState.active_faults.has("CO2_SCRUBBER_SATURATION"), "Failure Scenario 1: CO2_SCRUBBER_SATURATION triggered")
+	var scrub_panel = load("res://scenes/interactables/scrubber_panel.tscn").instantiate()
+	add_child(scrub_panel)
+	_assert_true(scrub_panel.is_saturated(), "Scrubber panel detects saturation state")
+	_assert_true(scrub_panel.get_prompt().contains("Flush & Replace"), "Scrubber prompt offers cartridge flush when saturated")
+	# Resolution Path 1: Physical panel repair
+	scrub_panel.interact(self)
+	_assert_true(not ShipState.active_faults.has("CO2_SCRUBBER_SATURATION"), "Physical scrubber cartridge replacement resolves fault")
+	remove_child(scrub_panel)
+	scrub_panel.queue_free()
+	
+	# Resolution Path 2: Terminal purge override
+	ShipState.trigger_fault("CO2_SCRUBBER_SATURATION")
+	_assert_true(ShipState.active_faults.has("CO2_SCRUBBER_SATURATION"), "CO2_SCRUBBER_SATURATION re-triggered")
+	env_mgr.trigger_co2_purge()
+	_assert_true(not ShipState.active_faults.has("CO2_SCRUBBER_SATURATION"), "Terminal emergency CO2 purge override resolves fault")
+	
+	# Resolution Path 3: Power Rerouting to Secondary Scrubber Bank
+	ShipState.trigger_fault("CO2_SCRUBBER_SATURATION")
+	ShipSystemManager.get_system("power_distribution").state = ShipSystemClass.State.ONLINE
+	ShipState.reroute_auxiliary_scrubber(true)
+	_assert_true(ShipState.auxiliary_scrubber_active, "Power rerouting engages secondary CO2 scrubber bank")
+	env_mgr.compartments["life_support"]["co2_ppm"] = 1500.0
+	env_mgr._process(1.0)
+	_assert_true(env_mgr.compartments["life_support"]["co2_ppm"] < 1500.0, "Auxiliary scrubber absorbs CO2 while primary scrubber remains faulted")
+	ShipState.reroute_auxiliary_scrubber(false)
+	ShipState.resolve_fault("CO2_SCRUBBER_SATURATION")
+	
+	# --- SCENARIO 2: CABIN_PRESSURE_LEAK ---
+	var f2 = ShipState.trigger_fault("CABIN_PRESSURE_LEAK")
+	_assert_true(f2 != null and ShipState.active_faults.has("CABIN_PRESSURE_LEAK"), "Failure Scenario 2: CABIN_PRESSURE_LEAK triggered")
+	var press_valve = load("res://scenes/interactables/emergency_valve.tscn").instantiate()
+	press_valve.valve_type = "pressure"
+	add_child(press_valve)
+	_assert_true(press_valve.check_fault_active(), "Pressure isolation valve identifies active leak")
+	_assert_true(press_valve.get_prompt().contains("Seal Cabin Leak"), "Valve prompt offers leak seal")
+	# Resolution Path 1: Handwheel valve operation
+	press_valve.interact(self)
+	_assert_true(not ShipState.active_faults.has("CABIN_PRESSURE_LEAK"), "Operating emergency shutoff valve resolves CABIN_PRESSURE_LEAK")
+	remove_child(press_valve)
+	press_valve.queue_free()
+	
+	# Resolution Path 2: Terminal pressurization override
+	ShipState.trigger_fault("CABIN_PRESSURE_LEAK")
+	_assert_true(ShipState.active_faults.has("CABIN_PRESSURE_LEAK"), "CABIN_PRESSURE_LEAK re-triggered")
+	env_mgr.trigger_pressurization_override("")
+	_assert_true(not ShipState.active_faults.has("CABIN_PRESSURE_LEAK"), "Terminal emergency repressurization override resolves fault")
+	
+	# --- SCENARIO 3: THERMAL_RUNAWAY ---
+	var f3 = ShipState.trigger_fault("THERMAL_RUNAWAY")
+	_assert_true(f3 != null and ShipState.active_faults.has("THERMAL_RUNAWAY"), "Failure Scenario 3: THERMAL_RUNAWAY triggered")
+	var therm_valve = load("res://scenes/interactables/emergency_valve.tscn").instantiate()
+	therm_valve.valve_type = "cooling"
+	add_child(therm_valve)
+	_assert_true(therm_valve.check_fault_active(), "Cooling bypass valve identifies thermal runaway")
+	_assert_true(therm_valve.get_prompt().contains("Dump Excess Heat"), "Thermal valve prompt offers heat dump")
+	# Resolution Path 1: Valve bypass operation
+	therm_valve.interact(self)
+	_assert_true(not ShipState.active_faults.has("THERMAL_RUNAWAY"), "Operating radiator cooling bypass valve resolves THERMAL_RUNAWAY")
+	remove_child(therm_valve)
+	therm_valve.queue_free()
+	
+	# Resolution Path 2: Terminal thermal reset override
+	ShipState.trigger_fault("THERMAL_RUNAWAY")
+	_assert_true(ShipState.active_faults.has("THERMAL_RUNAWAY"), "THERMAL_RUNAWAY re-triggered")
+	env_mgr.trigger_thermal_reset()
+	_assert_true(not ShipState.active_faults.has("THERMAL_RUNAWAY"), "Terminal climate reset override resolves THERMAL_RUNAWAY")
+	
+	remove_child(env_mgr)
+	env_mgr.queue_free()
+	ShipState.reset_to_defaults()
+
+func _test_player_afflictions() -> void:
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	env_mgr.player_compartment_id = "engineering_bay"
+	
+	# 1. Hypoxia (O2 < 60%)
+	env_mgr.compartments["engineering_bay"]["o2_level"] = 50.0
+	env_mgr._evaluate_player_afflictions(0.0)
+	_assert_true(env_mgr.player_afflictions.has("HYPOXIA"), "Hypoxia detected when O2 < 60%")
+	
+	# 2. CO2 Toxicity (CO2 > 2000 ppm)
+	env_mgr.compartments["engineering_bay"]["o2_level"] = 100.0
+	env_mgr.compartments["engineering_bay"]["co2_ppm"] = 2800.0
+	env_mgr._evaluate_player_afflictions(0.0)
+	_assert_true(env_mgr.player_afflictions.has("CO2_TOXICITY"), "CO2 toxicity detected when CO2 > 2000 ppm")
+	
+	# 3. Hypothermia (Temp < 283.15 K = 10°C)
+	env_mgr.compartments["engineering_bay"]["co2_ppm"] = 420.0
+	env_mgr.compartments["engineering_bay"]["temperature"] = 278.0
+	env_mgr._evaluate_player_afflictions(0.0)
+	_assert_true(env_mgr.player_afflictions.has("HYPOTHERMIA"), "Hypothermia detected when Temperature < 10°C")
+	
+	# 4. Heatstroke (Temp > 311.15 K = 38°C)
+	env_mgr.compartments["engineering_bay"]["temperature"] = 318.0
+	env_mgr._evaluate_player_afflictions(0.0)
+	_assert_true(env_mgr.player_afflictions.has("HEATSTROKE"), "Heatstroke detected when Temperature > 38°C")
+	
+	# 5. Decompression (Pressure < 75.0 kPa)
+	env_mgr.compartments["engineering_bay"]["temperature"] = 294.15
+	env_mgr.compartments["engineering_bay"]["pressure"] = 62.0
+	env_mgr._evaluate_player_afflictions(0.0)
+	_assert_true(env_mgr.player_afflictions.has("DECOMPRESSION"), "Decompression detected when Pressure < 75 kPa")
+	
+	# 6. PlayerController response to afflictions
+	var player_scene = load("res://scenes/player/player.tscn")
+	var player = player_scene.instantiate()
+	add_child(player)
+	player.apply_environmental_afflictions(["HYPOXIA"])
+	_assert_true(player.speed_modifier < 1.0, "Player movement speed reduced under Hypoxia")
+	
+	player.apply_environmental_afflictions(["HYPOTHERMIA"])
+	_assert_true(player.is_shivering, "Player camera shivering active under Hypothermia")
+	
+	player.apply_environmental_afflictions([])
+	_assert_true(player.speed_modifier == 1.0, "Player movement speed restored to 1.0 when nominal")
+	_assert_true(not player.is_shivering, "Camera shivering deactivated when nominal")
+	
+	player.free()
+	env_mgr.free()
+
+func _test_environmental_save_load() -> void:
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	
+	env_mgr.compartments["corridors"]["o2_level"] = 82.5
+	env_mgr.compartments["corridors"]["co2_ppm"] = 1450.0
+	env_mgr.compartments["corridors"]["temperature"] = 286.0
+	env_mgr.compartments["corridors"]["pressure"] = 92.4
+	env_mgr.compartments["corridors"]["vents_open"] = false
+	env_mgr.compartments["corridors"]["leak_rate"] = 0.5
+	
+	var exported: Dictionary = env_mgr.export_save_data()
+	_assert_true(exported.has("compartments"), "Exported save data includes multi-compartment dictionary")
+	_assert_true(exported["compartments"].has("corridors"), "Exported data contains corridors telemetry")
+	
+	var new_env = EnvManagerScript.new()
+	add_child(new_env)
+	new_env.import_save_data(exported)
+	var corr = new_env.get_compartment_atmosphere("corridors")
+	_assert_true(is_equal_approx(corr["o2_level"], 82.5), "Serialized O2 level preserved across save/load")
+	_assert_true(is_equal_approx(corr["co2_ppm"], 1450.0), "Serialized CO2 ppm preserved across save/load")
+	_assert_true(is_equal_approx(corr["temperature"], 286.0), "Serialized temperature preserved across save/load")
+	_assert_true(is_equal_approx(corr["pressure"], 92.4), "Serialized pressure preserved across save/load")
+	_assert_true(corr["vents_open"] == false, "Serialized vent damper position preserved across save/load")
+	_assert_true(is_equal_approx(corr["leak_rate"], 0.5), "Serialized leak rate preserved across save/load")
+	
+	new_env.free()
+	env_mgr.free()
+
+func _test_schematic_and_terminal_environmental_ui() -> void:
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	
+	# 1. Ship Schematic UI contains live atmospheric metrics
+	var sdata = ShipState.get_schematic_data()
+	_assert_true(sdata["compartments"]["life_support"].has("atmosphere"), "Schematic data includes compartment atmosphere dictionary")
+	var ls_atmo: Dictionary = sdata["compartments"]["life_support"]["atmosphere"]
+	_assert_true(ls_atmo.has("o2_level") and ls_atmo.has("pressure"), "Schematic atmosphere includes O2 and pressure metrics")
+	
+	# 2. Terminal Dialog Environmental Control Tab & Overrides
+	var term_scene = load("res://scenes/ui/terminal_dialog.tscn")
+	var term = term_scene.instantiate()
+	add_child(term)
+	
+	term.open_terminal("life_support", "Atmospheric Diagnostics Console")
+	var atmo_view: VBoxContainer = term.get_node("%AtmosphereView")
+	_assert_true(atmo_view.visible, "Atmospheric Diagnostics Console opens directly to Atmosphere view")
+	
+	var atmo_list: VBoxContainer = term.get_node("%AtmosphereList")
+	_assert_true(atmo_list.get_child_count() == 4, "Atmosphere view renders telemetry cards for all 4 compartments")
+	
+	# Test emergency override dispatch
+	ShipSystemManager.get_system("power_distribution").state = ShipSystemClass.State.ONLINE
+	term._on_emergency_purge_pressed()
+	var atmo_status: Label = term.get_node("%AtmoStatusLabel")
+	_assert_true(atmo_status.text.contains("OVERRIDE ENGAGED"), "Emergency purge override dispatches successfully")
+	
+	term.close_terminal()
+	_assert_true(not term.visible, "Terminal closes cleanly")
+	remove_child(term)
+	term.queue_free()
+	remove_child(env_mgr)
+	env_mgr.queue_free()
+	ShipSystemManager.reset_to_defaults()
+
+func _test_m2_interconnection_persistence_and_diagnostics() -> void:
+	ShipState.reset_to_defaults()
+	
+	# 1. Dynamic Fault Persistence across Save / Load
+	var f_leak = ShipState.trigger_fault("CABIN_PRESSURE_LEAK")
+	var f_sat = ShipState.trigger_fault("CO2_SCRUBBER_SATURATION")
+	ShipState.reroute_auxiliary_scrubber(true)
+	_assert_true(ShipState.active_faults.has("CABIN_PRESSURE_LEAK") and ShipState.active_faults.has("CO2_SCRUBBER_SATURATION"), "Dynamic faults actively triggered before save")
+	
+	var exported_state := ShipState.export_save_data()
+	_assert_true(exported_state.get("auxiliary_scrubber_active", false) == true, "Auxiliary scrubber state included in exported save data")
+	_assert_true(exported_state["active_fault_ids"].has("CABIN_PRESSURE_LEAK"), "Dynamic fault IDs included in exported save data")
+	
+	# Simulate new game / fresh load
+	ShipState.active_faults.clear()
+	ShipState.import_save_data(exported_state)
+	_assert_true(ShipState.active_faults.has("CABIN_PRESSURE_LEAK"), "Dynamic CABIN_PRESSURE_LEAK preserved across save/load")
+	_assert_true(ShipState.active_faults.has("CO2_SCRUBBER_SATURATION"), "Dynamic CO2_SCRUBBER_SATURATION preserved across save/load")
+	_assert_true(ShipState.auxiliary_scrubber_active, "Auxiliary scrubber power state preserved across save/load")
+	ShipState.reset_to_defaults()
+	
+	# 2. Interconnected Failure Cascade
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	ShipSystemManager.get_system("life_support").state = ShipSystemClass.State.ONLINE
+	
+	# Thermal stress on scrubber amine beds
+	env_mgr.compartments["life_support"]["temperature"] = 325.0 # ~52°C
+	var base_co2: float = env_mgr.compartments["life_support"]["co2_ppm"]
+	env_mgr._process(1.0)
+	_assert_true(env_mgr.compartments["life_support"]["co2_ppm"] > base_co2, "Thermal stress above 320K degrades scrubber absorption efficiency")
+	
+	# Severe thermal runaway cascades into seal blowout
+	env_mgr.compartments["life_support"]["temperature"] = 338.0 # ~65°C
+	env_mgr._process(1.0)
+	_assert_true(ShipState.active_faults.has("CABIN_PRESSURE_LEAK"), "Extreme thermal runaway (>335K) cascades into CABIN_PRESSURE_LEAK seal rupture")
+	
+	# Decompression leak accelerates oxygen loss
+	var o2_start: float = env_mgr.compartments["life_support"]["o2_level"]
+	env_mgr._process(2.0)
+	_assert_true(env_mgr.compartments["life_support"]["o2_level"] < o2_start, "Decompression leak vents compartment oxygen rapidly")
+	
+	# 3. Tactical Schematic Card Telemetry Hazard Warning
+	var schematic_scene = load("res://scenes/ui/ship_schematic.tscn")
+	var schematic = schematic_scene.instantiate()
+	add_child(schematic)
+	
+	# Decompress Engineering Bay without device fault
+	ShipState.active_faults.clear()
+	env_mgr.compartments["engineering_bay"]["pressure"] = 55.0
+	schematic.refresh_schematic()
+	var eng_lbl: Label = schematic.find_child("EngBayPanel", true, false).find_child("StatusLabel", true, false)
+	_assert_true(eng_lbl.text.contains("HAZARD: DECOMPRESSION"), "Tactical schematic card detects atmospheric decompression hazard")
+	
+	# Hypoxia in Command Bridge without device fault
+	env_mgr.compartments["bridge"]["o2_level"] = 40.0
+	schematic.refresh_schematic()
+	var bridge_lbl: Label = schematic.find_child("BridgePanel", true, false).find_child("StatusLabel", true, false)
+	_assert_true(bridge_lbl.text.contains("HAZARD: HYPOXIA"), "Tactical schematic card detects atmospheric hypoxia hazard")
+	
+	remove_child(schematic)
+	schematic.queue_free()
+	
+	# 4. Terminal In-Game Fault Simulation Controls
+	var term_scene = load("res://scenes/ui/terminal_dialog.tscn")
+	var term = term_scene.instantiate()
+	add_child(term)
+	ShipState.set_generator_breaker(true)
+	ShipState.set_bus_relay(true)
+	
+	# Simulate fault from terminal
+	term._on_simulate_fault_pressed()
+	_assert_true(ShipState.active_faults.size() > 0, "Terminal simulation control triggers test failure scenario")
+	
+	# Reroute auxiliary scrubber from terminal
+	term._on_reroute_aux_pressed()
+	_assert_true(ShipState.auxiliary_scrubber_active, "Terminal control engages auxiliary scrubber power rerouting")
+	
+	# Clear test faults from terminal
+	term._on_clear_faults_pressed()
+	_assert_true(ShipState.active_faults.is_empty(), "Terminal clear faults control restores ship to nominal state")
+	_assert_true(is_equal_approx(env_mgr.compartments["life_support"]["pressure"], 101.3), "Terminal clear control normalizes cabin pressure")
+	
+	remove_child(term)
+	term.queue_free()
+	remove_child(env_mgr)
+	env_mgr.queue_free()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+
+func _test_m3_inventory_and_resources() -> void:
+	InventoryManager.reset_to_defaults()
+	
+	# Quick slots validation
+	_assert_true(InventoryManager.quick_slots.size() == 4, "Quick select has 4 active slots")
+	_assert_true(InventoryManager.get_equipped_item_id() == "diagnostic_scanner", "Initial equipped slot 1 is Diagnostic Scanner")
+	
+	var eq2 := InventoryManager.equip_slot(2)
+	_assert_true(eq2 == "multitool" and InventoryManager.active_slot == 2, "Slot 2 equips Multitool / Welder")
+	
+	var eq3 := InventoryManager.equip_slot(3)
+	_assert_true(eq3 == "spare_fuse" and InventoryManager.active_slot == 3, "Slot 3 equips Spare Fuse pack")
+	
+	var eq4 := InventoryManager.equip_slot(4)
+	_assert_true(eq4 == "battery_cell" and InventoryManager.active_slot == 4, "Slot 4 equips Battery Cell")
+	
+	var eq_invalid := InventoryManager.equip_slot(99)
+	_assert_true(eq_invalid == "" and InventoryManager.active_slot == 0, "Out-of-range slot disarms tool (active_slot 0)")
+	
+	# Consumables tally & item operations
+	var initial_fuses := InventoryManager.get_item_count("spare_fuse")
+	_assert_true(initial_fuses >= 2, "Initial spare fuse count is at least 2")
+	
+	InventoryManager.add_item("spare_fuse", 3)
+	_assert_true(InventoryManager.get_item_count("spare_fuse") == initial_fuses + 3, "add_item increments spare fuse tally")
+	
+	var rem_ok := InventoryManager.remove_item("spare_fuse", 2)
+	_assert_true(rem_ok and InventoryManager.get_item_count("spare_fuse") == initial_fuses + 1, "remove_item decrements spare fuse tally")
+	
+	var rem_excess := InventoryManager.remove_item("spare_fuse", 999)
+	_assert_true(not rem_excess, "remove_item rejects removing more items than available")
+	
+	var rem_tool := InventoryManager.remove_item("diagnostic_scanner", 1)
+	_assert_true(not rem_tool, "Permanent tools cannot be removed via consumable API")
+	
+	# Battery charge consumption & portable cell recharges
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 100.0
+	var drain_ok := InventoryManager.drain_scanner_battery(25.0)
+	_assert_true(drain_ok and is_equal_approx(InventoryManager.get_scanner_battery(), 75.0), "drain_scanner_battery deducts 25% charge")
+	
+	var drain_fail := InventoryManager.drain_scanner_battery(90.0)
+	_assert_true(not drain_fail and is_equal_approx(InventoryManager.get_scanner_battery(), 75.0), "drain_scanner_battery fails when charge insufficient")
+	
+	# Portable battery cell usage
+	InventoryManager.consumables["battery_cell"] = 2
+	var used_cell := InventoryManager.use_battery_cell()
+	_assert_true(used_cell, "Portable battery cell recharges depleted scanner")
+	_assert_true(is_equal_approx(InventoryManager.get_scanner_battery(), 100.0), "Battery cell restores charge up to 100% max")
+	_assert_true(InventoryManager.get_item_count("battery_cell") == 1, "Battery cell quantity decremented after use")
+	
+	var use_when_full := InventoryManager.use_battery_cell()
+	_assert_true(not use_when_full, "Battery cell refused when scanner already at 100% capacity")
+	_assert_true(InventoryManager.get_item_count("battery_cell") == 1, "Unused battery cell preserved")
+	
+	InventoryManager.reset_to_defaults()
+
+func _test_m3_handheld_tools() -> void:
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	
+	# Multitool mode cycling
+	_assert_true(InventoryManager.get_multitool_mode() == "CALIBRATE", "Multitool initial mode is CALIBRATE")
+	var mode2 := InventoryManager.cycle_multitool_mode()
+	_assert_true(mode2 == "CUT_WELD", "Multitool cycles to CUT_WELD")
+	var mode3 := InventoryManager.cycle_multitool_mode()
+	_assert_true(mode3 == "TIGHTEN", "Multitool cycles to TIGHTEN")
+	var mode4 := InventoryManager.cycle_multitool_mode()
+	_assert_true(mode4 == "CALIBRATE", "Multitool loops back to CALIBRATE")
+	
+	InventoryManager.set_multitool_mode("CUT_WELD")
+	_assert_true(InventoryManager.get_multitool_mode() == "CUT_WELD", "set_multitool_mode sets mode directly")
+	
+	var tool_res := InventoryManager.perform_multitool_action("CUT_WELD")
+	_assert_true(tool_res.get("ok", false), "perform_multitool_action executes successfully")
+	
+	# Diagnostic Scanner telemetry & fault detection
+	InventoryManager.equip_slot(1)
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 100.0
+	
+	# Create a dummy target with a known device ID
+	var target_node := Node3D.new()
+	target_node.name = "GeneratorUnit"
+	add_child(target_node)
+	
+	var scan_res := InventoryManager.perform_diagnostic_scan(target_node)
+	_assert_true(scan_res.get("ok", false), "Diagnostic scan succeeds with charged scanner")
+	_assert_true(is_equal_approx(InventoryManager.get_scanner_battery(), 90.0), "Diagnostic scan drains 10% battery charge")
+	
+	var telem: Dictionary = scan_res.get("telemetry", {})
+	_assert_true(telem.has("device_name") and telem.has("integrity") and telem.has("power_draw"), "Scan returns real-time telemetry dictionary")
+	
+	# Depleted scanner scan denial
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 5.0
+	var scan_depleted := InventoryManager.perform_diagnostic_scan(target_node)
+	_assert_true(not scan_depleted.get("ok", false), "Diagnostic scan denied when battery < drain_cost")
+	_assert_true(scan_depleted.get("error", "") == "INSUFFICIENT_CHARGE", "Depleted scan returns INSUFFICIENT_CHARGE error code")
+	
+	remove_child(target_node)
+	target_node.queue_free()
+	InventoryManager.reset_to_defaults()
+
+func _test_m3_workstations_and_lockers() -> void:
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	
+	# 3D Storage Locker Tests
+	var locker_scene = load("res://scenes/interactables/storage_locker.tscn")
+	var locker = locker_scene.instantiate()
+	add_child(locker)
+	locker.stored_items = {
+		"spare_fuse": 2,
+		"battery_cell": 1
+	}
+	locker._update_visuals()
+	
+	_assert_true(locker.has_items(), "Storage locker reports items present")
+	_assert_true(locker.get_prompt().contains("Spare Fuse"), "Storage locker prompt lists stored items")
+	
+	var before_fuses: int = InventoryManager.get_item_count("spare_fuse")
+	var taken: Dictionary = locker.take_all()
+	_assert_true(taken.get("spare_fuse", 0) == 2, "take_all extracts all fuses from locker")
+	_assert_true(InventoryManager.get_item_count("spare_fuse") == before_fuses + 2, "Locker items transferred to InventoryManager")
+	_assert_true(not locker.has_items(), "Storage locker reports empty after take_all")
+	_assert_true(locker.get_prompt().contains("[Empty]"), "Storage locker prompt displays [Empty] status")
+	
+	# Store item back into locker
+	var store_ok: bool = locker.store_item("spare_fuse", 1)
+	_assert_true(store_ok and locker.get_item_count("spare_fuse") == 1, "store_item deposits items from inventory back into locker")
+	_assert_true(locker.has_items(), "Locker detects deposited items")
+	
+	remove_child(locker)
+	locker.queue_free()
+	
+	# 3D Workbench Station Tests
+	var bench_scene = load("res://scenes/interactables/workbench_station.tscn")
+	var bench = bench_scene.instantiate()
+	add_child(bench)
+	
+	# Station unpowered initially
+	ShipState.set_generator_breaker(false)
+	ShipState.set_bus_relay(false)
+	_assert_true(not bench.is_station_powered(), "Workbench reports unpowered when generator and bus offline")
+	_assert_true(bench.get_prompt().contains("[Unpowered]"), "Workbench prompt indicates [Unpowered] state")
+	
+	# Power the station
+	ShipState.set_generator_breaker(true)
+	ShipState.set_bus_relay(true)
+	_assert_true(bench.is_station_powered(), "Workbench reports powered once generator and bus are energized")
+	
+	# Test fast-recharge cradle
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 30.0
+	_assert_true(bench.get_prompt().contains("Dock & Fast-Recharge Scanner"), "Workbench prompt offers scanner docking when charge low")
+	
+	bench.recharge_scanner()
+	_assert_true(is_equal_approx(InventoryManager.get_scanner_battery(), 100.0), "Workbench dock recharges scanner to 100%")
+	
+	# Test component inspection and refurbishment
+	var insp: Dictionary = bench.inspect_component("spare_fuse")
+	_assert_true(insp.get("condition", "") == "NOMINAL", "Workbench inspects component tolerances")
+	
+	var pre_refurb_fuses := InventoryManager.get_item_count("spare_fuse")
+	var refurb_ok: bool = bench.refurbish_component("spare_fuse")
+	_assert_true(refurb_ok and InventoryManager.get_item_count("spare_fuse") == pre_refurb_fuses + 1, "Workbench refurbishes / fabricates spare fuses")
+	
+	remove_child(bench)
+	bench.queue_free()
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+
+func _test_m3_deepened_multi_step_repair() -> void:
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	
+	var repair_scene = load("res://scenes/interactables/multi_step_repair.tscn")
+	var panel = repair_scene.instantiate()
+	add_child(panel)
+	
+	panel.panel_title = "Primary Power Conduit Junction"
+	panel.device_id = "training_power_conduit"
+	panel.associated_fault_id = "CONDUIT_BLOWN_FUSE"
+	panel.required_item = "spare_fuse"
+	panel.component_name = "Spare Fuse Pack"
+	panel.current_stage = MultiStepRepairClass.Stage.DIAGNOSE
+	panel.is_repaired = false
+	panel._update_visuals()
+	
+	ShipState.trigger_fault("CONDUIT_BLOWN_FUSE")
+	_assert_true(ShipState.active_faults.has("CONDUIT_BLOWN_FUSE"), "CONDUIT_BLOWN_FUSE active before repair")
+	
+	# Stage 0: DIAGNOSE
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.DIAGNOSE, "Initial stage is DIAGNOSE")
+	_assert_true(panel.get_stage_name() == "DIAGNOSE", "get_stage_name() returns DIAGNOSE")
+	
+	# Wrong tool (Multitool) rejected on Stage 0
+	InventoryManager.equip_slot(2) # Multitool
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.DIAGNOSE, "Wrong tool (Multitool) rejected during DIAGNOSE stage")
+	
+	# Correct tool (Diagnostic Scanner) advances to UNCLAMP
+	InventoryManager.equip_slot(1) # Scanner
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 100.0
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.UNCLAMP, "Diagnostic Scanner advances panel to UNCLAMP stage")
+	_assert_true(panel.get_stage_name() == "UNCLAMP", "Stage name is UNCLAMP")
+	
+	# Stage 1: UNCLAMP
+	# Wrong tool (Scanner) rejected on Stage 1
+	InventoryManager.equip_slot(1)
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.UNCLAMP, "Wrong tool (Scanner) rejected during UNCLAMP stage")
+	
+	# Correct tool (Multitool) advances to REPLACE
+	InventoryManager.equip_slot(2)
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.REPLACE, "Multitool advances panel to REPLACE stage")
+	
+	# Stage 2: REPLACE
+	# Missing required item fails
+	InventoryManager.consumables["spare_fuse"] = 0
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.REPLACE, "Stage remains REPLACE when required spare part missing")
+	_assert_true(panel.get_prompt().contains("Missing"), "Prompt indicates missing component")
+	
+	# Supply spare fuse & install
+	InventoryManager.add_item("spare_fuse", 1)
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.CALIBRATE, "Installing spare fuse advances panel to CALIBRATE stage")
+	_assert_true(InventoryManager.get_item_count("spare_fuse") == 0, "Spare fuse consumed from inventory")
+	
+	# Stage 3: CALIBRATE
+	# Wrong tool (Scanner) rejected
+	InventoryManager.equip_slot(1)
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.CALIBRATE, "Scanner rejected during CALIBRATE stage")
+	
+	# Correct tool (Multitool) advances to TEST
+	InventoryManager.equip_slot(2)
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.TEST, "Multitool calibration advances panel to TEST stage")
+	
+	# Stage 4: TEST & ENERGIZE
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.COMPLETED, "Diagnostic test completes multi-step repair")
+	_assert_true(panel.is_repaired, "Panel marked is_repaired")
+	_assert_true(not ShipState.active_faults.has("CONDUIT_BLOWN_FUSE"), "CONDUIT_BLOWN_FUSE cleared from ShipState active faults")
+	_assert_true(is_equal_approx(ShipState.devices["training_power_conduit"].health, 100.0), "Device health restored to 100%")
+	_assert_true(panel.get_prompt().contains("[Operational]"), "Restored panel prompt indicates [Operational]")
+	
+	remove_child(panel)
+	panel.queue_free()
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+
+func _test_m3_rerouting_and_overrides() -> void:
+	ShipState.reset_to_defaults()
+	
+	# Power rerouting
+	var p_res := ShipState.reroute_power("reactor_primary", "training_power_conduit")
+	_assert_true(p_res.get("ok", false) and ShipState.power_rerouted, "reroute_power dispatches successfully and sets power_rerouted")
+	
+	# Coolant bypass loop rerouting
+	var c_res := ShipState.reroute_coolant_loop(true)
+	_assert_true(c_res.get("ok", false) and ShipState.coolant_bypass_active, "reroute_coolant_loop activates secondary coolant bypass")
+	var c_res2 := ShipState.reroute_coolant_loop(false)
+	_assert_true(c_res2.get("ok", false) and not ShipState.coolant_bypass_active, "reroute_coolant_loop restores primary loop")
+	
+	# Manual subsystem overrides
+	var o_res := ShipState.manual_override_subsystem("communications", true)
+	_assert_true(o_res.get("ok", false), "manual_override_subsystem dispatches successfully")
+	_assert_true(ShipState.subsystems["communications"].is_online(), "Manual override forces subsystem state ONLINE")
+	_assert_true(ShipState.manual_overrides.get("communications", false) == true, "Manual override tracked in ship state")
+	
+	var o_res2 := ShipState.manual_override_subsystem("communications", false)
+	_assert_true(not ShipState.subsystems["communications"].is_online(), "Manual override forces subsystem state OFFLINE")
+	
+	ShipState.reset_to_defaults()
+
+func _test_m3_diagnostic_tutorial() -> void:
+	var tut = DiagnosticTutorialClass.new()
+	_assert_true(not tut.is_active, "Tutorial initially inactive")
+	
+	tut.start_tutorial()
+	_assert_true(tut.is_active, "start_tutorial activates tutorial")
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.OBSERVE_SYMPTOMS, "Step 0 is OBSERVE_SYMPTOMS")
+	_assert_true(tut.get_current_title() == "OBSERVE SYMPTOMS", "Title matches OBSERVE SYMPTOMS")
+	_assert_true(tut.get_current_instruction().contains("Auxiliary Power Junction"), "Instruction guides player to inspect junction")
+	
+	tut.advance_step()
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.RETRIEVE_SCANNER, "Step 1 is RETRIEVE_SCANNER")
+	
+	tut.advance_step()
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.EQUIP_SCANNER, "Step 2 is EQUIP_SCANNER")
+	
+	tut.advance_step()
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.SCAN_DEVICE, "Step 3 is SCAN_DEVICE")
+	
+	tut.advance_step()
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.UNCLAMP_HOUSING, "Step 4 is UNCLAMP_HOUSING")
+	
+	tut.advance_step()
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.INSTALL_FUSE, "Step 5 is INSTALL_FUSE")
+	
+	tut.advance_step()
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.CALIBRATE_CIRCUIT, "Step 6 is CALIBRATE_CIRCUIT")
+	
+	tut.advance_step()
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.SYSTEM_TEST, "Step 7 is SYSTEM_TEST")
+	
+	tut.advance_step()
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.TUTORIAL_COMPLETE, "Step 8 is TUTORIAL_COMPLETE")
+	_assert_true(not tut.is_active, "Tutorial marks complete and deactivates")
+
+func _test_m3_save_load_persistence() -> void:
+	SaveManager.delete_save()
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	
+	# Set custom state before saving
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 62.5
+	InventoryManager.tools["multitool"]["mode"] = "CUT_WELD"
+	InventoryManager.consumables["spare_fuse"] = 8
+	InventoryManager.consumables["battery_cell"] = 5
+	InventoryManager.equip_slot(3) # slot 3 equipped
+	
+	ShipState.reroute_power("reactor_primary", "training_power_conduit")
+	ShipState.reroute_coolant_loop(true)
+	ShipState.manual_override_subsystem("communications", true)
+	
+	# Create a persistent locker and multi-step panel in tree to test scene serialization
+	var locker_scene = load("res://scenes/interactables/storage_locker.tscn")
+	var locker = locker_scene.instantiate()
+	locker.interactable_id = "TestPersistLocker"
+	locker.stored_items = {"coolant_canister": 4, "spare_fuse": 2}
+	add_child(locker)
+	
+	var repair_scene = load("res://scenes/interactables/multi_step_repair.tscn")
+	var panel = repair_scene.instantiate()
+	panel.device_id = "persist_test_device"
+	panel.current_stage = MultiStepRepairClass.Stage.CALIBRATE
+	panel.is_repaired = false
+	add_child(panel)
+	
+	# Save game
+	var save_res := SaveManager.save_game(null, null)
+	_assert_true(save_res and SaveManager.has_save_file(), "SaveManager exports game state with Milestone 3 data")
+	
+	# Reset states
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	locker.stored_items.clear()
+	panel.current_stage = MultiStepRepairClass.Stage.DIAGNOSE
+	
+	_assert_true(is_equal_approx(InventoryManager.get_scanner_battery(), 100.0), "Scanner reset to 100% before load")
+	_assert_true(InventoryManager.get_multitool_mode() == "CALIBRATE", "Multitool reset to CALIBRATE before load")
+	_assert_true(InventoryManager.get_item_count("spare_fuse") == 2, "Fuses reset before load")
+	
+	# Load game
+	var load_res := SaveManager.load_game(null, null)
+	_assert_true(load_res, "SaveManager loads game state successfully")
+	
+	_assert_true(is_equal_approx(InventoryManager.get_scanner_battery(), 62.5), "Serialized scanner battery charge (62.5%) preserved across save/load")
+	_assert_true(InventoryManager.get_multitool_mode() == "CUT_WELD", "Serialized multitool mode (CUT_WELD) preserved across save/load")
+	_assert_true(InventoryManager.get_item_count("spare_fuse") == 8, "Serialized spare fuse count (8) preserved across save/load")
+	_assert_true(InventoryManager.get_item_count("battery_cell") == 5, "Serialized battery cell count (5) preserved across save/load")
+	_assert_true(InventoryManager.active_slot == 3, "Serialized active quick-select slot (3) preserved across save/load")
+	
+	_assert_true(ShipState.power_rerouted, "Serialized power_rerouted flag preserved across save/load")
+	_assert_true(ShipState.coolant_bypass_active, "Serialized coolant_bypass_active flag preserved across save/load")
+	_assert_true(ShipState.manual_overrides.get("communications", false) == true, "Serialized manual subsystem override preserved across save/load")
+	
+	_assert_true(locker.get_item_count("coolant_canister") == 4, "Serialized locker stored items preserved across save/load")
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.CALIBRATE, "Serialized multi-step repair stage preserved across save/load")
+	
+	remove_child(locker)
+	locker.queue_free()
+	remove_child(panel)
+	panel.queue_free()
+	SaveManager.delete_save()
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+
+func _test_m3_deep_verification_and_edge_cases() -> void:
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	
+	# 1. Inventory & MissionManager Bidirectional Sync without Ghost Items
+	_assert_true(MissionManager.has_item("spare_fuse"), "MissionManager initially has spare_fuse")
+	InventoryManager.remove_item("spare_fuse", InventoryManager.get_item_count("spare_fuse"))
+	_assert_true(InventoryManager.get_item_count("spare_fuse") == 0, "All spare fuses removed from InventoryManager")
+	_assert_true(not MissionManager.has_item("spare_fuse"), "MissionManager no longer has spare_fuse when count drops to zero")
+	_assert_true(not MissionManager.inventory.has("spare_fuse"), "Depleted spare fuse removed from MissionManager.inventory (no ghost items)")
+	
+	InventoryManager.add_item("spare_fuse", 2)
+	_assert_true(MissionManager.has_item("spare_fuse"), "Adding items restores them in MissionManager")
+	_assert_true(MissionManager.inventory.has("spare_fuse"), "Restored item appears in MissionManager.inventory")
+	
+	# 2. Quick Slot Customization & Retrieval
+	var q_slots := InventoryManager.get_quick_slots()
+	_assert_true(q_slots.size() == 4, "Quick slots count is 4")
+	var set_ok := InventoryManager.set_quick_slot(3, "coolant_canister")
+	_assert_true(set_ok, "set_quick_slot succeeds for valid slot 3")
+	_assert_true(InventoryManager.quick_slots[2] == "coolant_canister", "Slot 3 updated to coolant_canister")
+	InventoryManager.equip_slot(3)
+	_assert_true(InventoryManager.get_equipped_item_id() == "coolant_canister", "Equipping slot 3 selects coolant_canister")
+	var set_invalid := InventoryManager.set_quick_slot(9, "spare_fuse")
+	_assert_true(not set_invalid, "set_quick_slot rejects invalid slot index")
+	InventoryManager.set_quick_slot(3, "spare_fuse")
+	
+	# 3. Multitool Mode Enforcement on MultiStepRepairPanel
+	var repair_scene = load("res://scenes/interactables/multi_step_repair.tscn")
+	var panel = repair_scene.instantiate()
+	add_child(panel)
+	panel.action_name = "Calibrate Circuit"
+	panel.required_multitool_mode = "CALIBRATE"
+	panel.current_stage = MultiStepRepairClass.Stage.CALIBRATE
+	panel.is_repaired = false
+	panel._update_visuals()
+	
+	InventoryManager.equip_slot(2) # Multitool
+	InventoryManager.set_multitool_mode("CUT_WELD") # WRONG MODE
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.CALIBRATE, "CUT_WELD mode rejected during CALIBRATE stage")
+	_assert_true(panel.get_prompt().contains("Switch Multitool to CALIBRATE Mode"), "Prompt directs player to switch multitool mode")
+	
+	InventoryManager.set_multitool_mode("TIGHTEN") # WRONG MODE
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.CALIBRATE, "TIGHTEN mode rejected during CALIBRATE stage")
+	
+	InventoryManager.set_multitool_mode("CALIBRATE") # CORRECT MODE
+	panel._on_interacted(null)
+	_assert_true(panel.current_stage == MultiStepRepairClass.Stage.TEST, "CALIBRATE mode advances panel to TEST stage")
+	remove_child(panel)
+	panel.free()
+	
+	# 4. Loose Manifold Clamp MultiStep Repair (Life Support) requiring TIGHTEN mode
+	var manifold_panel = repair_scene.instantiate()
+	add_child(manifold_panel)
+	manifold_panel.panel_title = "Coolant Distribution Manifold"
+	manifold_panel.device_id = "coolant_distribution_manifold"
+	manifold_panel.associated_fault_id = "MANIFOLD_CLAMP_LOOSE"
+	manifold_panel.action_name = "Torque Clamp Collar"
+	manifold_panel.required_multitool_mode = "TIGHTEN"
+	manifold_panel.current_stage = MultiStepRepairClass.Stage.CALIBRATE
+	manifold_panel.is_repaired = false
+	manifold_panel._update_visuals()
+	
+	InventoryManager.set_multitool_mode("CALIBRATE") # WRONG MODE FOR MANIFOLD
+	manifold_panel._on_interacted(null)
+	_assert_true(manifold_panel.current_stage == MultiStepRepairClass.Stage.CALIBRATE, "CALIBRATE mode rejected on loose clamp requiring TIGHTEN")
+	_assert_true(manifold_panel.get_prompt().contains("TIGHTEN Mode"), "Prompt directs player to TIGHTEN mode for loose clamp")
+	
+	InventoryManager.set_multitool_mode("TIGHTEN") # CORRECT MODE
+	manifold_panel._on_interacted(null)
+	_assert_true(manifold_panel.current_stage == MultiStepRepairClass.Stage.TEST, "TIGHTEN mode torques clamp collar and advances to TEST")
+	remove_child(manifold_panel)
+	manifold_panel.free()
+	
+	# 5. Power Rerouting Persistence Across Simulation Ticks
+	ShipState.set_generator_breaker(true)
+	ShipState.set_bus_relay(false) # Bus is dead
+	_assert_true(not ShipState.power_system.bus_energized, "Bus is de-energized")
+	ShipState.reroute_power("reactor_primary", "training_power_conduit")
+	_assert_true(ShipState.devices["training_power_conduit"].is_powered, "training_power_conduit powered immediately after reroute")
+	
+	# Run continuous physics/simulation tick
+	ShipState.tick_systems(1.0)
+	_assert_true(ShipState.devices["training_power_conduit"].is_powered, "training_power_conduit remains powered across simulation tick")
+	_assert_true(ShipState.power_routes.has("training_power_conduit"), "power_routes tracks conduit connection")
+	
+	ShipState.clear_power_reroutes()
+	ShipState.tick_systems(1.0)
+	_assert_true(not ShipState.devices["training_power_conduit"].is_powered, "Clearing power reroutes restores normal bus-unpowered state")
+	
+	# 6. Storage Locker Deposit When Empty via can_interact & store_item
+	var locker_scene = load("res://scenes/interactables/storage_locker.tscn")
+	var locker = locker_scene.instantiate()
+	add_child(locker)
+	locker.stored_items.clear()
+	locker._update_visuals()
+	_assert_true(not locker.has_items(), "Locker is empty")
+	_assert_true(locker.can_interact(null), "Empty locker allows interaction")
+	
+	InventoryManager.add_item("spare_fuse", 2)
+	InventoryManager.equip_slot(3) # Fuse equipped
+	_assert_true(locker.get_prompt().contains("Deposit"), "Prompt offers depositing equipped fuse into empty locker")
+	locker._on_interacted(null)
+	_assert_true(locker.has_items(), "Depositing item marks locker non-empty")
+	_assert_true(locker.get_item_count("spare_fuse") == 1, "1x spare fuse deposited into locker")
+	remove_child(locker)
+	locker.free()
+	
+	# 7. Workbench Inspection & Refurbishment of Equipped Consumables
+	var bench_scene = load("res://scenes/interactables/workbench_station.tscn")
+	var bench = bench_scene.instantiate()
+	add_child(bench)
+	ShipState.set_generator_breaker(true)
+	ShipState.set_bus_relay(true)
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 100.0
+	
+	InventoryManager.set_quick_slot(3, "coolant_canister")
+	InventoryManager.equip_slot(3) # Coolant canister equipped
+	_assert_true(bench.get_prompt().contains("Inspect & Service Coolant Canister"), "Workbench prompt offers inspecting equipped coolant canister")
+	var pre_coolant := InventoryManager.get_item_count("coolant_canister")
+	bench._on_interacted(null)
+	_assert_true(InventoryManager.get_item_count("coolant_canister") == pre_coolant + 1, "Interacting at workbench refurbishes equipped coolant canister")
+	remove_child(bench)
+	bench.free()
+	
+	# 8. Diagnostic Tutorial In-Game Reactive Progression
+	var level_scene = load("res://scenes/levels/ship_interior.tscn")
+	var level = level_scene.instantiate()
+	add_child(level)
+	var player = level.get_node("Player")
+	var tut = DiagnosticTutorialClass.new()
+	tut.setup_in_game(level, player)
+	
+	_assert_true(tut.is_active, "In-game diagnostic tutorial is active")
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.OBSERVE_SYMPTOMS, "Initial step is OBSERVE_SYMPTOMS")
+	_assert_true(player.hud.tutorial_margin.visible, "Tutorial HUD banner is visible")
+	
+	# Simulate looking at junction
+	player.interaction_ctrl.prompt_changed.emit("[E] Auxiliary Power Junction")
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.RETRIEVE_SCANNER, "Observing junction advances to RETRIEVE_SCANNER")
+	
+	# Simulate opening locker
+	var eng_locker = level.find_child("EngineeringLocker", true, false)
+	eng_locker.locker_opened.emit(eng_locker.interactable_id, {})
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.EQUIP_SCANNER, "Opening locker advances to EQUIP_SCANNER")
+	
+	# Equip scanner
+	InventoryManager.equip_slot(1)
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.SCAN_DEVICE, "Equipping scanner advances to SCAN_DEVICE")
+	
+	# Conduit stage advances
+	var conduit = level.find_child("EngineeringConduitRepair", true, false)
+	conduit.stage_advanced.emit(1, "UNCLAMP")
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.UNCLAMP_HOUSING, "Conduit UNCLAMP advances to UNCLAMP_HOUSING")
+	
+	conduit.stage_advanced.emit(2, "REPLACE")
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.INSTALL_FUSE, "Conduit REPLACE advances to INSTALL_FUSE")
+	
+	conduit.stage_advanced.emit(3, "CALIBRATE")
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.CALIBRATE_CIRCUIT, "Conduit CALIBRATE advances to CALIBRATE_CIRCUIT")
+	
+	conduit.stage_advanced.emit(4, "TEST")
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.SYSTEM_TEST, "Conduit TEST advances to SYSTEM_TEST")
+	
+	conduit.stage_advanced.emit(5, "COMPLETED")
+	_assert_true(tut.get_current_step() == DiagnosticTutorialClass.Step.TUTORIAL_COMPLETE, "Conduit COMPLETED advances to TUTORIAL_COMPLETE")
+	_assert_true(not tut.is_active, "Tutorial deactivates upon completion")
+	_assert_true(not player.hud.tutorial_margin.visible, "Tutorial HUD banner is hidden upon completion")
+	
+	level.free()
+	InventoryManager.reset_to_defaults()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+
+
+
+func _test_m4_environmental_simulation() -> void:
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	_assert_true(env_mgr.compartments.size() == 11, "All 11 compartments registered in EnvironmentalManager")
+	_assert_true(env_mgr.get_all_compartments(true).size() == 11, "get_all_compartments(true) returns 11 compartments")
+	_assert_true(env_mgr.get_all_compartments(false).size() == 4, "get_all_compartments(false) returns 4 core compartments for backward compatibility")
+	
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(0, 0, -16)) == "bridge", "Position (0, 0, -16) maps to bridge")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(10, 0, -16)) == "avionics_bay", "Position (10, 0, -16) maps to avionics_bay")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(-9, 0, -8)) == "crew_quarters", "Position (-9, 0, -8) maps to crew_quarters")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(9, 0, -8)) == "medbay", "Position (9, 0, -8) maps to medbay")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(0, 0, 0)) == "life_support", "Position (0, 0, 0) maps to life_support")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(0, 0, 8)) == "corridors", "Position (0, 0, 8) maps to corridors")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(-10, 0, 9)) == "cargo_bay", "Position (-10, 0, 9) maps to cargo_bay")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(9, 0, 9)) == "airlock_chamber", "Position (9, 0, 9) maps to airlock_chamber")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(0, 0, 16)) == "engineering_bay", "Position (0, 0, 16) maps to engineering_bay")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(0, -2, 26)) == "reactor_subdeck", "Position (0, -2, 26) maps to reactor_subdeck")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(-7.5, -1, 18)) == "maintenance_crawlway", "Position (-7.5, -1, 18) maps to maintenance_crawlway")
+	
+	var crawl = env_mgr.compartments["maintenance_crawlway"]
+	_assert_true(is_equal_approx(crawl.leak_rate, 0.3), "Crawlway initial leak rate is 0.3 kPa/s")
+	# Isolate crawlway vent damper to test hull breach decompression without adjacent room equalizing
+	env_mgr.set_vent_damper("maintenance_crawlway", false)
+	var init_press: float = crawl.pressure
+	env_mgr._process(10.0)
+	_assert_true(crawl.pressure < init_press, "Crawlway depressurizes during simulation tick")
+	env_mgr.seal_hull_breach("maintenance_crawlway")
+	_assert_true(is_equal_approx(crawl.leak_rate, 0.0), "Sealing hull breach stops decompression (leak rate 0.0)")
+	_assert_true(env_mgr.is_breach_sealed("maintenance_crawlway"), "is_breach_sealed returns true")
+	
+	remove_child(env_mgr)
+	env_mgr.free()
+
+func _test_m4_airlock_interlocks_and_cycling() -> void:
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	var airlock = AirlockControllerClass.new()
+	var inner_d = DoorClass.new()
+	var outer_d = DoorClass.new()
+	add_child(airlock)
+	add_child(inner_d)
+	add_child(outer_d)
+	
+	airlock.inner_door = inner_d
+	airlock.outer_door = outer_d
+	inner_d.interlock_controller = airlock
+	outer_d.interlock_controller = airlock
+	
+	_assert_true(airlock.can_open_door(inner_d), "Inner door allowed to open when chamber pressurized")
+	_assert_true(not airlock.can_open_door(outer_d), "Outer door forbidden to open when chamber pressurized (prevents venting cabin)")
+	
+	inner_d.is_open = true
+	_assert_true(not airlock.can_open_door(outer_d), "Outer door forbidden when inner door is open (safety interlock)")
+	inner_d.is_open = false
+	
+	airlock.cycle_to_eva(true)
+	_assert_true(env_mgr.is_airlock_depressurized(), "Airlock compartment depressurized to 0 kPa for EVA")
+	_assert_true(airlock.can_open_door(outer_d), "Outer door allowed to open in vacuum")
+	_assert_true(not airlock.can_open_door(inner_d), "Inner door forbidden to open into vacuum (prevents cabin blow-out)")
+	
+	airlock.cycle_to_cabin(true)
+	_assert_true(env_mgr.is_airlock_pressurized(), "Airlock compartment repressurized to 101.3 kPa for Cabin")
+	_assert_true(airlock.can_open_door(inner_d), "Inner door allowed to open again after repressurization")
+	_assert_true(MissionManager.airlock_cycles_completed >= 2, "MissionManager tracks airlock cycles")
+	
+	# Mid-cycle re-entrance and interlock safety verification
+	airlock.cycle_state = AirlockControllerClass.CycleState.CYCLING_TO_EVA
+	_assert_true(not airlock.can_open_door(inner_d), "Inner door forbidden while cycling to EVA")
+	_assert_true(not airlock.can_open_door(outer_d), "Outer door forbidden while cycling to EVA")
+	var prev_state = airlock.cycle_state
+	airlock.toggle_cycle()
+	_assert_true(airlock.cycle_state == prev_state, "toggle_cycle rejected mid-cycle to prevent input race")
+	airlock.cycle_to_cabin()
+	_assert_true(airlock.cycle_state == prev_state, "cycle_to_cabin rejected mid-cycle")
+	airlock.cycle_state = AirlockControllerClass.CycleState.IDLE
+	
+	remove_child(airlock)
+	remove_child(inner_d)
+	remove_child(outer_d)
+	remove_child(env_mgr)
+	airlock.free()
+	inner_d.free()
+	outer_d.free()
+	env_mgr.free()
+
+func _test_m4_ship_schematic_overhaul() -> void:
+	var schematic_scene = load("res://scenes/ui/ship_schematic.tscn")
+	var schematic = schematic_scene.instantiate()
+	add_child(schematic)
+	
+	_assert_true(schematic.bridge_panel != null, "BridgePanel present in schematic")
+	_assert_true(schematic.crew_panel != null, "CrewQuartersPanel present in schematic")
+	_assert_true(schematic.avionics_panel != null, "AvionicsBayPanel present in schematic")
+	_assert_true(schematic.medbay_panel != null, "MedbayPanel present in schematic")
+	_assert_true(schematic.ls_panel != null, "LifeSupportPanel present in schematic")
+	_assert_true(schematic.corridor_panel != null, "CorridorPanel present in schematic")
+	_assert_true(schematic.cargo_panel != null, "CargoBayPanel present in schematic")
+	_assert_true(schematic.airlock_panel != null, "AirlockPanel present in schematic")
+	_assert_true(schematic.eng_panel != null, "EngBayPanel present in schematic")
+	_assert_true(schematic.subdeck_panel != null, "ReactorSubdeckPanel present in schematic")
+	_assert_true(schematic.crawlway_panel != null, "MaintenanceCrawlwayPanel present in schematic")
+	
+	var comps := ["bridge", "avionics_bay", "crew_quarters", "medbay", "life_support", "corridors", "cargo_bay", "airlock_chamber", "engineering_bay", "reactor_subdeck", "maintenance_crawlway"]
+	for cid in comps:
+		schematic._select_compartment(cid, true)
+		_assert_true(schematic.current_selected_compartment == cid, "Selected compartment is " + cid)
+	
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	env_mgr.player_compartment_id = "medbay"
+	schematic.refresh_schematic()
+	var pin_med = schematic.medbay_panel.find_child("PlayerPin", true, false)
+	var pin_eng = schematic.eng_panel.find_child("PlayerPin", true, false)
+	_assert_true(pin_med != null and pin_med.visible, "Player pin visible on Medbay when player in Medbay")
+	_assert_true(pin_eng != null and not pin_eng.visible, "Player pin hidden on Engineering when player not there")
+	
+	schematic._select_compartment("crew_quarters", true)
+	schematic._on_reroute_room_power_pressed()
+	_assert_true(ShipState.power_rerouted, "Direct power reroute from schematic engages auxiliary power")
+	schematic._on_reroute_room_power_pressed()
+	_assert_true(not ShipState.power_rerouted, "Second click clears compartment power reroute")
+	
+	remove_child(schematic)
+	remove_child(env_mgr)
+	schematic.free()
+	env_mgr.free()
+
+func _test_m4_breach_salvage_shortcuts() -> void:
+	InventoryManager.equip_slot(2) # Equip Multitool
+	
+	var seal = HullBreachSealClass.new()
+	add_child(seal)
+	InventoryManager.set_multitool_mode("CALIBRATE")
+	seal._on_interacted(null)
+	_assert_true(not seal.is_sealed, "Breach remains unsealed when multitool is not in CUT_WELD mode")
+	InventoryManager.set_multitool_mode("CUT_WELD")
+	seal._on_interacted(null)
+	_assert_true(seal.is_sealed, "Breach successfully sealed with CUT_WELD mode")
+	_assert_true(MissionManager.breaches_sealed_count >= 1, "MissionManager tracks breach sealed")
+	remove_child(seal)
+	seal.free()
+	
+	var crate = SalvageCrateClass.new()
+	add_child(crate)
+	crate.salvage_contents = ["scrap_alloy", "high_capacity_cell"]
+	InventoryManager.set_multitool_mode("TIGHTEN")
+	crate._on_interacted(null)
+	_assert_true(not crate.is_cut_open, "Salvage crate cannot be opened with TIGHTEN mode")
+	InventoryManager.set_multitool_mode("CUT_WELD")
+	crate._on_interacted(null)
+	_assert_true(crate.is_cut_open, "Salvage crate breached with CUT_WELD mode")
+	_assert_true(MissionManager.inventory.has("scrap_alloy"), "Salvage items dispensed to inventory")
+	remove_child(crate)
+	crate.free()
+	
+	var door = DoorClass.new()
+	door.requires_multitool_to_unlock = true
+	door.multitool_mode_required = "CUT_WELD"
+	door.is_locked = true
+	add_child(door)
+	InventoryManager.set_multitool_mode("CALIBRATE")
+	door._on_interacted(null)
+	_assert_true(door.is_locked and not door.is_open, "Shortcut door remains locked with wrong tool mode")
+	InventoryManager.set_multitool_mode("CUT_WELD")
+	door._on_interacted(null)
+	_assert_true(not door.is_locked and door.is_open, "Shortcut door unlocks and opens with CUT_WELD mode")
+	remove_child(door)
+	door.free()
+
+func _test_m4_save_load_persistence() -> void:
+	var door = DoorClass.new()
+	door.name = "DoorWingPort"
+	door.device_id = "door_wing_port"
+	door.is_open = true
+	door.is_locked = false
+	door.requires_multitool_to_unlock = true
+	door.multitool_mode_required = "CUT_WELD"
+	add_child(door)
+	
+	var rpanel = RepairPanel.new()
+	rpanel.name = "WaterRecyclerPump"
+	rpanel.device_id = "water_recycler_pump"
+	rpanel.is_repaired = true
+	add_child(rpanel)
+	
+	var airlock = AirlockControllerClass.new()
+	airlock.name = "AirlockController"
+	airlock.cycle_state = AirlockControllerClass.CycleState.CYCLING_TO_EVA
+	airlock.cycle_timer = 2.5
+	add_child(airlock)
+	
+	var crate = SalvageCrateClass.new()
+	crate.name = "SalvageCrate"
+	crate.device_id = "salvage_crate"
+	crate.is_cut_open = true
+	add_child(crate)
+	
+	var seal = HullBreachSealClass.new()
+	seal.name = "HullBreachSeal"
+	seal.device_id = "hull_breach_seal"
+	seal.is_sealed = true
+	add_child(seal)
+	
+	var save_ok: bool = SaveManager.save_game()
+	_assert_true(save_ok, "SaveManager.save_game() succeeds with Milestone 4 entities")
+	
+	door.is_open = false
+	door.requires_multitool_to_unlock = false
+	door.multitool_mode_required = ""
+	rpanel.is_repaired = false
+	airlock.cycle_state = AirlockControllerClass.CycleState.IDLE
+	crate.is_cut_open = false
+	seal.is_sealed = false
+	
+	var load_ok: bool = SaveManager.load_game()
+	_assert_true(load_ok, "SaveManager.load_game() succeeds")
+	_assert_true(door.is_open, "Serialized door state preserved across save/load")
+	_assert_true(door.requires_multitool_to_unlock, "Serialized door requires_multitool_to_unlock preserved across save/load")
+	_assert_true(door.multitool_mode_required == "CUT_WELD", "Serialized door multitool_mode_required preserved across save/load")
+	_assert_true(rpanel.is_repaired, "Serialized RepairPanel is_repaired state preserved across save/load")
+	_assert_true(airlock.cycle_state == AirlockControllerClass.CycleState.CYCLING_TO_EVA, "Serialized airlock state preserved across save/load")
+	_assert_true(crate.is_cut_open, "Serialized salvage crate state preserved across save/load")
+	_assert_true(seal.is_sealed, "Serialized hull breach seal state preserved across save/load")
+	
+	SaveManager.delete_save()
+	remove_child(door)
+	remove_child(rpanel)
+	remove_child(airlock)
+	remove_child(crate)
+	remove_child(seal)
+	door.free()
+	rpanel.free()
+	airlock.free()
+	crate.free()
+	seal.free()
+
+func _test_m4_narrative_logs_and_exploration() -> void:
+	_assert_true(MissionManager.CREW_LOGS.size() == 10, "Base crew logs count is exactly 10")
+	_assert_true(MissionManager.get_all_crew_logs().size() == 14, "get_all_crew_logs() returns all 14 crew logs")
+	_assert_true(MissionManager.get_crew_log("log_11").get("title") == "Bridge Command Directives", "Log 11 is Commander Hayes Bridge Directives")
+	_assert_true(MissionManager.get_crew_log("log_12").get("title") == "Infirmary Triage Log", "Log 12 is Dr. Thorne Medbay Triage Log")
+	_assert_true(MissionManager.get_crew_log("log_13").get("title") == "Cargo Staging & Crawlway Breach", "Log 13 is Quartermaster Reyes Cargo Log")
+	_assert_true(MissionManager.get_crew_log("log_14").get("title") == "Reactor Subdeck Vaults", "Log 14 is Chief Engineer Vasquez Subdeck Log")
+	
+	MissionManager.reset_missions()
+	var all_rooms := ["bridge", "avionics_bay", "crew_quarters", "medbay", "life_support", "corridors", "cargo_bay", "airlock_chamber", "engineering_bay", "reactor_subdeck", "maintenance_crawlway"]
+	for room in all_rooms:
+		MissionManager.mark_room_discovered(room)
+	_assert_true(MissionManager.discovered_rooms.size() == 11, "All 11 compartments tracked in discovered_rooms")
+	_assert_true(MissionManager.is_room_discovered("maintenance_crawlway"), "is_room_discovered returns true for discovered crawlway")
+	
+	var term_scene = load("res://scenes/ui/terminal_dialog.tscn")
+	var term = term_scene.instantiate()
+	add_child(term)
+	term.open_terminal("diagnostics", "Test Diagnostics Console")
+	_assert_true(term.logs_list.item_count == 14, "TerminalDialog displays all 14 crew logs in logs list")
+	term._on_log_selected(10)
+	_assert_true(term.log_title_label.text == "BRIDGE COMMAND DIRECTIVES", "TerminalDialog displays Log 11 title")
+	_assert_true(term.log_author_label.text.contains("Hayes"), "TerminalDialog displays Log 11 author Commander Hayes")
+	term.close_terminal()
+	remove_child(term)
+	term.free()
