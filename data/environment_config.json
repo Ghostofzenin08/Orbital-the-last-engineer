@@ -122,5 +122,27 @@
     "door_cargo_id": "door_crawlway_cargo",
     "door_eng_id": "door_crawlway_eng",
     "deck": "lower"
+  },
+  "specimen_vault": {
+    "name": "Deep Specimen Containment Vault",
+    "volume_m3": 280.0,
+    "initial_o2_pct": 94.0,
+    "initial_co2_ppm": 850.0,
+    "initial_temp_k": 288.15,
+    "initial_pressure_kpa": 99.8,
+    "connected_to": ["reactor_subdeck"],
+    "door_id": "door_vault",
+    "deck": "lower"
+  },
+  "research_observatory": {
+    "name": "Bio-Research Observatory Dome",
+    "volume_m3": 340.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 410.0,
+    "initial_temp_k": 294.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["crew_quarters", "bridge"],
+    "door_id": "door_observatory",
+    "deck": "main"
   }
 }
