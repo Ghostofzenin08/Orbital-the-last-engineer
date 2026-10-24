@@ -1,0 +1,229 @@
+{
+  "GENERATOR_TRIP": {
+    "fault_id": "GENERATOR_TRIP",
+    "subsystem": "power",
+    "device_id": "reactor_primary",
+    "root_cause": "Manual emergency trip breaker open",
+    "symptoms": [
+      "Reactor turbine dark",
+      "Generator hum silent",
+      "Zero power output on grid"
+    ],
+    "diagnostic_method": [
+      "Check generator breaker switch position",
+      "Inspect power telemetry"
+    ],
+    "required_parts": [],
+    "repair_steps": [
+      "Locate Generator Primary Breaker",
+      "Engage manual breaker lever"
+    ],
+    "workaround": "Rely on limited auxiliary battery reserve",
+    "consequence": "Total ship-wide power loss when batteries exhaust",
+    "narrative_clue": "Vasquez locked breaker on manual override following orbit entry."
+  },
+  "BUS_ISOLATION": {
+    "fault_id": "BUS_ISOLATION",
+    "subsystem": "power",
+    "device_id": "distribution_bus",
+    "root_cause": "Distribution bus relay open due to electrical isolation protocol",
+    "symptoms": [
+      "Bulkhead doors unpowered",
+      "Subsystems disconnected from generator",
+      "Red LED indicators"
+    ],
+    "diagnostic_method": [
+      "Inspect bus relay switch",
+      "Read terminal power distribution page"
+    ],
+    "required_parts": [],
+    "repair_steps": [
+      "Verify primary power active",
+      "Close distribution bus relay switch"
+    ],
+    "workaround": "None; bus must be closed to route electricity",
+    "consequence": "Life support, doors, and flight consoles stay unpowered",
+    "narrative_clue": "Vasquez severed the main electrical distribution bus to isolate planetary interference."
+  },
+  "COOLANT_COUPLER_FRACTURE": {
+    "fault_id": "COOLANT_COUPLER_FRACTURE",
+    "subsystem": "life_support",
+    "device_id": "life_support_scrubber",
+    "root_cause": "Ceramic coupler fractured cleanly during orbital braking cavitation",
+    "symptoms": [
+      "Scrubber red alarm light",
+      "Oxygen level steadily venting",
+      "Warning on HUD"
+    ],
+    "diagnostic_method": [
+      "Inspect coolant manifold in Life Support",
+      "Read Atmospheric Diagnostics Console"
+    ],
+    "required_parts": ["coolant_coupler"],
+    "repair_steps": [
+      "Retrieve spare coupler from Engineering workbench",
+      "Insert into Life Support manifold"
+    ],
+    "workaround": "Conserve activity to reduce oxygen consumption",
+    "consequence": "Asphyxiation when compartment oxygen drops to 0%",
+    "narrative_clue": "Chen placed two salvaged spare couplers in Engineering Bay storage."
+  },
+  "COMMS_SERVO_DESYNC": {
+    "fault_id": "COMMS_SERVO_DESYNC",
+    "subsystem": "communications",
+    "device_id": "comms_array",
+    "root_cause": "Antenna dish servo desynchronized; frequency drift from planetary pulse",
+    "symptoms": [
+      "Comms array offline",
+      "Corrupted telemetry",
+      "No distress beacon"
+    ],
+    "diagnostic_method": [
+      "Access Bridge Communications Terminal",
+      "Run antenna frequency test"
+    ],
+    "required_parts": [],
+    "repair_steps": [
+      "Supply main bus electrical power",
+      "Execute frequency lock calibration on Bridge terminal"
+    ],
+    "workaround": "Local optical beacon (short range only)",
+    "consequence": "Unable to transmit distress signal or download flight telemetry",
+    "narrative_clue": "Kharon-4 ELF radiation caused frequency drift in antenna servos."
+  },
+  "CO2_SCRUBBER_SATURATION": {
+    "fault_id": "CO2_SCRUBBER_SATURATION",
+    "subsystem": "life_support",
+    "device_id": "life_support_scrubber",
+    "initial_active": false,
+    "root_cause": "Chemical lithium-hydroxide absorption canisters saturated with carbonate crusting",
+    "symptoms": [
+      "Scrubber warning beacon illuminated amber",
+      "Atmospheric CO2 levels climbing above 2500 ppm",
+      "Crew fatigue, dizziness, and hypercapnia warning"
+    ],
+    "diagnostic_method": [
+      "Inspect scrubber column status beacon in Life Support",
+      "Read Atmospheric Diagnostics Console CO2 telemetry",
+      "Check Environmental Sensor in Life Support or Corridors"
+    ],
+    "required_parts": ["scrubber_cartridge"],
+    "repair_steps": [
+      "Path 1: Replace chemical cartridge at Life Support Scrubber panel",
+      "Path 2: Execute Scrubber Thermal Bake Purge override on Life Support terminal",
+      "Path 3: Open cross-ventilation dampers to disperse concentration"
+    ],
+    "workaround": "Open inter-compartment vent dampers or trigger terminal electrostatic bake",
+    "consequence": "Acute CO2 toxicity, vision impairment, and eventual fatal acidosis",
+    "narrative_clue": "Chen noted that scrubber bed lithium-hydroxide crystals were due for thermal regeneration bake."
+  },
+  "CABIN_PRESSURE_LEAK": {
+    "fault_id": "CABIN_PRESSURE_LEAK",
+    "subsystem": "life_support",
+    "device_id": "atmospheric_pressure_regulator",
+    "initial_active": false,
+    "root_cause": "Manifold gasket puncture venting cabin atmosphere into vacuum",
+    "symptoms": [
+      "Audible gas jet hissing near Life Support manifold",
+      "Cabin pressure dropping below 80 kPa",
+      "Decompression alarm klaxon & HUD barometric alert",
+      "Ear ringing and blurred vision"
+    ],
+    "diagnostic_method": [
+      "Locate acoustic hissing source in Life Support or Corridors",
+      "Check barometric pressure on wall environmental sensors",
+      "Inspect Ship Schematic decompression vector map"
+    ],
+    "required_parts": [],
+    "repair_steps": [
+      "Path 1: Rotate emergency shutoff valve on leaking atmospheric line",
+      "Path 2: Close bulkhead doors to seal and isolate leaking compartment",
+      "Path 3: Trigger terminal emergency pressurization compensation feed"
+    ],
+    "workaround": "Isolate affected compartment with bulkhead doors",
+    "consequence": "Complete cabin decompression, explosive ebullism, and hypoxia",
+    "narrative_clue": "Kharon-4 debris field peppered the external life support manifold during orbital braking."
+  },
+  "THERMAL_RUNAWAY": {
+    "fault_id": "THERMAL_RUNAWAY",
+    "subsystem": "coolant",
+    "device_id": "climate_thermal_exchanger",
+    "initial_active": false,
+    "root_cause": "Heat exchanger proportional bypass valve jammed open; dumping reactor heat into ventilation",
+    "symptoms": [
+      "Atmospheric temperature rising rapidly above 315 K (42°C)",
+      "Radiator steam venting hiss",
+      "Thermal warning klaxon and heat haze distortion",
+      "Player hyperthermia and stamina drain"
+    ],
+    "diagnostic_method": [
+      "Read environmental sensors showing temperature > 38°C",
+      "Inspect thermal exchanger piping in Life Support",
+      "Read climate loop diagnostic page on Engineering or LS terminal"
+    ],
+    "required_parts": [],
+    "repair_steps": [
+      "Path 1: Turn manual radiator cooling bypass valve on Life Support manifold",
+      "Path 2: Issue terminal thermal reset / radiator flush override",
+      "Path 3: Shed electrical load / throttle reactor output"
+    ],
+    "workaround": "Ventilation damper thermal cross-bleed or terminal coolant cycle",
+    "consequence": "Severe heatstroke, electronic malfunction, and thermal cabin cookoff",
+    "narrative_clue": "Vasquez reported the bypass servo was binding whenever the primary turbine reached full excitation."
+  },
+  "CONDUIT_BLOWN_FUSE": {
+    "fault_id": "CONDUIT_BLOWN_FUSE",
+    "subsystem": "power",
+    "device_id": "training_power_conduit",
+    "initial_active": false,
+    "root_cause": "Current spike severed thermal protection fuse link",
+    "symptoms": [
+      "Flickering amber warning LED on conduit casing",
+      "Intermittent power arcing buzz",
+      "Low auxiliary power voltage telemetry"
+    ],
+    "diagnostic_method": [
+      "Scan conduit with Diagnostic Scanner [1]",
+      "Inspect conduit fuse bracket in Engineering Bay"
+    ],
+    "required_parts": ["spare_fuse"],
+    "repair_steps": [
+      "Scan unit with Diagnostic Scanner to verify circuit parameters",
+      "Unclamp fuse housing with Multitool [2]",
+      "Insert Spare Fuse Pack into terminal bracket",
+      "Calibrate circuit impedance with Multitool [2]",
+      "Perform system diagnostic test"
+    ],
+    "workaround": "Manual power rerouting via terminal",
+    "consequence": "Auxiliary power disruption and secondary system flicker",
+    "narrative_clue": "Chen noticed the surge from Kharon-4 popped the auxiliary protection fuses."
+  },
+  "MANIFOLD_CLAMP_LOOSE": {
+    "fault_id": "MANIFOLD_CLAMP_LOOSE",
+    "subsystem": "coolant",
+    "device_id": "coolant_distribution_manifold",
+    "initial_active": false,
+    "root_cause": "Pneumatic coupling clamp loosened under thermal shock",
+    "symptoms": [
+      "Coolant mist weeping from joint collar",
+      "Chilled mist vapor venting",
+      "Coolant pressure drop"
+    ],
+    "diagnostic_method": [
+      "Scan with Diagnostic Scanner [1]",
+      "Inspect Life Support coolant header"
+    ],
+    "required_parts": ["coolant_canister"],
+    "repair_steps": [
+      "Diagnose pressure drop with Diagnostic Scanner",
+      "Loosen clamp collar with Multitool [2]",
+      "Inject fresh coolant from Coolant Canister",
+      "Weld and torque clamp collar with Multitool [2]",
+      "Execute flow test"
+    ],
+    "workaround": "Radiator bypass loop reroute",
+    "consequence": "Gradual loss of thermal dissipation capacity",
+    "narrative_clue": "Vibration loosened the high-pressure pneumatic clamps on header B."
+  }
+}
+
