@@ -129,6 +129,9 @@ func _pregenerate_sounds() -> void:
 	_sound_cache["creature_sound"] = _generate_creature_sound()
 	_sound_cache["creature_roar"] = _generate_creature_roar()
 	_sound_cache["crisis_alarm"] = _generate_crisis_alarm()
+	_sound_cache["boss_screech"] = _generate_boss_screech()
+	_sound_cache["horror_zoom"] = _generate_horror_zoom()
+	_sound_cache["heartbeat_rapid"] = _generate_heartbeat_rapid()
 
 func play_datapad_decrypt() -> void:
 	play_sfx("datapad_decrypt")
@@ -144,6 +147,15 @@ func play_creature_roar() -> void:
 
 func play_crisis_alarm() -> void:
 	play_sfx("crisis_alarm")
+
+func play_boss_screech() -> void:
+	play_sfx("boss_screech")
+
+func play_horror_zoom() -> void:
+	play_sfx("horror_zoom")
+
+func play_heartbeat_rapid() -> void:
+	play_sfx("heartbeat_rapid")
 
 func _generate_click() -> AudioStreamWAV:
 	var sample_rate := 22050
@@ -638,6 +650,73 @@ func _generate_crisis_alarm() -> AudioStreamWAV:
 		var freq: float = 640.0 if step == 0 else 480.0
 		var tone := sin(2.0 * PI * freq * t) * 0.5
 		var sample := int(clampf(tone, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
+
+func _generate_boss_screech() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 1.3
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var env := sin(PI * minf(1.0, t / 0.1)) * exp(-t * 2.0)
+		var f_base := 850.0 + sin(2.0 * PI * 14.0 * t) * 320.0
+		var tone := sin(2.0 * PI * f_base * t) * 0.4
+		var shriek := sin(2.0 * PI * (f_base * 1.85) * t) * 0.3
+		var noise := (randf() * 2.0 - 1.0) * 0.3
+		var val := (tone + shriek + noise) * env
+		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
+
+func _generate_horror_zoom() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 1.5
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var env := sin(PI * minf(1.0, t / 0.08)) * exp(-t * 1.8)
+		var sub_freq := maxf(35.0, 120.0 - (t / duration) * 85.0)
+		var sub := sin(2.0 * PI * sub_freq * t) * 0.6
+		var drone := sin(2.0 * PI * (sub_freq * 2.41) * t) * 0.25
+		var rumble := (randf() * 2.0 - 1.0) * 0.2 * exp(-t * 3.0)
+		var val := (sub + drone + rumble) * env
+		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
+
+func _generate_heartbeat_rapid() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 0.8
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var b1 := exp(-pow((t - 0.1) * 35.0, 2.0))
+		var b2 := exp(-pow((t - 0.28) * 40.0, 2.0)) * 0.8
+		var tone := sin(2.0 * PI * 55.0 * t) * (b1 + b2)
+		var val := tone * 0.75
+		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
 		data.encode_s16(i * 2, sample)
 	var wav := AudioStreamWAV.new()
 	wav.format = AudioStreamWAV.FORMAT_16_BITS
