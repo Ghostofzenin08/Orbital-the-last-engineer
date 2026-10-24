@@ -93,6 +93,8 @@ func _on_interacted(player: Node) -> void:
 		var msg := "Poisonous Gas Valve OPENED! Chamber flooded with lethal decontamination gas. Mutant alien exterminated."
 		if player != null and "hud" in player and player.hud != null and player.hud.has_method("show_notification"):
 			player.hud.show_notification(msg, 5.0)
+		if has_node("/root/MissionManager"):
+			get_node("/root/MissionManager")._broadcast_current_objective()
 		_update_visuals()
 		return
 	
