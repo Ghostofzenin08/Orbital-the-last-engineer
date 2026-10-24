@@ -230,6 +230,15 @@ func engage_propulsion() -> Dictionary:
 		dependency_failed.emit("propulsion", prereq_check["reason"])
 		return prereq_check
 	
+	if get_node_or_null("/root/ShipState") != null:
+		var ss = get_node("/root/ShipState")
+		if "crisis_manager" in ss and ss.crisis_manager != null:
+			if ss.crisis_manager.current_crisis == 3 and not ss.crisis_manager.is_creature_eliminated:
+				AudioManager.play_sfx("denied")
+				var reason := "Station in lockdown: Mutant alien predator active. Trap and eliminate with poisonous gas before departure."
+				dependency_failed.emit("propulsion", reason)
+				return {"ok": false, "reason": reason}
+	
 	propulsion_primed = true
 	var sys: ShipSystem = systems["propulsion"]
 	var old_state := sys.state
