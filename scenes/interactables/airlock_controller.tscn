@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/interactables/airlock_controller.gd" id="1_airlock"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_panel"]
+size = Vector3(0.6, 0.8, 0.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_housing"]
+size = Vector3(0.55, 0.75, 0.15)
+
+[sub_resource type="SphereMesh" id="SphereMesh_beacon"]
+radius = 0.06
+height = 0.12
+
+[node name="AirlockController" type="StaticBody3D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_airlock")
+status_light_path = NodePath("StatusLight")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_panel")
+
+[node name="HousingMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_housing")
+
+[node name="BeaconMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0.08)
+mesh = SubResource("SphereMesh_beacon")
+
+[node name="StatusLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0.2)
+light_color = Color(0.2, 0.9, 0.3, 1)
+light_energy = 1.0
+omni_range = 2.5
