@@ -17,6 +17,9 @@ var reactor_temp_critical: float = 650.0
 var cooldown_rate: float = 2.5
 var coolant_flow_rate: float = 1.0 # 0.0 to 1.0
 var thermal_throttled: bool = false
+var harmonic_damping_active: bool = false
+var thermal_accumulation_multiplier: float = 1.0
+var auxiliary_headroom_kw: float = 0.0
 
 var battery_capacity: float = 60.0 # kWh
 var battery_charge: float = 25.0 # kWh
@@ -70,22 +73,30 @@ func _load_config() -> void:
 			max_discharge_rate = float(b.get("max_discharge_rate", max_discharge_rate))
 			battery_efficiency = float(b.get("efficiency", battery_efficiency))
 
+func set_harmonic_damping(active: bool) -> void:
+	harmonic_damping_active = active
+	thermal_accumulation_multiplier = 0.85 if active else 1.0
+	auxiliary_headroom_kw = 10.0 if active else 0.0
+	if reactor_online and not thermal_throttled:
+		current_generation = (reactor_capacity * efficiency) + auxiliary_headroom_kw
+	_update_distribution(0.0)
+
 func apply_damage(amount: float, _reason: String = "") -> void:
 	super.apply_damage(amount, _reason)
 	if reactor_online:
-		current_generation = reactor_capacity * efficiency
+		current_generation = (reactor_capacity * efficiency) + auxiliary_headroom_kw
 	_update_distribution(0.0)
 
 func repair(amount: float = 1.0) -> void:
 	super.repair(amount)
 	if reactor_online:
-		current_generation = reactor_capacity * efficiency
+		current_generation = (reactor_capacity * efficiency) + auxiliary_headroom_kw
 	_update_distribution(0.0)
 
 func set_generator(closed: bool) -> Dictionary:
 	reactor_online = closed
 	if closed:
-		current_generation = reactor_capacity * efficiency
+		current_generation = (reactor_capacity * efficiency) + auxiliary_headroom_kw
 		fault_description = "Nominal reactor turbine output (100% capacity)"
 		if state == 0 or state == 3: # OFFLINE or FAILED
 			set_state(2, fault_description) # ONLINE
@@ -124,7 +135,7 @@ func _update_distribution(delta: float) -> void:
 	if reactor_online and delta > 0.0:
 		var sim_dt := clampf(delta, 0.0, 5.0)
 		if coolant_flow_rate < 0.8:
-			var heat_gain := (1.0 - coolant_flow_rate) * 2.5 * sim_dt
+			var heat_gain := (1.0 - coolant_flow_rate) * 2.5 * thermal_accumulation_multiplier * sim_dt
 			reactor_temperature = minf(reactor_temp_critical, reactor_temperature + heat_gain)
 		else:
 			var cool_loss := cooldown_rate * sim_dt
@@ -135,7 +146,7 @@ func _update_distribution(delta: float) -> void:
 			current_generation = minf(current_generation, reactor_capacity * 0.4)
 		elif reactor_temperature <= 420.0:
 			thermal_throttled = false
-			current_generation = reactor_capacity * efficiency
+			current_generation = (reactor_capacity * efficiency) + auxiliary_headroom_kw
 	elif not reactor_online and delta > 0.0:
 		var cool_dt := clampf(delta, 0.0, 5.0)
 		reactor_temperature = maxf(320.0, reactor_temperature - (cooldown_rate * cool_dt))
@@ -225,12 +236,14 @@ func _update_distribution(delta: float) -> void:
 func get_grid_telemetry() -> Dictionary:
 	return {
 		"reactor_online": reactor_online,
-		"reactor_capacity": reactor_capacity,
+		"reactor_capacity": reactor_capacity + auxiliary_headroom_kw,
 		"current_generation": current_generation if reactor_online else 0.0,
 		"reactor_temperature": reactor_temperature,
 		"reactor_temp_critical": reactor_temp_critical,
 		"thermal_throttled": thermal_throttled,
 		"coolant_flow_rate": coolant_flow_rate,
+		"harmonic_damping_active": harmonic_damping_active,
+		"auxiliary_headroom_kw": auxiliary_headroom_kw,
 		"bus_relay_closed": bus_relay_closed,
 		"bus_energized": bus_energized,
 		"current_demand": current_demand,
@@ -248,6 +261,7 @@ func to_dict() -> Dictionary:
 	base["reactor_temperature"] = reactor_temperature
 	base["thermal_throttled"] = thermal_throttled
 	base["coolant_flow_rate"] = coolant_flow_rate
+	base["harmonic_damping_active"] = harmonic_damping_active
 	base["bus_relay_closed"] = bus_relay_closed
 	base["battery_charge"] = battery_charge
 	return base
@@ -258,6 +272,7 @@ func from_dict(data: Dictionary) -> void:
 	reactor_temperature = float(data.get("reactor_temperature", 320.0))
 	thermal_throttled = bool(data.get("thermal_throttled", false))
 	coolant_flow_rate = float(data.get("coolant_flow_rate", 1.0))
+	set_harmonic_damping(bool(data.get("harmonic_damping_active", false)))
 	bus_relay_closed = bool(data.get("bus_relay_closed", false))
 	battery_charge = float(data.get("battery_charge", 25.0))
 	set_generator(reactor_online)
