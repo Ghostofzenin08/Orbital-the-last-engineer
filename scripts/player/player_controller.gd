@@ -76,7 +76,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			var equipped = InventoryManager.get_equipped_item_id()
 			if target is MultiStepRepairPanel:
 				target.interact(self)
-			elif target is DatapadPickup and equipped == "diagnostic_scanner" and not target.is_collected:
+			elif target is DatapadPickup and equipped == "diagnostic_scanner" and (not target.is_collected or not target.is_decrypted):
 				target.interact(self)
 			elif equipped == "diagnostic_scanner":
 				InventoryManager.perform_diagnostic_scan(target)
