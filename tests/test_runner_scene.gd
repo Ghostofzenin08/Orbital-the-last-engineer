@@ -68,6 +68,7 @@ func _ready() -> void:
 	_run_suite("Milestone 6: Alien Stalking, Chamber Trap & Toxic Gas Purge", _test_m6_creature_hunt_and_poison_gas_trap)
 	_run_suite("Milestone 6: Tactical UI Telemetry, Immediate Task & Sizing", _test_m6_tactical_ui_telemetry_and_immediate_task)
 	_run_suite("Milestone 6: Crisis Save / Load Persistence & Legacy Compatibility", _test_m6_save_load_crisis_persistence)
+	_run_suite("Milestone 6: Enhanced Object Visuals & In-Game Storyline Verification", _test_m6_enhanced_visuals_and_storyline_verification)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -2461,6 +2462,140 @@ func _test_m6_save_load_crisis_persistence() -> void:
 
 	SaveManager.delete_save()
 	ShipState.reset_to_defaults()
+	MissionManager.reset_missions()
+
+func _test_m6_enhanced_visuals_and_storyline_verification() -> void:
+	ShipState.reset_to_defaults()
+	MissionManager.reset_missions()
+
+	# 1. StorageLocker visual enhancement verification
+	var locker_scene = load("res://scenes/interactables/storage_locker.tscn")
+	_assert_true(locker_scene != null, "StorageLocker scene loads successfully")
+	var locker = locker_scene.instantiate()
+	add_child(locker)
+	_assert_true(locker.has_node("ChassisFrame"), "StorageLocker has reinforced ChassisFrame")
+	_assert_true(locker.has_node("DoorPanel"), "StorageLocker has recessed DoorPanel")
+	_assert_true(locker.has_node("VentLouverTop"), "StorageLocker has VentLouverTop")
+	_assert_true(locker.has_node("HandleMesh"), "StorageLocker has HandleMesh")
+	_assert_true(locker.has_node("IndicatorLED"), "StorageLocker has IndicatorLED")
+	remove_child(locker)
+	locker.free()
+
+	# 2. AirlockController visual enhancement verification
+	var airlock_scene = load("res://scenes/interactables/airlock_controller.tscn")
+	_assert_true(airlock_scene != null, "AirlockController scene loads successfully")
+	var airlock = airlock_scene.instantiate()
+	add_child(airlock)
+	_assert_true(airlock.has_node("MountingPlate"), "AirlockController has MountingPlate")
+	_assert_true(airlock.has_node("HousingMesh"), "AirlockController has HousingMesh")
+	_assert_true(airlock.has_node("DisplayScreen"), "AirlockController has DisplayScreen")
+	_assert_true(airlock.has_node("ButtonEVA"), "AirlockController has ButtonEVA")
+	_assert_true(airlock.has_node("ButtonCabin"), "AirlockController has ButtonCabin")
+	_assert_true(airlock.has_node("StatusLight"), "AirlockController has StatusLight")
+	remove_child(airlock)
+	airlock.free()
+
+	# 3. VentDamper visual enhancement verification
+	var damper_scene = load("res://scenes/interactables/vent_damper.tscn")
+	_assert_true(damper_scene != null, "VentDamper scene loads successfully")
+	var damper = damper_scene.instantiate()
+	add_child(damper)
+	_assert_true(damper.has_node("MountingFlange"), "VentDamper has MountingFlange")
+	_assert_true(damper.has_node("FrameMesh"), "VentDamper has FrameMesh")
+	_assert_true(damper.has_node("ActuatorHousing"), "VentDamper has ActuatorHousing")
+	_assert_true(damper.has_node("Louvers"), "VentDamper has Louvers node")
+	_assert_true(damper.has_node("StatusLED"), "VentDamper has StatusLED")
+	remove_child(damper)
+	damper.free()
+
+	# 4. WorkbenchStation visual enhancement verification
+	var bench_scene = load("res://scenes/interactables/workbench_station.tscn")
+	_assert_true(bench_scene != null, "WorkbenchStation scene loads successfully")
+	var bench = bench_scene.instantiate()
+	add_child(bench)
+	_assert_true(bench.has_node("TableBase"), "WorkbenchStation has TableBase")
+	_assert_true(bench.has_node("DockMesh"), "WorkbenchStation has DockMesh")
+	_assert_true(bench.has_node("ToolTray"), "WorkbenchStation has ToolTray")
+	_assert_true(bench.has_node("ChargerRing"), "WorkbenchStation has ChargerRing")
+	_assert_true(bench.has_node("CradleLED"), "WorkbenchStation has CradleLED")
+	remove_child(bench)
+	bench.free()
+
+	# 5. EnvironmentalSensor visual enhancement verification
+	var sensor_scene = load("res://scenes/interactables/env_sensor.tscn")
+	_assert_true(sensor_scene != null, "EnvironmentalSensor scene loads successfully")
+	var sensor = sensor_scene.instantiate()
+	add_child(sensor)
+	_assert_true(sensor.has_node("MountingBracket"), "EnvironmentalSensor has MountingBracket")
+	_assert_true(sensor.has_node("CasingMesh"), "EnvironmentalSensor has CasingMesh")
+	_assert_true(sensor.has_node("SamplingGrill"), "EnvironmentalSensor has SamplingGrill")
+	_assert_true(sensor.has_node("StatusLED"), "EnvironmentalSensor has StatusLED")
+	remove_child(sensor)
+	sensor.free()
+
+	# 6. PickupItem visual enhancement verification
+	var pickup_scene = load("res://scenes/interactables/pickup.tscn")
+	_assert_true(pickup_scene != null, "PickupItem scene loads successfully")
+	var pickup = pickup_scene.instantiate()
+	add_child(pickup)
+	_assert_true(pickup.has_node("MeshInstance3D"), "PickupItem has main cylindrical coupler mesh")
+	_assert_true(pickup.has_node("FlangeTop"), "PickupItem has FlangeTop")
+	_assert_true(pickup.has_node("FlangeBottom"), "PickupItem has FlangeBottom")
+	_assert_true(pickup.has_node("ItemLight"), "PickupItem has ItemLight")
+	remove_child(pickup)
+	pickup.free()
+
+	# 7. Level placement of DecontaminationPoisonGasValve in ship_interior.tscn
+	var level_scene = load("res://scenes/levels/ship_interior.tscn")
+	_assert_true(level_scene != null, "ship_interior.tscn loads successfully")
+	var level = level_scene.instantiate()
+	add_child(level)
+	var poison_valve = level.get_node_or_null("Compartments/AirlockChamber/DecontaminationPoisonGasValve")
+	_assert_true(poison_valve != null, "DecontaminationPoisonGasValve exists in Compartments/AirlockChamber")
+	_assert_true(poison_valve.valve_type == "poison_gas", "DecontaminationPoisonGasValve has valve_type 'poison_gas'")
+	remove_child(level)
+	level.free()
+
+	# 8. MainMenu and MissionComplete storyline text verification
+	var mm_scene = load("res://scenes/ui/main_menu.tscn")
+	_assert_true(mm_scene != null, "main_menu.tscn loads successfully")
+	var mm = mm_scene.instantiate()
+	add_child(mm)
+	var subtitle_lbl = mm.get_node_or_null("Center/VBox/TitleBox/Subtitle")
+	_assert_true(subtitle_lbl != null and subtitle_lbl.text.contains("Biological Research"), "Main menu subtitle reflects Biological Research Facility")
+	remove_child(mm)
+	mm.free()
+
+	var mc_scene = load("res://scenes/ui/mission_complete.tscn")
+	_assert_true(mc_scene != null, "mission_complete.tscn loads successfully")
+	var mc = mc_scene.instantiate()
+	add_child(mc)
+	var mc_body = mc.get_node_or_null("Center/Panel/Margin/VBox/BodyText")
+	_assert_true(mc_body != null and mc_body.text.contains("Lead Scientist"), "MissionComplete body text refers to Lead Scientist")
+	_assert_true(mc_body.text.contains("poisonous gas valve"), "MissionComplete body text mentions poisonous gas valve purge")
+	remove_child(mc)
+	mc.free()
+
+	# 9. In-game predator lockdown verification
+	ShipSystemManager.set_generator_breaker(true)
+	ShipSystemManager.set_power_distribution(true)
+	ShipSystemManager.install_coolant_coupler()
+	ShipSystemManager.align_comms_array()
+	_assert_true(ShipSystemManager.is_system_online("communications"), "All propulsion prerequisites online")
+
+	# Start predator hunt crisis
+	ShipState.start_crisis(CrisisManagerClass.CrisisType.CREATURE_PREDATORY_HUNT)
+	var prop_block = ShipSystemManager.engage_propulsion()
+	_assert_true(not prop_block.get("ok", true), "Propulsion blocked while mutant alien is active")
+	_assert_true(prop_block.get("reason", "").contains("lockdown"), "Block reason indicates station lockdown / predator active")
+
+	# Execute purge to clear predator threat
+	ShipState.purge_creature_with_poison_gas("airlock_chamber")
+	var prop_ok = ShipSystemManager.engage_propulsion()
+	_assert_true(prop_ok.get("ok", false), "Propulsion engages successfully once predator is purged")
+
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
 	MissionManager.reset_missions()
 
 
