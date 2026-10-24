@@ -36,6 +36,8 @@ signal cascading_fault_triggered(parent_fault: String, cascaded_fault: String)
 signal creature_sound_emitted(sound_type: String, compartment_id: String)
 signal creature_trapped(chamber_id: String)
 signal creature_eliminated(chamber_id: String)
+signal creature_spawned(chamber_id: String)
+signal horror_zoom_triggered(player_target: Node)
 signal crisis_resolved(type: int)
 
 var ship_state: Node = null
@@ -51,6 +53,8 @@ var target_chamber_id: String = "airlock_chamber"
 var is_creature_trapped: bool = false
 var is_creature_eliminated: bool = false
 var poison_gas_valve_opened: bool = false
+var horror_zoom_executed: bool = false
+var stalker_entity: Node = null
 
 var active_cascading_faults: Array[String] = []
 var cascading_history: Array[Dictionary] = []
@@ -70,6 +74,7 @@ func reset() -> void:
 	is_creature_trapped = false
 	is_creature_eliminated = false
 	poison_gas_valve_opened = false
+	horror_zoom_executed = false
 	active_cascading_faults.clear()
 	cascading_history.clear()
 
@@ -98,6 +103,9 @@ func start_crisis(type: int, start_stage: int = Stage.STAGE_1_SURGE) -> void:
 			stage_name = "SPECIMEN_BREACH_STALKING"
 			creature_state = CreatureState.STALKING
 			trigger_creature_sound("growl", "life_support")
+			if stalker_entity != null and stalker_entity.has_method("spawn_in_chamber"):
+				stalker_entity.spawn_in_chamber(target_chamber_id)
+			creature_spawned.emit(target_chamber_id)
 		_:
 			stage_name = "NOMINAL"
 	
@@ -201,6 +209,25 @@ func trigger_creature_sound(sound_type: String = "growl", comp_id: String = "lif
 				AudioManager.play_sfx("creature_sound")
 	creature_sound_emitted.emit(sound_type, comp_id)
 
+func register_stalker(entity: Node) -> void:
+	stalker_entity = entity
+	if stalker_entity != null:
+		if is_creature_eliminated and stalker_entity.has_method("eliminate"):
+			stalker_entity.eliminate()
+		elif is_creature_trapped and stalker_entity.has_method("trap_in_chamber"):
+			stalker_entity.trap_in_chamber(target_chamber_id)
+		elif creature_state == CreatureState.STALKING or creature_state == CreatureState.AGGRESSIVE:
+			if stalker_entity.has_method("spawn_in_chamber"):
+				stalker_entity.spawn_in_chamber(target_chamber_id)
+
+func trigger_creature_horror_zoom(player: Node = null) -> void:
+	horror_zoom_executed = true
+	if stalker_entity != null and stalker_entity.has_method("zoom_near_player"):
+		stalker_entity.zoom_near_player(player)
+	elif player != null and player.has_method("trigger_horror_zoom"):
+		player.trigger_horror_zoom(1.2, 24.0, 0.85)
+	horror_zoom_triggered.emit(player)
+
 func trap_creature(chamber_id: String = "") -> bool:
 	if is_creature_eliminated:
 		return false
@@ -208,6 +235,8 @@ func trap_creature(chamber_id: String = "") -> bool:
 		target_chamber_id = chamber_id
 	is_creature_trapped = true
 	creature_state = CreatureState.TRAPPED
+	if stalker_entity != null and stalker_entity.has_method("trap_in_chamber"):
+		stalker_entity.trap_in_chamber(target_chamber_id)
 	creature_trapped.emit(target_chamber_id)
 	trigger_creature_sound("roar", target_chamber_id)
 	return true
@@ -217,6 +246,9 @@ func execute_poison_gas_purge(chamber_id: String = "") -> bool:
 	poison_gas_valve_opened = true
 	is_creature_eliminated = true
 	creature_state = CreatureState.ELIMINATED
+	
+	if stalker_entity != null and stalker_entity.has_method("eliminate"):
+		stalker_entity.eliminate()
 	
 	if AudioManager != null:
 		AudioManager.play_sfx("gas_hiss")
@@ -260,6 +292,7 @@ func serialize() -> Dictionary:
 		"is_creature_trapped": is_creature_trapped,
 		"is_creature_eliminated": is_creature_eliminated,
 		"poison_gas_valve_opened": poison_gas_valve_opened,
+		"horror_zoom_executed": horror_zoom_executed,
 		"active_cascading_faults": active_cascading_faults.duplicate(),
 		"cascading_history": cascading_history.duplicate(true)
 	}
@@ -274,6 +307,7 @@ func deserialize(data: Dictionary) -> void:
 	is_creature_trapped = bool(data.get("is_creature_trapped", false))
 	is_creature_eliminated = bool(data.get("is_creature_eliminated", false))
 	poison_gas_valve_opened = bool(data.get("poison_gas_valve_opened", false))
+	horror_zoom_executed = bool(data.get("horror_zoom_executed", false))
 	active_cascading_faults.clear()
 	if data.has("active_cascading_faults") and data["active_cascading_faults"] is Array:
 		for f in data["active_cascading_faults"]:
