@@ -57,20 +57,37 @@ func _sync_metadata_from_config() -> void:
 		datapad_title = str(info.get("title", datapad_title))
 
 func _on_global_datapad_collected(collected_id: String, _data: Dictionary) -> void:
-	if collected_id == datapad_id and not is_collected:
+	if collected_id == datapad_id:
 		is_collected = true
-		is_decrypted = true
+		if has_node("/root/MissionManager"):
+			is_decrypted = get_node("/root/MissionManager").is_datapad_decrypted(datapad_id)
+		else:
+			is_decrypted = not is_encrypted
 		_update_visuals()
 
 func _can_decrypt_via_subsystem() -> bool:
-	if datapad_id == "datapad_avionics_telemetry" and is_inside_tree():
-		var relay = get_tree().root.find_child("AvionicsRelayBank", true, false)
-		if relay != null and "is_repaired" in relay and relay.is_repaired:
+	if datapad_id == "datapad_avionics_telemetry":
+		if is_inside_tree():
+			var relay = get_tree().root.find_child("AvionicsRelayBank", true, false)
+			if relay != null and "is_repaired" in relay and relay.is_repaired:
+				return true
+		if has_node("/root/ShipState"):
+			var ss = get_node("/root/ShipState")
+			if ss.devices.has("avionics_relay_bank") and ss.devices["avionics_relay_bank"].health >= 100.0:
+				return true
+	elif datapad_id == "datapad_medbay_autopsy":
+		if has_node("/root/ShipSystemManager") and get_node("/root/ShipSystemManager").is_system_online("power_distribution"):
 			return true
+		if has_node("/root/ShipState"):
+			var ss = get_node("/root/ShipState")
+			if ss.power_system != null and ss.power_system.bus_energized:
+				return true
+			if ss.devices.has("lighting_medbay") and ss.devices["lighting_medbay"].is_powered:
+				return true
 	return false
 
 func get_prompt() -> String:
-	if is_collected:
+	if is_collected and is_decrypted:
 		return "[Recovered] %s (Review in Terminal [INCIDENT LOGS])" % datapad_title
 	
 	if is_encrypted and not is_decrypted:
@@ -86,7 +103,7 @@ func get_prompt() -> String:
 	return "[E / Enter] Recover %s" % datapad_title
 
 func _on_interacted(player: Node) -> void:
-	if is_collected:
+	if is_collected and is_decrypted:
 		if AudioManager != null:
 			AudioManager.play_sfx("click")
 		if player != null and "hud" in player and player.hud != null and player.hud.has_method("show_notification"):
@@ -141,7 +158,8 @@ func _on_interacted(player: Node) -> void:
 			var latest_rev_id: String = mm.unlocked_revelations[mm.unlocked_revelations.size() - 1]
 			var rev_data: Dictionary = mm.get_revelation_data(latest_rev_id)
 			player.hud.show_notification(
-				"REVELATION UNLOCKED: %s // %s" % [
+				"DATAPAD RECOVERED: %s // REVELATION UNLOCKED: %s (%s)" % [
+					datapad_title,
 					str(rev_data.get("title", latest_rev_id)),
 					str(rev_data.get("bonus_summary", "System Optimization Active"))
 				],
