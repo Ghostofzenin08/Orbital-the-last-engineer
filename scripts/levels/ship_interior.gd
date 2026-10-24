@@ -62,18 +62,60 @@ func _ready() -> void:
 	if alien_stalker != null and ShipState != null and ShipState.crisis_manager != null:
 		ShipState.crisis_manager.register_stalker(alien_stalker)
 	
-	# Milestone 6 & 7: Trigger in-game creature hunt crisis upon reaching Objective 4 during live playthrough
-	if DisplayServer.get_name() != "headless":
-		MissionManager.objective_completed.connect(func(idx: int, _title: String):
-			if idx == 3 and ShipState != null and ShipState.crisis_manager != null:
-				ShipState.start_crisis(CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT)
-				if alien_stalker != null and player != null:
-					get_tree().create_timer(1.0).timeout.connect(func():
-						alien_stalker.zoom_near_player(player, 1.2)
-					)
-		)
+	# Milestone 6 & 7: Check and trigger creature hunt crisis with exploration gating
+	MissionManager.objective_completed.connect(func(idx: int, _title: String):
+		if idx == 3:
+			_check_trigger_final_hunt()
+	)
+	MissionManager.room_discovered.connect(func(_room_id: String, _room_name: String):
+		if MissionManager.current_objective_index >= 3:
+			_check_trigger_final_hunt()
+	)
 	
 	_refresh_environment_lighting()
+
+func _check_trigger_final_hunt() -> void:
+	if ShipState == null or ShipState.crisis_manager == null:
+		return
+	if ShipState.crisis_manager.current_crisis == CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT or ShipState.crisis_manager.is_creature_eliminated:
+		return
+	if MissionManager.can_engage_final_hunt():
+		trigger_creature_horror_encounter()
+
+func trigger_creature_horror_encounter() -> void:
+	if ShipState == null or ShipState.crisis_manager == null:
+		return
+	ShipState.start_crisis(CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT)
+	_flicker_lights_for_encounter()
+	if alien_stalker != null and player != null:
+		get_tree().create_timer(1.0).timeout.connect(func():
+			if is_instance_valid(alien_stalker) and is_instance_valid(player) and alien_stalker.has_method("zoom_near_player"):
+				alien_stalker.zoom_near_player(player, 1.2)
+		)
+
+func _flicker_lights_for_encounter() -> void:
+	# Dramatic horror light flicker across station
+	var lights_to_flicker: Array[Node3D] = [
+		bridge_lights, corridor_lights, engineering_lights, life_support_lights
+	]
+	for grp in lights_to_flicker:
+		if grp != null:
+			for light in grp.get_children():
+				if light is Light3D:
+					var orig_energy: float = light.light_energy
+					light.light_energy = 0.1
+					get_tree().create_timer(0.2).timeout.connect(func():
+						if is_instance_valid(light):
+							light.light_energy = orig_energy * 0.4
+					)
+					get_tree().create_timer(0.5).timeout.connect(func():
+						if is_instance_valid(light):
+							light.light_energy = 0.05
+					)
+					get_tree().create_timer(1.0).timeout.connect(func():
+						if is_instance_valid(light):
+							light.light_energy = orig_energy
+					)
 
 func _process(delta: float) -> void:
 	# Flashing red hazard beacons in breached crawlway
