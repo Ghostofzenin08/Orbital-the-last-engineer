@@ -57,6 +57,17 @@ func _ready() -> void:
 		MissionManager.room_discovered.connect(func(_rid: String, rname: String):
 			show_notification("DISCOVERED: %s" % rname, 3.5)
 		)
+	if MissionManager.has_signal("datapad_collected"):
+		MissionManager.datapad_collected.connect(func(_dp_id: String, dp_data: Dictionary):
+			var dp_title: String = str(dp_data.get("title", _dp_id))
+			show_notification("DATAPAD RECOVERED: %s [Review in Terminal]" % dp_title, 4.0)
+		)
+	if MissionManager.has_signal("revelation_unlocked"):
+		MissionManager.revelation_unlocked.connect(func(_rev_id: String, rev_data: Dictionary):
+			var rev_title: String = str(rev_data.get("title", _rev_id))
+			var rev_bonus: String = str(rev_data.get("bonus_summary", "System Optimization Active"))
+			show_notification("REVELATION UNLOCKED: %s // %s" % [rev_title, rev_bonus], 5.5)
+		)
 	
 	# Connect to InventoryManager signals
 	if has_node("/root/InventoryManager"):
