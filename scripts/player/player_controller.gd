@@ -19,10 +19,21 @@ var _pitch: float = 0.0
 var speed_modifier: float = 1.0
 var shiver_intensity: float = 0.0
 
+# Milestone 7: Horror Boss Zoom & Camera Trauma Mechanics
+var camera_trauma: float = 0.0
+var _horror_zoom_timer: float = 0.0
+var _horror_zoom_duration: float = 1.0
+var _base_fov: float = 75.0
+var _target_fov: float = 75.0
+
 func _ready() -> void:
 	collision_layer = 2 # bit 1 = Player
 	collision_mask = 1  # bit 0 = Environment
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	
+	if camera != null:
+		_base_fov = camera.fov
+		_target_fov = _base_fov
 	
 	if interaction_ctrl != null and hud != null and hud.has_method("set_prompt"):
 		interaction_ctrl.prompt_changed.connect(hud.set_prompt)
@@ -154,17 +165,48 @@ func _physics_process(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, target_vel_x, current_rate * delta)
 	velocity.z = move_toward(velocity.z, target_vel_z, current_rate * delta)
 	
+	if _horror_zoom_timer > 0.0:
+		_horror_zoom_timer -= delta
+		var alpha := 1.0 - clampf(_horror_zoom_timer / _horror_zoom_duration, 0.0, 1.0)
+		if camera != null:
+			camera.fov = lerpf(_target_fov, _base_fov, alpha)
+	elif camera != null and absf(camera.fov - _base_fov) > 0.1:
+		camera.fov = move_toward(camera.fov, _base_fov, delta * 35.0)
+
 	if camera != null:
-		if shiver_intensity > 0.0:
-			camera.rotation.z = sin(Time.get_ticks_msec() * 0.02) * shiver_intensity
+		if camera_trauma > 0.0:
+			camera_trauma = maxf(0.0, camera_trauma - delta * 1.25)
+			var shake := camera_trauma * camera_trauma
+			camera.h_offset = (randf() * 2.0 - 1.0) * 0.14 * shake
+			camera.v_offset = (randf() * 2.0 - 1.0) * 0.14 * shake
+			camera.rotation.z = (randf() * 2.0 - 1.0) * 0.06 * shake
 		else:
-			camera.rotation.z = 0.0
+			camera.h_offset = 0.0
+			camera.v_offset = 0.0
+			if shiver_intensity > 0.0:
+				camera.rotation.z = sin(Time.get_ticks_msec() * 0.02) * shiver_intensity
+			else:
+				camera.rotation.z = 0.0
 	
 	move_and_slide()
 
 var is_shivering: bool:
 	get:
 		return shiver_intensity > 0.0
+
+var is_in_horror_shock: bool:
+	get:
+		return _horror_zoom_timer > 0.0 or camera_trauma > 0.15
+
+func trigger_horror_zoom(duration: float = 1.2, fov_drop: float = 24.0, trauma: float = 0.85) -> void:
+	if camera != null:
+		_target_fov = maxf(42.0, _base_fov - fov_drop)
+		camera.fov = _target_fov
+		_horror_zoom_duration = maxf(0.1, duration)
+		_horror_zoom_timer = _horror_zoom_duration
+	camera_trauma = clampf(camera_trauma + trauma, 0.0, 1.0)
+	if hud != null and hud.has_method("trigger_horror_vignette"):
+		hud.trigger_horror_vignette(duration)
 
 func apply_environmental_afflictions(afflictions: Array) -> void:
 	if afflictions.has("DECOMPRESSION"):
