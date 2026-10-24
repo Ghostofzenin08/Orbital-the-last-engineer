@@ -15,6 +15,7 @@ const DoorClass = preload("res://scripts/interactables/door.gd")
 const DatapadPickupClass = preload("res://scripts/interactables/datapad_pickup.gd")
 const EmergencyValveClass = preload("res://scripts/interactables/emergency_valve.gd")
 const CrisisManagerClass = preload("res://scripts/systems/crisis_manager.gd")
+const AlienStalkerClass = preload("res://scripts/entities/alien_stalker.gd")
 
 var tests_passed: int = 0
 var tests_failed: int = 0
@@ -69,6 +70,10 @@ func _ready() -> void:
 	_run_suite("Milestone 6: Tactical UI Telemetry, Immediate Task & Sizing", _test_m6_tactical_ui_telemetry_and_immediate_task)
 	_run_suite("Milestone 6: Crisis Save / Load Persistence & Legacy Compatibility", _test_m6_save_load_crisis_persistence)
 	_run_suite("Milestone 6: Enhanced Object Visuals & In-Game Storyline Verification", _test_m6_enhanced_visuals_and_storyline_verification)
+	_run_suite("Milestone 7: Expanded Chambers & Environmental Survey Simulation", _test_m7_expanded_chambers_and_environmental_survey)
+	_run_suite("Milestone 7: 3D Physical Alien Stalker Entity & Horror Boss Zoom Mechanics", _test_m7_physical_stalker_and_horror_zoom)
+	_run_suite("Milestone 7: Extended Exploration & Crisis Stalking Progression Flow", _test_m7_exploration_and_crisis_stalking_flow)
+	_run_suite("Milestone 7: Production Release Polish, Save/Load Persistence & End-Game Verification", _test_m7_production_polish_and_persistence)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -2597,5 +2602,254 @@ func _test_m6_enhanced_visuals_and_storyline_verification() -> void:
 	ShipState.reset_to_defaults()
 	ShipSystemManager.reset_to_defaults()
 	MissionManager.reset_missions()
+
+func _test_m7_expanded_chambers_and_environmental_survey() -> void:
+	ShipState.reset_to_defaults()
+	MissionManager.reset_missions()
+	
+	# 1. Verify ShipState compartments dictionary includes expanded chambers
+	_assert_true(ShipState.COMPARTMENTS.has("specimen_vault"), "ShipState includes specimen_vault compartment")
+	_assert_true(ShipState.COMPARTMENTS.has("research_observatory"), "ShipState includes research_observatory compartment")
+	
+	var spec_info: Dictionary = ShipState.COMPARTMENTS["specimen_vault"]
+	_assert_true(spec_info.get("deck") == "lower", "specimen_vault is located on lower deck")
+	_assert_true(spec_info.get("name", "").contains("Specimen"), "specimen_vault name reflects Specimen Containment")
+	
+	var obs_info: Dictionary = ShipState.COMPARTMENTS["research_observatory"]
+	_assert_true(obs_info.get("deck") == "main", "research_observatory is located on main deck")
+	_assert_true(obs_info.get("name", "").contains("Observatory"), "research_observatory name reflects Observatory Dome")
+	
+	# 2. Verify EnvironmentalManager simulation across expanded chambers
+	var env_mgr = EnvManagerScript.new()
+	add_child(env_mgr)
+	
+	_assert_true(env_mgr.get_all_compartments(true, true).size() == 13, "get_all_compartments(true, true) returns 13 compartments")
+	_assert_true(env_mgr.get_all_compartments(true, false).size() == 11, "get_all_compartments(true, false) maintains 11 compartments for backward compatibility")
+	_assert_true(env_mgr.get_all_compartments(false).size() == 4, "get_all_compartments(false) maintains 4 core compartments")
+	
+	# 3. Position-to-compartment spatial detection
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(0, -2, 38)) == "specimen_vault", "Position (0, -2, 38) maps to specimen_vault")
+	_assert_true(env_mgr.get_compartment_for_position(Vector3(-14, 0, -20)) == "research_observatory", "Position (-14, 0, -20) maps to research_observatory")
+	
+	var vault_atmo: Dictionary = env_mgr.get_compartment_atmosphere("specimen_vault")
+	_assert_true(vault_atmo.get("co2_ppm", 0.0) > 600.0, "specimen_vault exhibits elevated bio-contaminant CO2 reading")
+	
+	var obs_atmo: Dictionary = env_mgr.get_compartment_atmosphere("research_observatory")
+	_assert_true(obs_atmo.get("o2_level", 0.0) == 100.0, "research_observatory maintains nominal oxygenation from flora")
+	
+	remove_child(env_mgr)
+	env_mgr.free()
+	
+	# 4. MissionManager exploration tracking
+	MissionManager.mark_room_discovered("specimen_vault")
+	MissionManager.mark_room_discovered("research_observatory")
+	_assert_true(MissionManager.is_room_discovered("specimen_vault"), "is_room_discovered returns true for specimen_vault")
+	_assert_true(MissionManager.is_room_discovered("research_observatory"), "is_room_discovered returns true for research_observatory")
+	_assert_true(MissionManager.get_expanded_chamber_count() == 2, "get_expanded_chamber_count() returns 2 expanded chambers")
+
+func _test_m7_physical_stalker_and_horror_zoom() -> void:
+	ShipState.reset_to_defaults()
+	MissionManager.reset_missions()
+	
+	var stalker_scene = load("res://scenes/entities/alien_stalker.tscn")
+	_assert_true(stalker_scene != null, "alien_stalker.tscn loads successfully")
+	
+	var stalker: AlienStalker = stalker_scene.instantiate()
+	add_child(stalker)
+	
+	# 1. Structural anatomy verification
+	_assert_true(stalker.has_node("CollisionShape3D"), "AlienStalker has CollisionShape3D")
+	_assert_true(stalker.has_node("Torso"), "AlienStalker has Torso")
+	_assert_true(stalker.has_node("Head"), "AlienStalker has Head")
+	_assert_true(stalker.has_node("EyeLeftLight"), "AlienStalker has EyeLeftLight")
+	_assert_true(stalker.has_node("EyeRightLight"), "AlienStalker has EyeRightLight")
+	_assert_true(stalker.has_node("ClawLeft"), "AlienStalker has ClawLeft")
+	_assert_true(stalker.has_node("ClawRight"), "AlienStalker has ClawRight")
+	_assert_true(stalker.has_node("Spines"), "AlienStalker has Spines")
+	_assert_true(stalker.has_node("Tail"), "AlienStalker has Tail")
+	_assert_true(stalker.has_node("AuraLight"), "AlienStalker has AuraLight")
+	
+	# 2. Dormancy check
+	_assert_true(stalker.current_state == AlienStalkerClass.State.DORMANT, "AlienStalker starts in DORMANT state")
+	_assert_true(not stalker.visible, "AlienStalker is invisible while dormant")
+	
+	# 3. Spawning sequence
+	stalker.spawn_in_chamber("specimen_vault", Vector3(0, -2, 38))
+	_assert_true(stalker.current_state == AlienStalkerClass.State.SPAWNING, "AlienStalker transitions to SPAWNING state")
+	_assert_true(stalker.visible, "AlienStalker becomes visible upon spawn")
+	_assert_true(stalker.stalk_chamber_id == "specimen_vault", "Stalker chamber ID set to specimen_vault")
+	
+	# 4. Horror boss zoom & jumpscare encounter
+	var player_scene = load("res://scenes/player/player.tscn")
+	var player: PlayerController = player_scene.instantiate()
+	add_child(player)
+	player.global_position = Vector3(0, 0, 0)
+	
+	_assert_true(not player.is_in_horror_shock, "Player not in horror shock initially")
+	_assert_true(player.camera_trauma == 0.0, "Player camera trauma zero initially")
+	
+	stalker.zoom_near_player(player, 0.5)
+	_assert_true(stalker.current_state == AlienStalkerClass.State.HORROR_ZOOM, "AlienStalker transitions to HORROR_ZOOM")
+	_assert_true(stalker.horror_zoom_executed, "horror_zoom_executed flag set on stalker")
+	_assert_true(player.is_in_horror_shock, "Player enters horror shock state")
+	_assert_true(player.camera_trauma > 0.5, "Player camera trauma elevated during horror zoom")
+	_assert_true(player.camera.fov < player._base_fov, "Camera FOV punched in for shock effect")
+	
+	# Simulate physics tick to complete zoom
+	stalker._physics_process(0.6)
+	_assert_true(stalker.current_state == AlienStalkerClass.State.AGGRESSIVE, "Stalker advances to AGGRESSIVE after horror zoom")
+	
+	# 5. Trap and elimination
+	stalker.trap_in_chamber("airlock_chamber", Vector3(8, 0, 8))
+	_assert_true(stalker.current_state == AlienStalkerClass.State.TRAPPED, "Stalker transitions to TRAPPED")
+	_assert_true(stalker.is_trapped, "is_trapped is true on stalker")
+	
+	stalker.eliminate()
+	_assert_true(stalker.current_state == AlienStalkerClass.State.ELIMINATED, "Stalker transitions to ELIMINATED")
+	_assert_true(stalker.is_eliminated, "is_eliminated is true on stalker")
+	_assert_true(stalker.eye_left_light.light_energy == 0.0, "Stalker eye light extinguished upon death")
+	
+	remove_child(player)
+	remove_child(stalker)
+	player.free()
+	stalker.free()
+
+func _test_m7_exploration_and_crisis_stalking_flow() -> void:
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+	
+	# 1. Chamber exploration prerequisite gate
+	_assert_true(not MissionManager.can_engage_final_hunt(), "can_engage_final_hunt is false when rooms undiscovered")
+	
+	var chambers := ["engineering_bay", "corridors", "life_support", "bridge", "specimen_vault"]
+	for ch in chambers:
+		MissionManager.mark_room_discovered(ch)
+	
+	_assert_true(MissionManager.can_engage_final_hunt(), "can_engage_final_hunt is true after discovering 5 chambers")
+	var stats: Dictionary = MissionManager.get_exploration_stats()
+	_assert_true(bool(stats.get("can_engage_final_hunt", false)), "Exploration stats report can_engage_final_hunt is true")
+	
+	# 2. CrisisManager and AlienStalker registration
+	var stalker_scene = load("res://scenes/entities/alien_stalker.tscn")
+	var stalker: AlienStalker = stalker_scene.instantiate()
+	add_child(stalker)
+	
+	ShipState.crisis_manager.register_stalker(stalker)
+	_assert_true(ShipState.crisis_manager.stalker_entity == stalker, "Stalker entity registered with CrisisManager")
+	
+	# 3. Start crisis and verify stalker activation
+	ShipState.start_crisis(CrisisManagerClass.CrisisType.CREATURE_PREDATORY_HUNT)
+	_assert_true(stalker.current_state == AlienStalkerClass.State.SPAWNING, "Stalker spawns upon creature hunt start")
+	
+	# 4. Trigger horror zoom through ShipState
+	ShipState.trigger_creature_horror_zoom(null)
+	_assert_true(ShipState.crisis_manager.horror_zoom_executed, "horror_zoom_executed recorded in CrisisManager")
+	_assert_true(stalker.current_state == AlienStalkerClass.State.HORROR_ZOOM, "Stalker entered HORROR_ZOOM via ShipState")
+	
+	# 5. Trap and purge sequence through ShipState
+	ShipState.trap_creature_in_chamber("airlock_chamber")
+	_assert_true(ShipState.crisis_manager.is_creature_trapped, "CrisisManager records creature trapped")
+	_assert_true(stalker.is_trapped, "Stalker records is_trapped")
+	_assert_true(stalker.current_state == AlienStalkerClass.State.TRAPPED, "Stalker state is TRAPPED")
+	
+	ShipState.purge_creature_with_poison_gas("airlock_chamber")
+	_assert_true(ShipState.crisis_manager.is_creature_eliminated, "CrisisManager records creature eliminated")
+	_assert_true(stalker.is_eliminated, "Stalker records is_eliminated")
+	_assert_true(stalker.current_state == AlienStalkerClass.State.ELIMINATED, "Stalker state is ELIMINATED")
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.NONE, "Crisis resolved after poison gas purge")
+	
+	remove_child(stalker)
+	stalker.free()
+	
+	ShipState.reset_to_defaults()
+	MissionManager.reset_missions()
+
+func _test_m7_production_polish_and_persistence() -> void:
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+	SaveManager.delete_save()
+	
+	# 1. Level scene contains expanded chambers and physical alien stalker
+	var level_scene = load("res://scenes/levels/ship_interior.tscn")
+	_assert_true(level_scene != null, "ship_interior.tscn loads successfully")
+	var level = level_scene.instantiate()
+	add_child(level)
+	
+	_assert_true(level.has_node("Compartments/SpecimenVault"), "ship_interior.tscn contains Compartments/SpecimenVault")
+	_assert_true(level.has_node("Compartments/SpecimenVault/AlienStalker"), "ship_interior.tscn contains physical AlienStalker in SpecimenVault")
+	_assert_true(level.has_node("Compartments/ResearchObservatory"), "ship_interior.tscn contains Compartments/ResearchObservatory")
+	_assert_true(level.has_node("Compartments/ResearchObservatory/ObservatorySensor"), "ship_interior.tscn contains ObservatorySensor")
+	
+	remove_child(level)
+	level.free()
+	
+	# 2. MainMenu production release styling
+	var mm_scene = load("res://scenes/ui/main_menu.tscn")
+	_assert_true(mm_scene != null, "main_menu.tscn loads successfully")
+	var mm = mm_scene.instantiate()
+	add_child(mm)
+	var rel_lbl = mm.get_node_or_null("%ReleaseLabel")
+	_assert_true(rel_lbl != null, "main_menu.tscn contains %ReleaseLabel")
+	_assert_true(rel_lbl.text.contains("v1.0 Production Release"), "ReleaseLabel displays v1.0 Production Release")
+	remove_child(mm)
+	mm.free()
+	
+	# 3. Project configuration release version
+	_assert_true(ProjectSettings.get_setting("application/config/version") == "1.0.0", "project.godot version is 1.0.0")
+	
+	# 4. Save / Load persistence of Milestone 7 state
+	ShipState.start_crisis(CrisisManagerClass.CrisisType.CREATURE_PREDATORY_HUNT)
+	ShipState.trigger_creature_horror_zoom(null)
+	MissionManager.mark_room_discovered("specimen_vault")
+	MissionManager.mark_room_discovered("research_observatory")
+	
+	var save_ok = SaveManager.save_game()
+	_assert_true(save_ok, "SaveManager.save_game() persists Milestone 7 state")
+	
+	ShipState.reset_to_defaults()
+	MissionManager.reset_missions()
+	_assert_true(not ShipState.crisis_manager.horror_zoom_executed, "horror_zoom_executed cleared on reset")
+	_assert_true(MissionManager.get_expanded_chamber_count() == 0, "Expanded chamber count cleared on reset")
+	
+	var load_ok = SaveManager.load_game()
+	_assert_true(load_ok, "SaveManager.load_game() succeeds for Milestone 7 save")
+	_assert_true(ShipState.crisis_manager.horror_zoom_executed, "horror_zoom_executed restored from save")
+	_assert_true(MissionManager.is_room_discovered("specimen_vault"), "specimen_vault discovery restored from save")
+	_assert_true(MissionManager.is_room_discovered("research_observatory"), "research_observatory discovery restored from save")
+	
+	# 5. Legacy save load backwards compatibility
+	var legacy_save := {
+		"version": 1,
+		"crisis": {
+			"current_crisis": 0,
+			"current_stage": 0
+		}
+	}
+	var f := FileAccess.open(SaveManager.SAVE_PATH, FileAccess.WRITE)
+	f.store_string(JSON.stringify(legacy_save))
+	f.close()
+	
+	var leg_ok = SaveManager.load_game()
+	_assert_true(leg_ok, "Legacy save loads without error")
+	_assert_true(not ShipState.crisis_manager.horror_zoom_executed, "Legacy save defaults horror_zoom_executed to false")
+	
+	# 6. Complete mission victory engagement
+	ShipSystemManager.set_generator_breaker(true)
+	ShipSystemManager.set_power_distribution(true)
+	ShipSystemManager.install_coolant_coupler()
+	ShipSystemManager.align_comms_array()
+	ShipState.purge_creature_with_poison_gas("airlock_chamber")
+	
+	var victory_res = ShipSystemManager.engage_propulsion()
+	_assert_true(victory_res.get("ok", false), "Final departure propulsion engages successfully")
+	_assert_true(ShipSystemManager.is_system_online("propulsion"), "Propulsion system is ONLINE")
+	
+	SaveManager.delete_save()
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+
 
 
