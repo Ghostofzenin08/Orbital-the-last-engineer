@@ -1,0 +1,97 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/interactables/switch.tscn" id="1_switch"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/terminal.tscn" id="2_term"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(14, 0.4, 14)
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(14, 0.4, 14)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.18, 0.2, 0.24, 1)
+metallic = 0.8
+roughness = 0.35
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_table"]
+size = Vector3(1, 0.9, 2.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_table"]
+size = Vector3(1, 0.9, 2.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_machinery"]
+albedo_color = Color(0.22, 0.26, 0.3, 1)
+metallic = 0.85
+roughness = 0.3
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_holo"]
+top_radius = 1.0
+bottom_radius = 1.0
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_holo"]
+albedo_color = Color(0.1, 0.6, 1, 0.6)
+transparency = 1
+emission_enabled = true
+emission = Color(0.2, 0.7, 1, 1)
+emission_energy_multiplier = 2.5
+
+[node name="Bridge" type="Node3D"]
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="HoloTable" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="HoloTable"]
+shape = SubResource("BoxShape3D_table")
+
+[node name="Mesh" type="MeshInstance3D" parent="HoloTable"]
+mesh = SubResource("BoxMesh_table")
+surface_material_override/0 = SubResource("StandardMaterial3D_machinery")
+
+[node name="HoloProjector" type="MeshInstance3D" parent="HoloTable"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+mesh = SubResource("CylinderMesh_holo")
+surface_material_override/0 = SubResource("StandardMaterial3D_holo")
+
+[node name="HelmConsole" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -4.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="HelmConsole"]
+shape = SubResource("BoxShape3D_table")
+
+[node name="Mesh" type="MeshInstance3D" parent="HelmConsole"]
+mesh = SubResource("BoxMesh_table")
+surface_material_override/0 = SubResource("StandardMaterial3D_machinery")
+
+[node name="DepartureSwitch" parent="." instance=ExtResource("1_switch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -4.0)
+switch_target = "propulsion"
+label_name = "Orbital Departure Switch"
+
+[node name="BridgeCommsTerminal" parent="." instance=ExtResource("2_term")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -5.2, 0, 0)
+terminal_type = "bridge_comms"
+terminal_title = "Bridge Comms Array"
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+light_color = Color(0.3, 0.6, 1, 1)
+light_energy = 1.2
+omni_range = 9.0
