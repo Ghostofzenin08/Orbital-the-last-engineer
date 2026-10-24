@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/player/interaction_controller.gd" id="2_inter"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="3_hud"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.38
+height = 1.8
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+current = true
+fov = 75.0
+
+[node name="InteractionController" type="Node3D" parent="CameraPivot/Camera3D" node_paths=PackedStringArray("ray_cast", "player_body")]
+script = ExtResource("2_inter")
+ray_cast = NodePath("RayCast3D")
+player_body = NodePath("../../..")
+
+[node name="RayCast3D" type="RayCast3D" parent="CameraPivot/Camera3D/InteractionController"]
+target_position = Vector3(0, 0, -2.5)
+collision_mask = 4
+collide_with_areas = true
+
+[node name="AudioListener3D" type="AudioListener3D" parent="CameraPivot/Camera3D"]
+current = true
+
+[node name="HUD" parent="." instance=ExtResource("3_hud")]
