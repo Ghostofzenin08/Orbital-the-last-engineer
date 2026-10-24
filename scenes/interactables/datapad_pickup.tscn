@@ -1,26 +1,42 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/interactables/datapad_pickup.gd" id="1_datapad"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_datapad"]
-size = Vector3(0.32, 0.16, 0.42)
+size = Vector3(0.34, 0.16, 0.44)
 
 [sub_resource type="BoxMesh" id="BoxMesh_slate_body"]
-size = Vector3(0.24, 0.025, 0.34)
+size = Vector3(0.25, 0.024, 0.35)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_slate_body"]
-albedo_color = Color(0.18, 0.21, 0.25, 1)
-metallic = 0.75
-roughness = 0.35
+albedo_color = Color(0.12, 0.14, 0.17, 1)
+metallic = 0.8
+roughness = 0.28
+
+[sub_resource type="BoxMesh" id="BoxMesh_bumper"]
+size = Vector3(0.018, 0.03, 0.352)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bumper"]
+albedo_color = Color(0.28, 0.32, 0.36, 1)
+metallic = 0.5
+roughness = 0.6
 
 [sub_resource type="BoxMesh" id="BoxMesh_screen_glow"]
-size = Vector3(0.2, 0.008, 0.26)
+size = Vector3(0.205, 0.008, 0.265)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_screen_glow"]
 albedo_color = Color(0.1, 0.55, 0.65, 1)
 emission_enabled = true
 emission = Color(0.15, 0.85, 1, 1)
 emission_energy_multiplier = 2.2
+
+[sub_resource type="BoxMesh" id="BoxMesh_port"]
+size = Vector3(0.08, 0.006, 0.015)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_port"]
+albedo_color = Color(0.04, 0.05, 0.06, 1)
+metallic = 0.95
+roughness = 0.1
 
 [sub_resource type="SphereMesh" id="SphereMesh_status_led"]
 radius = 0.012
@@ -44,8 +60,23 @@ shape = SubResource("BoxShape3D_datapad")
 mesh = SubResource("BoxMesh_slate_body")
 surface_material_override/0 = SubResource("StandardMaterial3D_slate_body")
 
+[node name="BumperLeft" type="MeshInstance3D" parent="SlateBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.126, 0, 0)
+mesh = SubResource("BoxMesh_bumper")
+surface_material_override/0 = SubResource("StandardMaterial3D_bumper")
+
+[node name="BumperRight" type="MeshInstance3D" parent="SlateBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.126, 0, 0)
+mesh = SubResource("BoxMesh_bumper")
+surface_material_override/0 = SubResource("StandardMaterial3D_bumper")
+
+[node name="DataPort" type="MeshInstance3D" parent="SlateBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, 0.14)
+mesh = SubResource("BoxMesh_port")
+surface_material_override/0 = SubResource("StandardMaterial3D_port")
+
 [node name="ScreenGlow" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, -0.01)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, -0.012)
 mesh = SubResource("BoxMesh_screen_glow")
 surface_material_override/0 = SubResource("StandardMaterial3D_screen_glow")
 
