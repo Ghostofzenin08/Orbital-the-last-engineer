@@ -1,16 +1,39 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/interactables/salvage_crate.gd" id="1_crate"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_crate"]
-size = Vector3(1.2, 1.0, 1.2)
+size = Vector3(1.25, 1.05, 1.25)
 
 [sub_resource type="BoxMesh" id="BoxMesh_body"]
-size = Vector3(1.15, 0.95, 1.15)
+size = Vector3(1.15, 0.75, 1.15)
 
-[sub_resource type="SphereMesh" id="SphereMesh_weld_seam"]
-radius = 0.04
-height = 0.08
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
+albedo_color = Color(0.24, 0.28, 0.32, 1)
+metallic = 0.8
+roughness = 0.35
+
+[sub_resource type="BoxMesh" id="BoxMesh_lid"]
+size = Vector3(1.18, 0.18, 1.18)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lid"]
+albedo_color = Color(0.32, 0.36, 0.4, 1)
+metallic = 0.85
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="BoxMesh_rib"]
+size = Vector3(1.19, 0.06, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hazard"]
+albedo_color = Color(0.85, 0.6, 0.1, 1)
+metallic = 0.5
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_light"]
+albedo_color = Color(1, 0.5, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.5, 0.1, 1)
+emission_energy_multiplier = 2.0
 
 [node name="SalvageCrate" type="StaticBody3D"]
 collision_layer = 4
@@ -20,13 +43,36 @@ mesh_path = NodePath("CrateMesh")
 status_light_path = NodePath("StatusLight")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("BoxShape3D_crate")
 
 [node name="CrateMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.375, 0)
 mesh = SubResource("BoxMesh_body")
+surface_material_override/0 = SubResource("StandardMaterial3D_body")
+
+[node name="ReinforceRibFront" type="MeshInstance3D" parent="CrateMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.55)
+mesh = SubResource("BoxMesh_rib")
+surface_material_override/0 = SubResource("StandardMaterial3D_hazard")
+
+[node name="ReinforceRibBack" type="MeshInstance3D" parent="CrateMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.55)
+mesh = SubResource("BoxMesh_rib")
+surface_material_override/0 = SubResource("StandardMaterial3D_hazard")
+
+[node name="LidMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.84, 0)
+mesh = SubResource("BoxMesh_lid")
+surface_material_override/0 = SubResource("StandardMaterial3D_lid")
+
+[node name="LidLatch" type="MeshInstance3D" parent="LidMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0.58)
+mesh = SubResource("BoxMesh_rib")
+surface_material_override/0 = SubResource("StandardMaterial3D_light")
 
 [node name="StatusLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.7)
 light_color = Color(1, 0.5, 0.1, 1)
-light_energy = 0.8
-omni_range = 1.5
+light_energy = 0.9
+omni_range = 1.8
