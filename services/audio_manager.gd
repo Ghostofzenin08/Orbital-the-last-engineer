@@ -124,6 +124,14 @@ func _pregenerate_sounds() -> void:
 	_sound_cache["multitool_ratchet"] = _generate_multitool_ratchet()
 	_sound_cache["locker_open"] = _generate_locker_open()
 	_sound_cache["recharge"] = _generate_recharge()
+	_sound_cache["datapad_decrypt"] = _generate_datapad_decrypt()
+	_sound_cache["revelation_chime"] = _generate_revelation_chime()
+
+func play_datapad_decrypt() -> void:
+	play_sfx("datapad_decrypt")
+
+func play_revelation_chime() -> void:
+	play_sfx("revelation_chime")
 
 func _generate_click() -> AudioStreamWAV:
 	var sample_rate := 22050
@@ -515,5 +523,51 @@ func _generate_recharge() -> AudioStreamWAV:
 	wav.stereo = false
 	wav.data = data
 	return wav
+
+func _generate_datapad_decrypt() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 0.42
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var step := int((t / duration) * 4.0)
+		var freqs := [987.77, 1318.51, 1479.98, 1975.53]
+		var freq: float = freqs[clampi(step, 0, 3)]
+		var env := exp(-fmod(t, duration / 4.0) * 14.0)
+		var val := sin(2.0 * PI * freq * t) * env * 0.55
+		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
+
+func _generate_revelation_chime() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 0.85
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var env := sin(PI * minf(1.0, t / 0.12)) * exp(-t * 2.8)
+		var c1 := sin(2.0 * PI * 440.0 * t) * 0.30
+		var c2 := sin(2.0 * PI * 659.25 * t) * 0.28
+		var c3 := sin(2.0 * PI * 880.0 * t) * 0.25
+		var c4 := sin(2.0 * PI * 1108.73 * t) * 0.17
+		var val := (c1 + c2 + c3 + c4) * env
+		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
+
 
 
