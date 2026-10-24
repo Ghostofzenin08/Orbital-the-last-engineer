@@ -851,12 +851,33 @@ func get_schematic_data() -> Dictionary:
 func get_scrubber_efficiency_multiplier() -> float:
 	return scrubber_efficiency_multiplier
 
+func reset_revelation_bonuses() -> void:
+	has_revelation_anomaly = false
+	has_revelation_quarantine = false
+	has_revelation_directive = false
+	scrubber_efficiency_multiplier = 1.0
+	commander_override_code = ""
+	quarantine_lockout_cleared = false
+	thruster_efficiency_boost = 1.0
+	if power_system != null and power_system.has_method("set_harmonic_damping"):
+		power_system.set_harmonic_damping(false)
+	var react_dev = devices.get("reactor_primary", null)
+	if react_dev != null and "power_generation" in react_dev:
+		react_dev.power_generation = 150.0
+	var prop_dev = devices.get("ion_propulsion", null)
+	if prop_dev != null and "power_draw" in prop_dev:
+		prop_dev.power_draw = 60.0
+	tick_systems(0.0)
+
 func apply_revelation_bonus(revelation_id: String) -> Dictionary:
 	match revelation_id:
 		"revelation_anomaly":
 			has_revelation_anomaly = true
 			if power_system != null and power_system.has_method("set_harmonic_damping"):
 				power_system.set_harmonic_damping(true)
+			var react_dev = devices.get("reactor_primary", null)
+			if react_dev != null and "power_generation" in react_dev:
+				react_dev.power_generation = 160.0
 			tick_systems(0.0)
 			return {
 				"ok": true,
@@ -938,6 +959,7 @@ func export_save_data() -> Dictionary:
 	}
 
 func import_save_data(data: Dictionary) -> void:
+	reset_revelation_bonuses()
 	if data.has("subsystems"):
 		var sdata: Dictionary = data["subsystems"]
 		for k in sdata.keys():
