@@ -371,12 +371,25 @@ func mark_room_discovered(room_id: String) -> void:
 			if ss.COMPARTMENTS.has(room_id):
 				room_name = ss.COMPARTMENTS[room_id].get("name", room_name)
 		room_discovered.emit(room_id, room_name)
+	
+	if current_objective_index == 4 and (room_id == "airlock_chamber" or room_id == "cargo_bay"):
+		if has_node("/root/ShipState"):
+			var ss = get_node("/root/ShipState")
+			if ss.crisis_manager != null and not ss.crisis_manager.is_creature_trapped:
+				ss.trap_creature_in_chamber("airlock_chamber")
+				_broadcast_current_objective()
 
 func is_room_discovered(room_id: String) -> bool:
 	return discovered_rooms.has(room_id)
 
 func mark_airlock_cycled() -> void:
 	airlock_cycles_completed += 1
+	if current_objective_index == 4:
+		if has_node("/root/ShipState"):
+			var ss = get_node("/root/ShipState")
+			if ss.crisis_manager != null and not ss.crisis_manager.is_creature_trapped:
+				ss.trap_creature_in_chamber("airlock_chamber")
+				_broadcast_current_objective()
 	airlock_cycled.emit()
 
 func mark_breach_sealed(comp_id: String = "maintenance_crawlway") -> void:
@@ -407,6 +420,15 @@ func get_current_objective() -> Dictionary:
 
 func get_current_immediate_task() -> String:
 	var obj := get_current_objective()
+	if current_objective_index == 4 and has_node("/root/ShipState"):
+		var ss = get_node("/root/ShipState")
+		if ss.crisis_manager != null:
+			if not ss.crisis_manager.is_creature_trapped:
+				return "Trap Alien & Open Poison Gas Valve"
+			elif not ss.crisis_manager.is_creature_eliminated:
+				return "Open Poison Gas Valve to Purge Alien"
+			else:
+				return "Alien Purged - Engage Sub-Orbital Ion Thruster Bank (Bridge)"
 	return str(obj.get("immediate_task", "Follow Mission Directives"))
 
 func get_objective_count() -> int:
