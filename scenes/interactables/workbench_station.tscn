@@ -1,0 +1,51 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/interactables/workbench_station.gd" id="1_bench"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cradle"]
+size = Vector3(0.9, 0.4, 0.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dock"]
+size = Vector3(0.9, 0.25, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dock_mat"]
+albedo_color = Color(0.18, 0.2, 0.24, 1)
+metallic = 0.8
+roughness = 0.3
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_charger"]
+top_radius = 0.15
+bottom_radius = 0.18
+height = 0.12
+
+[sub_resource type="SphereMesh" id="SphereMesh_cradle_led"]
+radius = 0.035
+height = 0.07
+
+[node name="WorkbenchStation" type="StaticBody3D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_bench")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+shape = SubResource("BoxShape3D_cradle")
+
+[node name="DockMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.125, 0)
+mesh = SubResource("BoxMesh_dock")
+surface_material_override/0 = SubResource("StandardMaterial3D_dock_mat")
+
+[node name="ChargerRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
+mesh = SubResource("CylinderMesh_charger")
+
+[node name="CradleLED" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0.22)
+mesh = SubResource("SphereMesh_cradle_led")
+
+[node name="CradleLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+light_color = Color(0.1, 0.8, 1, 1)
+light_energy = 1.0
+omni_range = 2.5
