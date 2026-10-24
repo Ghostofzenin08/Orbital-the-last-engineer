@@ -1,0 +1,51 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/interactables/repair_panel.gd" id="1_panel"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_panel"]
+size = Vector3(0.5, 0.7, 0.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_housing"]
+size = Vector3(0.45, 0.65, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cavity"]
+size = Vector3(0.2, 0.2, 0.08)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_coupler"]
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.16
+
+[sub_resource type="SphereMesh" id="SphereMesh_led"]
+radius = 0.035
+height = 0.07
+
+[node name="RepairPanel" type="StaticBody3D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_panel")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_panel")
+
+[node name="HousingMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_housing")
+
+[node name="CavityMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0.05)
+mesh = SubResource("BoxMesh_cavity")
+
+[node name="SocketMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -0.05, 0.08)
+visible = false
+mesh = SubResource("CylinderMesh_coupler")
+
+[node name="IndicatorLED" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0.07)
+mesh = SubResource("SphereMesh_led")
+
+[node name="IndicatorLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0.15)
+light_color = Color(1, 0.2, 0.1, 1)
+light_energy = 0.8
+omni_range = 1.0
