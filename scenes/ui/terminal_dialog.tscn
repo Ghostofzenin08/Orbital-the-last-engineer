@@ -1,0 +1,267 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/terminal_dialog.gd" id="1_terminal"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ship_schematic.tscn" id="2_schematic"]
+
+[node name="TerminalDialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_terminal")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.07, 0.1, 0.92)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(1040, 600)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="HeaderHBox" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox/HeaderHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "ASTRAEA-7 TERMINAL OS // SHIPBOARD CONSOLE"
+
+[node name="CloseButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/HeaderHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 32)
+layout_mode = 2
+text = "[X] Close"
+
+[node name="TabBar" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TabDiagnostics" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+text = "DIAGNOSTICS"
+
+[node name="TabSchematic" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+text = "SHIP SCHEMATIC"
+
+[node name="TabAtmosphere" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+text = "ATMOSPHERE"
+
+[node name="TabLogs" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+text = "INCIDENT LOGS"
+
+[node name="TabComms" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+text = "COMMS ARRAY"
+
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="ContentContainer" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DiagnosticsView" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Scroll" type="ScrollContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/DiagnosticsView"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DiagnosticsList" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/DiagnosticsView/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="SchematicView" parent="CenterContainer/Panel/Margin/VBox/ContentContainer" instance=ExtResource("2_schematic")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="LogsView" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="LogsList" type="ItemList" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+
+[node name="LogDetailVBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="LogTitleLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView/LogDetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "INCIDENT ENTRY"
+
+[node name="LogAuthorLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView/LogDetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Author: Unknown | Date: Cycle 2184"
+
+[node name="HSep" type="HSeparator" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView/LogDetailVBox"]
+layout_mode = 2
+
+[node name="LogContentLabel" type="RichTextLabel" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView/LogDetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+text = "Select a log entry from the terminal directory."
+
+[node name="CommsView" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="CommsHeader" type="Label" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/CommsView"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "SUB-SPACE QUANTUM TRANSCEIVER RELAY"
+
+[node name="AlignStatusLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/CommsView"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "STATUS: CHECKING..."
+
+[node name="DescLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/CommsView"]
+layout_mode = 2
+text = "The communications array directs high-gain phased telemetry towards orbital relay satellites. Calibrating the antenna dish requires active electrical power from the distribution bus."
+autowrap_mode = 2
+
+[node name="AlignButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/CommsView"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+text = "CALIBRATE & LOCK COMM ARRAY"
+
+[node name="AtmosphereView" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="AtmoHeader" type="Label" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "ENVIRONMENTAL CONTROL & LIFE SUPPORT SUBSYSTEM"
+
+[node name="AtmoStatusLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+text = "STATUS: MONITORING SENSOR TELEMETRY"
+
+[node name="AtmoScroll" type="ScrollContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AtmosphereList" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView/AtmoScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="OverrideHBox" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BtnEmergencyPurge" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView/OverrideHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "EMERGENCY CO2 PURGE"
+
+[node name="BtnEmergencyPressurize" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView/OverrideHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "EMERGENCY PRESSURIZATION"
+
+[node name="BtnThermalReset" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView/OverrideHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "CLIMATE THERMAL RESET"
+
+[node name="ActionHBox2" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BtnRerouteAux" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView/ActionHBox2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "REROUTE AUX SCRUBBER (OFF)"
+
+[node name="BtnSimulateFault" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView/ActionHBox2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "TRIGGER TEST: CO2 FAULT"
+
+[node name="BtnClearFaults" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/AtmosphereView/ActionHBox2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "CLEAR ALL FAULTS"
