@@ -176,8 +176,18 @@ func load_game(player: Node3D = null, environmental_mgr: Node = null) -> bool:
 	if environmental_mgr != null and data.has("environment") and environmental_mgr.has_method("import_save_data"):
 		environmental_mgr.import_save_data(data["environment"])
 	
-	if data.has("ship_state") and get_node_or_null("/root/ShipState") != null:
-		ShipState.import_save_data(data["ship_state"])
+	if get_node_or_null("/root/ShipState") != null:
+		if data.has("ship_state"):
+			var sdata: Dictionary = data["ship_state"]
+			if not sdata.has("crisis_manager") and data.has("crisis"):
+				sdata["crisis"] = data["crisis"]
+			ShipState.import_save_data(sdata)
+		elif data.has("crisis"):
+			if ShipState.crisis_manager != null:
+				ShipState.crisis_manager.deserialize(data["crisis"])
+		else:
+			if ShipState.crisis_manager != null:
+				ShipState.crisis_manager.reset()
 	
 	if data.has("inventory") and get_node_or_null("/root/InventoryManager") != null:
 		InventoryManager.import_save_data(data["inventory"])
