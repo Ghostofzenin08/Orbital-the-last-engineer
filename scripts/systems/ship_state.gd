@@ -37,6 +37,10 @@ var commander_override_code: String = ""
 var quarantine_lockout_cleared: bool = false
 var thruster_efficiency_boost: float = 1.0
 
+# Milestone 6: Dynamic Multi-Stage Crisis & Cascading Faults
+const CrisisManagerScript = preload("res://scripts/systems/crisis_manager.gd")
+var crisis_manager: CrisisManager = null
+
 
 # Compartment definitions
 const COMPARTMENTS: Dictionary = {
@@ -129,7 +133,12 @@ func initialize_ship() -> void:
 	quarantine_lockout_cleared = false
 	thruster_efficiency_boost = 1.0
 
-	
+	if crisis_manager == null:
+		crisis_manager = CrisisManagerScript.new()
+		crisis_manager.setup(self)
+	else:
+		crisis_manager.reset()
+
 	_create_subsystems()
 	_load_devices_from_config()
 	_load_initial_faults()
@@ -360,6 +369,9 @@ func tick_systems(delta: float) -> void:
 	for sub in subsystems.values():
 		if sub != null and sub.has_method("tick"):
 			sub.tick(delta)
+	
+	if crisis_manager != null and delta > 0.0:
+		crisis_manager.tick(delta)
 	
 	# Update dependent subsystem states based on power & faults
 	_evaluate_subsystem_dependencies()
@@ -955,7 +967,8 @@ func export_save_data() -> Dictionary:
 		"scrubber_efficiency_multiplier": scrubber_efficiency_multiplier,
 		"commander_override_code": commander_override_code,
 		"quarantine_lockout_cleared": quarantine_lockout_cleared,
-		"thruster_efficiency_boost": thruster_efficiency_boost
+		"thruster_efficiency_boost": thruster_efficiency_boost,
+		"crisis_manager": crisis_manager.serialize() if crisis_manager != null else {}
 	}
 
 func import_save_data(data: Dictionary) -> void:
@@ -1020,4 +1033,38 @@ func import_save_data(data: Dictionary) -> void:
 			if not active_faults.has(str(fid)):
 				trigger_fault(str(fid))
 	
+	if data.has("crisis_manager") and data["crisis_manager"] is Dictionary and crisis_manager != null:
+		crisis_manager.deserialize(data["crisis_manager"])
+	elif crisis_manager != null:
+		crisis_manager.reset()
+	
 	tick_systems(0.0)
+
+func start_crisis(type: int, start_stage: int = 1) -> void:
+	if crisis_manager != null:
+		crisis_manager.start_crisis(type, start_stage)
+
+func advance_crisis_stage() -> void:
+	if crisis_manager != null:
+		crisis_manager.advance_crisis_stage()
+
+func trigger_cascading_fault(arg1: String, arg2: String = "") -> bool:
+	if crisis_manager != null:
+		var parent := arg1 if arg2 != "" else "SYSTEM_ANOMALY"
+		var cascaded := arg2 if arg2 != "" else arg1
+		return crisis_manager.trigger_cascading_fault(parent, cascaded)
+	return false
+
+func trap_creature_in_chamber(chamber_id: String = "airlock_chamber") -> bool:
+	if crisis_manager != null:
+		return crisis_manager.trap_creature(chamber_id)
+	return false
+
+func purge_creature_with_poison_gas(chamber_id: String = "") -> bool:
+	if crisis_manager != null:
+		return crisis_manager.execute_poison_gas_purge(chamber_id)
+	return false
+
+func resolve_crisis() -> void:
+	if crisis_manager != null:
+		crisis_manager.resolve_current_crisis()
