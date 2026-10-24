@@ -127,8 +127,14 @@ func save_game(player: Node3D = null, environmental_mgr: Node = null) -> bool:
 	if not breach_data.is_empty():
 		save_dict["hull_breach_seals"] = breach_data
 
+	var datapads_data: Dictionary = {}
+	var datapads = root.find_children("*", "DatapadPickup", true, false)
+	for dp in datapads:
+		var key = dp.datapad_id if dp.datapad_id != "" else dp.name
+		datapads_data[key] = dp.export_save_data()
+	if not datapads_data.is_empty():
+		save_dict["datapads"] = datapads_data
 
-	
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
 		push_error("Failed to open save file for writing: %s" % SAVE_PATH)
@@ -243,6 +249,15 @@ func load_game(player: Node3D = null, environmental_mgr: Node = null) -> bool:
 			var key = b.device_id if b.device_id != "" else b.name
 			if bdata.has(key):
 				b.import_save_data(bdata[key])
+
+	if data.has("datapads"):
+		var root := get_tree().root
+		var dpdata: Dictionary = data["datapads"]
+		var datapads = root.find_children("*", "DatapadPickup", true, false)
+		for dp in datapads:
+			var key = dp.datapad_id if dp.datapad_id != "" else dp.name
+			if dpdata.has(key):
+				dp.import_save_data(dpdata[key])
 
 
 	
