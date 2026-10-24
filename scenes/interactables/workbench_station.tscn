@@ -1,22 +1,43 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/interactables/workbench_station.gd" id="1_bench"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cradle"]
-size = Vector3(0.9, 0.4, 0.6)
+size = Vector3(0.95, 0.45, 0.65)
+
+[sub_resource type="BoxMesh" id="BoxMesh_table"]
+size = Vector3(0.92, 0.1, 0.62)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_table"]
+albedo_color = Color(0.12, 0.14, 0.18, 1)
+metallic = 0.9
+roughness = 0.25
 
 [sub_resource type="BoxMesh" id="BoxMesh_dock"]
-size = Vector3(0.9, 0.25, 0.6)
+size = Vector3(0.84, 0.22, 0.54)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dock_mat"]
-albedo_color = Color(0.18, 0.2, 0.24, 1)
-metallic = 0.8
-roughness = 0.3
+albedo_color = Color(0.2, 0.23, 0.28, 1)
+metallic = 0.82
+roughness = 0.32
+
+[sub_resource type="BoxMesh" id="BoxMesh_tray"]
+size = Vector3(0.32, 0.04, 0.46)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tray"]
+albedo_color = Color(0.08, 0.09, 0.11, 1)
+metallic = 0.7
+roughness = 0.45
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_charger"]
-top_radius = 0.15
-bottom_radius = 0.18
+top_radius = 0.16
+bottom_radius = 0.19
 height = 0.12
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ring"]
+albedo_color = Color(0.9, 0.6, 0.1, 1)
+metallic = 0.85
+roughness = 0.2
 
 [sub_resource type="SphereMesh" id="SphereMesh_cradle_led"]
 radius = 0.035
@@ -31,21 +52,32 @@ script = ExtResource("1_bench")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
 shape = SubResource("BoxShape3D_cradle")
 
+[node name="TableBase" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("BoxMesh_table")
+surface_material_override/0 = SubResource("StandardMaterial3D_table")
+
 [node name="DockMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.125, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, 0)
 mesh = SubResource("BoxMesh_dock")
 surface_material_override/0 = SubResource("StandardMaterial3D_dock_mat")
 
+[node name="ToolTray" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, 0.3, 0)
+mesh = SubResource("BoxMesh_tray")
+surface_material_override/0 = SubResource("StandardMaterial3D_tray")
+
 [node name="ChargerRing" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.32, 0)
 mesh = SubResource("CylinderMesh_charger")
+surface_material_override/0 = SubResource("StandardMaterial3D_ring")
 
 [node name="CradleLED" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0.22)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.38, 0.18)
 mesh = SubResource("SphereMesh_cradle_led")
 
 [node name="CradleLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.48, 0)
 light_color = Color(0.1, 0.8, 1, 1)
 light_energy = 1.0
 omni_range = 2.5
