@@ -233,15 +233,8 @@ func reset_missions() -> void:
 	quarantine_lockout_cleared = false
 	if has_node("/root/ShipState"):
 		var ss = get_node("/root/ShipState")
-		ss.has_revelation_anomaly = false
-		ss.has_revelation_quarantine = false
-		ss.has_revelation_directive = false
-		ss.scrubber_efficiency_multiplier = 1.0
-		ss.commander_override_code = ""
-		ss.quarantine_lockout_cleared = false
-		ss.thruster_efficiency_boost = 1.0
-		if ss.power_system != null and ss.power_system.has_method("set_harmonic_damping"):
-			ss.power_system.set_harmonic_damping(false)
+		if ss.has_method("reset_revelation_bonuses"):
+			ss.reset_revelation_bonuses()
 	if has_node("/root/InventoryManager"):
 		get_node("/root/InventoryManager").reset_to_defaults()
 	inventory_changed.emit(inventory)
@@ -250,14 +243,19 @@ func reset_missions() -> void:
 func collect_datapad(datapad_id: String, mark_decrypted: bool = true) -> bool:
 	if datapad_id == "":
 		return false
-	if not collected_datapads.has(datapad_id):
+	var was_collected: bool = collected_datapads.has(datapad_id)
+	var was_decrypted: bool = decrypted_logs.has(datapad_id)
+	if not was_collected:
 		collected_datapads.append(datapad_id)
 	var dp_info: Dictionary = get_datapad_data(datapad_id)
 	var is_enc: bool = bool(dp_info.get("is_encrypted", false))
+	var now_decrypted: bool = was_decrypted
 	if mark_decrypted or not is_enc:
-		if not decrypted_logs.has(datapad_id):
+		if not was_decrypted:
 			decrypted_logs.append(datapad_id)
-	datapad_collected.emit(datapad_id, dp_info)
+		now_decrypted = true
+	if (not was_collected) or (not was_decrypted and now_decrypted):
+		datapad_collected.emit(datapad_id, dp_info)
 	_evaluate_revelations()
 	return true
 
@@ -511,14 +509,22 @@ func import_save_data(data: Dictionary) -> void:
 		decrypted_logs.append(str(dl))
 	
 	unlocked_revelations.clear()
+	commander_override_code = ""
+	quarantine_lockout_cleared = false
+	if has_node("/root/ShipState"):
+		var ss = get_node("/root/ShipState")
+		if ss.has_method("reset_revelation_bonuses"):
+			ss.reset_revelation_bonuses()
 	var loaded_rev: Array = data.get("unlocked_revelations", [])
 	for rv in loaded_rev:
 		var rev_id := str(rv)
 		unlocked_revelations.append(rev_id)
 		_apply_revelation_consequence(rev_id)
 	
-	commander_override_code = str(data.get("commander_override_code", commander_override_code))
-	quarantine_lockout_cleared = bool(data.get("quarantine_lockout_cleared", quarantine_lockout_cleared))
+	if data.has("commander_override_code"):
+		commander_override_code = str(data["commander_override_code"])
+	if data.has("quarantine_lockout_cleared"):
+		quarantine_lockout_cleared = bool(data["quarantine_lockout_cleared"])
 	
 	inventory_changed.emit(inventory)
 	_broadcast_current_objective()
