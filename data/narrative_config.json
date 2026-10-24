@@ -10,8 +10,8 @@
       "is_encrypted": false,
       "requires_scanner_to_decrypt": false,
       "revelation_id": "revelation_anomaly",
-      "summary": "Details abnormal 47.3 Hz harmonic induction on the primary electrical bus prior to crew evacuation.",
-      "content": "PERSONAL BENCH SLATE // CHIEF ENGINEER VASQUEZ\n\nThis isn't a turbine bearing fault. I isolated Generator 2 from the excitation coils twenty minutes ago, yet the primary bus is still ringing at a locked 47.3 Hz harmonic. The copper busbars are acting like a receiving antenna for whatever is pulsing out of Kharon-4's southern magnetosphere.\n\nEvery time the planet's carrier wave peaks during perigee, current surges back into the magnetic containment torus. If I leave the main breaker closed while the core is uncalibrated, that induced standing wave will cascade into the fusion bottle. I'm pulling the main breaker and heading down to the subdeck to adjust the deuterium feed manually."
+      "summary": "Details abnormal 47.3 Hz harmonic induction on the primary electrical bus after the mutant specimen attacked power conduits.",
+      "content": "PERSONAL BENCH SLATE // CHIEF ENGINEER VASQUEZ\n\nThis isn't a simple turbine bearing fault. Ever since the mutant specimen broke out of Dr. Thorne's secret breeding chamber, it has been deliberately targeting our electrical infrastructure. I isolated Generator 2 from the excitation coils, yet the primary bus is still ringing at a locked 47.3 Hz harmonic.\n\nThe creature is drawn to the electromagnetic field, chewing through high-voltage conduits. If I leave the main breaker closed while the core is uncalibrated, the power surge will destroy our containment shields. I'm pulling the main breaker and heading down to the subdeck to secure the auxiliary poisonous gas reserves."
     },
     "datapad_subdeck_throttle": {
       "id": "datapad_subdeck_throttle",
@@ -23,8 +23,8 @@
       "is_encrypted": false,
       "requires_scanner_to_decrypt": false,
       "revelation_id": "revelation_anomaly",
-      "summary": "Reveals Vasquez intentionally throttled the auxiliary fuel valve to prevent gravimetric core resonance.",
-      "content": "MAINTENANCE OVERRIDE SLATE // REACTOR SUBDECK VAULT\n\nI've mechanically throttled the auxiliary deuterium-helium3 injection valve by 18% and locked the phase-damper trim into the subdeck firmware. The bridge keeps calling down demanding full thruster power, but they don't see the gravimetric shear curves on the lower manifold.\n\nBy detuning the reactant feed rate against the planetary carrier frequency, we can cancel out 85% of the core's harmonic coupling. Anyone waking up from stasis: once you correlate this phase offset with the Avionics carrier wave telemetry, the reactor controller will automatically engage harmonic damping—giving you cooler core temperatures and an extra 10 kW of clean auxiliary headroom."
+      "summary": "Reveals Vasquez throttled fuel injection and verified poisonous gas decontamination lines to prepare a trap for the creature.",
+      "content": "MAINTENANCE OVERRIDE SLATE // REACTOR SUBDECK VAULT\n\nI've mechanically throttled the auxiliary deuterium-helium3 injection valve by 18% to prevent core resonance, and inspected the high-pressure poisonous gas line connecting to the decontamination chamber. The creature is stalking the upper levels, and its thick hide deflects our pulse rifles.\n\nThorne confirmed the beast's synthetic respiratory system cannot survive neuro-toxic decontamination gas. If we lure the alien into the sealed chamber, we can flood it by opening the manual emergency valve. Once you correlate this phase offset with the Avionics telemetry, the reactor will engage harmonic damping—providing +10 kW auxiliary headroom to power the decontamination pumps."
     },
     "datapad_avionics_telemetry": {
       "id": "datapad_avionics_telemetry",
@@ -36,8 +36,8 @@
       "is_encrypted": true,
       "requires_scanner_to_decrypt": true,
       "revelation_id": "revelation_anomaly",
-      "summary": "Corrupted flight telemetry shard confirming Kharon-4's magnetosphere broadcasts a structured mathematical carrier wave.",
-      "content": "DECRYPTED FLIGHT TELEMETRY SHARD // AVIONICS SERVER CORE\n\n[CARRIER WAVE RECONSTRUCTION COMPLETE — PARITY VERIFIED]\n\nSpectral analysis of the 1.42 GHz microwave bursts from Kharon-4's southern caldera confirms non-natural origin. The planetary magnetosphere is being modulated by a sub-crustal gravimetric emitter broadcasting prime-interval phase packets.\n\nThe signal isn't an attack—it's a synchronization beacon designed to lock onto conductive orbital masses. Because Astraea-7's unshielded avionics relay bank resonated in sympathy with the pulse, our flight computer mistook the carrier wave for an internal bus short. Filtering out the 47.3 Hz carrier harmonic restores full reactor phase stability."
+      "summary": "Corrupted flight telemetry shard confirming the mutant alien broadcasts a bio-electric carrier wave in resonance with Kharon-4.",
+      "content": "DECRYPTED FLIGHT TELEMETRY SHARD // AVIONICS SERVER CORE\n\n[CARRIER WAVE RECONSTRUCTION COMPLETE — PARITY VERIFIED]\n\nSpectral analysis of the 1.42 GHz microwave bursts confirms non-natural bio-frequency emissions. The alien predator engineered in secret Chamber 4 has bonded with the local magnetosphere, radiating electromagnetic pulses that blinded our automated security cameras.\n\nThis explains how the creature ambushed the research team without triggering hallway motion sensors. Filtering out the 47.3 Hz bio-carrier harmonic stabilizes the reactor grid and allows tracking the creature's biometric signatures across the observatory chambers."
     },
     "datapad_ls_contamination": {
       "id": "datapad_ls_contamination",
@@ -49,8 +49,8 @@
       "is_encrypted": false,
       "requires_scanner_to_decrypt": false,
       "revelation_id": "revelation_quarantine",
-      "summary": "Documents carbon-scrubber saturation and trace neuro-reactive particulate in the ventilation loop.",
-      "content": "ATMOSPHERIC LAB SLATE // SPECIALIST CHEN\n\nI pulled the primary amine filter bed from Scrubber Column A after the crew started complaining of metallic tastes and ringing ears. The lithium-hydroxide crystals are crusted with carbonate, but there's something else trapped in the Electrostatic Precipitator: microscopic ferromagnetic silicates that leaked out of the deep-core sample container in Cargo Bay.\n\nWhen the ship's hull vibrates at 47 Hz, those airborne silicate particulates oscillate inside the ventilation ducts, amplifying the acoustic resonance right into the crew bunks. I've programmed a high-frequency electrostatic purge profile into the scrubber controller, but we need Dr. Thorne's medical clearance before running it."
+      "summary": "Documents carbon-scrubber saturation and toxic alien bio-spores in the ventilation loop, leaving the air unbreathable.",
+      "content": "ATMOSPHERIC LAB SLATE // SPECIALIST CHEN\n\nI pulled the primary amine filter bed from Scrubber Column A after the entire research team began suffocating. The lithium-hydroxide canisters are saturated not just with carbon crusting, but with thick aerosolized bio-venom secreted by the escaped mutant beast.\n\nThe creature severed the coolant lines to intentionally foul our life support loop, making it impossible to breathe in the chambers without an EVA suit. I've programmed an emergency electrostatic purge sequence into the scrubber controller, but we need Dr. Thorne's medical triage clearance to neutralize the venom."
     },
     "datapad_crew_quarantine": {
       "id": "datapad_crew_quarantine",
@@ -62,8 +62,8 @@
       "is_encrypted": false,
       "requires_scanner_to_decrypt": false,
       "revelation_id": "revelation_quarantine",
-      "summary": "Recounts crew insomnia, auditory hallucinations near the vents, and the order to seal the lower crawlway.",
-      "content": "PERSONAL LOG // CREW QUARTERS BUNK 04\n\nNobody has slept more than twenty minutes in three orbital cycles. If you press your ear against the habitation vent grille, you can hear the bulkhead plating humming in three-beat intervals—like something knocking from the outside.\n\nReyes nearly took a plasma torch to the cargo bulkhead an hour ago, swearing the planetary core sample was 'answering' the hum from the surface. Commander Hayes ordered the lower crawlway sealed and confined everyone off-shift to Medbay observation. Dr. Thorne says the airborne silicates are coupling with the ELF field to trigger temporal lobe seizures. He's preparing something drastic in the infirmary."
+      "summary": "Recounts mysterious angry animal growls, bulkhead scratching in the vents, and the slaughter of the science team.",
+      "content": "PERSONAL LOG // CREW QUARTERS BUNK 04\n\nNobody has slept in three cycles. If you press your ear against the habitation vent grille, you can hear guttural, terrifying animal growls and heavy claws raking against the titanium plates—the beast is hunting us.\n\nReyes tried to barricade the corridor, but the creature ripped the steel doors off their hinges. It attacked with ferocious anger, killing Dr. Thorne and our zoology specialists before retreating into the dark ceilings. Commander Hayes sealed the crawlway, but we know it's only a matter of time before it finds our hiding spot."
     },
     "datapad_medbay_autopsy": {
       "id": "datapad_medbay_autopsy",
@@ -75,8 +75,8 @@
       "is_encrypted": true,
       "requires_scanner_to_decrypt": true,
       "revelation_id": "revelation_quarantine",
-      "summary": "Encrypted clinical record revealing Protocol Zero-Nine induced controlled hypoxia to halt neural resonance before lifeboat evacuation.",
-      "content": "DECRYPTED MEDICAL DOSSIER // DR. ARIS THORNE [CLEARANCE: OMEGA]\n\nSUBJECT: Enactment of Protocol Zero-Nine (Controlled Hypoxic Decoupling)\n\nConventional sedatives failed to arrest the ferromagnetic neural resonance in five crew members. However, hyperbaric trials revealed that lowering ambient partial oxygen pressure by 28% while pulsing the electrostatic scrubbers immediately halts particulate ionization in the bloodstream.\n\nNobody died on Astraea-7. I intentionally bled down the primary cabin oxygen mix to sedate the delirious crew and break the neural feedback loop long enough to load everyone into Pod Bay 1. The standby engineer remains safely isolated in cryo-stasis with independent O2 reserves. Uploading my electrostatic bio-filter purge calibration to the shipboard Life Support computer now—it will boost O2 synthesis and CO2 scrubbing efficiency by 20%."
+      "summary": "Encrypted clinical triage record revealing the secret alien experiment, the mistake that birthed the predator, and its vulnerability to poisonous gas.",
+      "content": "DECRYPTED MEDICAL DOSSIER // DR. ARIS THORNE [CLEARANCE: OMEGA]\n\nCONFESSION OF DR. THORNE // PROTOCOL ZERO-NINE\n\nI created the monster. In our secret observatory chamber, I attempted to engineer a new animal species by combining apex alien genetics with synthetic embryonic cells. Due to a critical transcription error in codon-7, the embryo mutated uncontrollably into an unstoppable predator that broke containment and slaughtered my colleagues.\n\nConventional weapons cannot pierce its chitinous shell. However, my physiological necropsy reveals its respiratory tract is hyper-vulnerable to concentrated neuro-toxic decontamination gas. To our returning Lead Scientist: lure the beast into the sealed chamber, lock the pressure doors, and open the poisonous gas valve. Uploading bio-filter purge calibrations now—boosting scrubber efficiency by 20%."
     },
     "datapad_cargo_manifest": {
       "id": "datapad_cargo_manifest",
@@ -88,8 +88,8 @@
       "is_encrypted": false,
       "requires_scanner_to_decrypt": false,
       "revelation_id": "revelation_directive",
-      "summary": "Reveals a classified Kharon-4 deep-core sample was jettisoned through the airlock, causing the crawlway micro-breach during recoil.",
-      "content": "SEALED CARGO MANIFEST // QUARTERMASTER REYES\n\nITEM: Specimen Container K4-OMEGA (Sub-Crustal Crystalline Core, Mass: 410 kg)\nSTATUS: EMERGENCY JETTISON AUTHORIZED BY COMMANDER HAYES\n\nThat thing in Container K4-OMEGA was acting as a transponder for the planet below. Every time we tried to plot an escape burn, the specimen's magnetic flux spiked and scrambled the helm gyros. With the cargo hoist blown, Lin and I had to haul the containment cask across the deck on manual rollers and ram it into the Starboard Airlock.\n\nWhen we fired the pneumatic ejection bolts without main bus power, the uncompensated recoil slammed back through the lower structural frame and cracked a titanium weld seam in the Maintenance Crawlway."
+      "summary": "Reveals the secret specimen breeding chamber and the frantic attempt to jettison the bio-hazard before the beast attacked.",
+      "content": "SEALED CARGO MANIFEST // QUARTERMASTER REYES\n\nITEM: Specimen Incubation Chamber K4-OMEGA\nSTATUS: CONTAINMENT BREACH — MUTANT ALIEN ESCAPED\n\nThat creature was bred right here in the classified staging bay. When it hatched, it shattered the reinforced plexiglass with a single blow and tore through the hydraulic cargo hoist. Lin and I tried to push the containment cradle toward the airlock, but the creature ambushed us from the overhead scaffolding.\n\nIn our struggle, the pneumatic ejection bolts fired erratically, cracking a titanium weld seam in the Maintenance Crawlway. The creature retreated into the ceiling conduits, waiting in the dark to hunt the Lead Scientist upon docking."
     },
     "datapad_crawlway_blackbox": {
       "id": "datapad_crawlway_blackbox",
@@ -101,8 +101,8 @@
       "is_encrypted": false,
       "requires_scanner_to_decrypt": false,
       "revelation_id": "revelation_directive",
-      "summary": "Records Specialist Lin's final external hull weld attempt in the crawlway before evacuating.",
-      "content": "EVA SUIT BLACKBOX TRANSCRIPT // OFFICER MARCUS LIN\n\n[PRESSURE ALARM: 98.5 kPa AND FALLING — CRAWLWAY SECTOR 4]\n\n'Vasquez, I'm inside the lower maintenance crawlway. Reyes was right—the recoil from ejecting Specimen K4-OMEGA sheared a 14-centimeter micro-fracture along the port longitudinal rib. I slapped a temporary polymer patch over the seam to slow the leak to 0.3 kPa per second, but my welder battery just flatlined.'\n\n'Hayes is holding the port lifeboat hatch open for the last sixty seconds. I'm dogging the crawlway hatches and leaving a full salvage crate of welding cells in the Cargo Hold. Whoever wakes from cryo—torch open that crate, switch your Multitool to CUT/WELD, and finish sealing this seam!'"
+      "summary": "Records Specialist Lin being stalked by the mutant alien into the crawlway before sealing the bypass hatch.",
+      "content": "EVA SUIT BLACKBOX TRANSCRIPT // OFFICER MARCUS LIN\n\n[PRESSURE ALARM: 98.5 kPa AND FALLING — CRAWLWAY SECTOR 4]\n\n'Vasquez, the beast followed me down into the lower crawlway! It's right above the plating—I can hear its claws scraping against the conduit channels! The recoil from the cargo hoist sheared a micro-fracture along the port rib and I'm losing pressure fast.'\n\n'I patched the hull seam with polymer resin and dogged the bypass hatch behind me. I left cutting fuel and battery cells in the cargo crate. Lead Scientist, when you dock: weld this breach shut, arm your Multitool, and prepare the chamber trap!'"
     },
     "datapad_airlock_jettison": {
       "id": "datapad_airlock_jettison",
@@ -114,8 +114,8 @@
       "is_encrypted": false,
       "requires_scanner_to_decrypt": false,
       "revelation_id": "revelation_directive",
-      "summary": "Logs the emergency unpowered payload ejection of Specimen K4-OMEGA and inner seal lockdown.",
-      "content": "AIRLOCK MECHANICAL LOG // STARBOARD EVA CHAMBER\n\n03:48 — Inner bulkhead door sealed manually. Specimen K4-OMEGA secured to ejection sled.\n03:51 — Explosive blow-down bolts triggered. Outer EVA door blown open to vacuum; payload ejected on retrograde vector into Kharon-4's upper atmosphere.\n03:54 — Outer EVA door winched shut and dogged. Emergency ballast equalized chamber back to 101.3 kPa.\n\nNOTE FROM REYES: The specimen is gone—burning up in Kharon-4's mesosphere. As soon as it cleared 50 kilometers, the magnetic interference on our hull dropped by 90%. The ship is clean. All that stands between Astraea-7 and home is the automated quarantine lockout on the Bridge."
+      "summary": "Logs rigging the starboard decontamination chamber as a tactical trap with the emergency poisonous gas line.",
+      "content": "AIRLOCK MECHANICAL LOG // STARBOARD DECONTAMINATION CHAMBER\n\n03:48 — Inner bulkhead door rigged with manual interlock override. Poisonous gas supply line primed.\n03:51 — High-pressure toxic decontamination valves connected directly to the chamber manifold.\n\nNOTE FROM REYES: The trap is set. The airlock chamber can be sealed hermetically from the outside. If the beast enters this room, lock the bulkhead door and turn the poisonous gas valve. The lethal neuro-gas will flood the enclosure in four seconds, killing the alien and cleansing Astraea Station."
     },
     "datapad_bridge_directive": {
       "id": "datapad_bridge_directive",
@@ -127,8 +127,8 @@
       "is_encrypted": true,
       "requires_scanner_to_decrypt": true,
       "revelation_id": "revelation_directive",
-      "summary": "Encrypted command keycard containing the final Project ORBITAL quarantine directive and override clearance 7394-OMEGA.",
-      "content": "DECRYPTED COMMAND KEYCARD // COMMANDER EVELYN HAYES\n\nDIRECTIVE: PROJECT ORBITAL — FINAL CONTINGENCY AUTHORIZATION\nOVERRIDE CLEARANCE CODE: 7394-OMEGA\n\nTo our Standby Engineer: If the automated revival sequencer woke you, then Vasquez's gambit worked. We evacuated on Lifeboat Pod 1 after jettisoning the Kharon-4 core specimen so that Corporate Telemetry couldn't remotely lock our lifeboat controls.\n\nBefore we departed, the central computer automatically engaged the Project ORBITAL Quarantine Lockout, throttling ion propulsion plasma injectors to prevent an contaminated vessel from leaving orbit. Now that Specimen K4-OMEGA has been destroyed and the crew is clear, enter my command override [7394-OMEGA] into the ship state register. It will purge the quarantine lockout, reduce ion thruster power draw by 20%, and clear you for full orbital departure burn. Bring Astraea-7 home."
+      "summary": "Encrypted command keycard containing the final station directive and override code 7394-OMEGA to depart after killing the beast.",
+      "content": "DECRYPTED COMMAND KEYCARD // COMMANDER EVELYN HAYES\n\nDIRECTIVE: BIOLOGICAL RESEARCH OBSERVATORY — FINAL CONTINGENCY\nOVERRIDE CLEARANCE CODE: 7394-OMEGA\n\nTo our returning Lead Scientist: The research team is gone. Dr. Thorne's secret experiment produced an apex alien monster that decimated our station. Before we fell, I locked the automated departure thrusters behind emergency clearance [7394-OMEGA] so the beast could not escape into orbital shipping lanes.\n\nYou must finish what we started: restore the generators, seal the breached chambers, trap the alien in the decontamination chamber, and exterminate it with the poisonous gas valve. Once the creature is dead, enter my override code [7394-OMEGA] to purge the quarantine lockout, reduce ion engine power draw by 20%, and return to Earth."
     }
   },
   "revelations": {
@@ -140,7 +140,7 @@
         "datapad_subdeck_throttle",
         "datapad_avionics_telemetry"
       ],
-      "summary": "Kharon-4's magnetosphere broadcasts a structured 47.3 Hz carrier wave that induced harmonic resonance across the primary electrical bus. Chief Engineer Vasquez intentionally tripped the reactor breaker and throttled the subdeck deuterium valve to prevent gravimetric core implosion.",
+      "summary": "The mutant alien organism engineered in the secret chamber broadcasts a 47.3 Hz bio-frequency that caused electrical surging across the primary bus. Chief Engineer Vasquez tripped the reactor breaker and throttled the subdeck fuel lines to isolate the power grid from creature interference.",
       "gameplay_consequence": "Unlocks Reactor Harmonic Damping Optimization in ShipState: reduces reactor thermal accumulation rate by 15% and grants +10 kW auxiliary power headroom.",
       "bonus_summary": "Reactor Thermal Rate -15% | +10 kW Auxiliary Power Headroom",
       "bonus_code": "HARMONIC_DAMPING_OPT"
@@ -153,7 +153,7 @@
         "datapad_crew_quarantine",
         "datapad_medbay_autopsy"
       ],
-      "summary": "Ferromagnetic silicate particulates from the planetary sample resonated inside the ventilation ducts, inducing severe insomnia and auditory hallucinations. Dr. Thorne enacted Protocol Zero-Nine—using controlled mild hypoxia to break the neural resonance so the surviving crew could safely evacuate aboard Pod Bay 1.",
+      "summary": "Toxic bio-venom from the mutant alien fouled the ventilation loop, suffocating the research team. Dr. Thorne's final clinical triage reveals the alien's respiratory vulnerability to poisonous decontamination gas, providing the tactical plan to trap and destroy it.",
       "gameplay_consequence": "Unlocks Atmospheric Scrubber Purge Optimization in EnvironmentalManager & ShipState: improves O2 generation and CO2 scrubbing efficiency by 20%.",
       "bonus_summary": "O2 Generation & CO2 Scrubbing Efficiency +20%",
       "bonus_code": "SCRUBBER_PURGE_OPT"
@@ -167,7 +167,7 @@
         "datapad_airlock_jettison",
         "datapad_bridge_directive"
       ],
-      "summary": "Quartermaster Reyes and Officer Lin jettisoned Specimen K4-OMEGA through the unpowered starboard airlock; the launch recoil fractured the maintenance crawlway hull seam. Commander Hayes left Emergency Override Code 7394-OMEGA to lift the Project ORBITAL quarantine lockout for the awakened standby engineer.",
+      "summary": "Quartermaster Reyes and Officer Lin rigged the starboard airlock chamber with poisonous gas lines to trap the beast. Commander Hayes encoded Emergency Override Code 7394-OMEGA to clear the station quarantine lockout for the Lead Scientist once the alien is exterminated.",
       "gameplay_consequence": "Unlocks Commander's Emergency Override Code (7394-OMEGA) in ShipState & MissionManager: clears navigation/comms quarantine lockout and boosts ion thruster efficiency (-20% propulsion power draw).",
       "bonus_summary": "Override 7394-OMEGA Active | Ion Thruster Efficiency +25% (-20% Power Draw)",
       "bonus_code": "7394-OMEGA"
