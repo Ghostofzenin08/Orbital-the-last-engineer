@@ -13,6 +13,7 @@ extends CanvasLayer
 
 # Milestone 6 UI Controls
 @onready var info_btn: Button = get_node_or_null("%InfoButton")
+@onready var gear_info_btn: Button = get_node_or_null("%GearInfoButton")
 @onready var compact_gear_lbl: Label = get_node_or_null("%CompactGearLabel")
 @onready var overlay_rect: ColorRect = get_node_or_null("%StatusEffectOverlay")
 
@@ -106,6 +107,8 @@ func _ready() -> void:
 	
 	if info_btn != null:
 		info_btn.pressed.connect(toggle_info)
+	if gear_info_btn != null:
+		gear_info_btn.pressed.connect(toggle_info)
 	
 	# Connect to MissionManager signals
 	MissionManager.objective_updated.connect(_on_objective_updated)
