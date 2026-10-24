@@ -109,6 +109,18 @@ const COMPARTMENTS: Dictionary = {
 		"name": "Breached Maintenance Crawlway",
 		"description": "Breached crawlway bypass with low ceiling connecting Cargo Bay to Reactor Subdeck.",
 		"deck": "lower"
+	},
+	"specimen_vault": {
+		"id": "specimen_vault",
+		"name": "Deep Specimen Containment Vault",
+		"description": "Reinforced biological containment laboratory where Project Chimera was incubated.",
+		"deck": "lower"
+	},
+	"research_observatory": {
+		"id": "research_observatory",
+		"name": "Bio-Research Observatory Dome",
+		"description": "Panoramic genetic observation dome with botanical specimen racks and orbital scan arrays.",
+		"deck": "main"
 	}
 }
 
@@ -1071,3 +1083,7 @@ func purge_creature_with_poison_gas(chamber_id: String = "") -> bool:
 func resolve_crisis() -> void:
 	if crisis_manager != null:
 		crisis_manager.resolve_current_crisis()
+
+func trigger_creature_horror_zoom(player: Node = null) -> void:
+	if crisis_manager != null:
+		crisis_manager.trigger_creature_horror_zoom(player)
