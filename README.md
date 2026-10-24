@@ -101,16 +101,9 @@ As the Lead Scientist docking at the *Astraea Biological Research Facility*, you
 & "D:\EREN\Godot_v4.7.2-stable_win64_console.exe" --path "C:\Users\HARSHAL\OneDrive\Desktop\Godot\lost-from-space"
 ```
 
-### Run Full Headless Automated Test Suite:
-```powershell
-& "D:\EREN\Godot_v4.7.2-stable_win64_console.exe" --headless --path "C:\Users\HARSHAL\OneDrive\Desktop\Godot\lost-from-space" res://tests/test_runner.tscn
-```
-*Expected Output:* `TEST RESULTS: 877 PASSED, 0 FAILED`.
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.  
+Copyright (c) 2026 Oldest_dream08.
 
 ---
-
-## Repository & Commit Standards
-Every change in this repository strictly adheres to our core development rule:
-- Strictly **1 file per commit**.
-- Concise, meaningful commit messages (3–5 words).
-- Zero conventional commit prefixes (`feat`, `chore`, `fix`, `docs`, etc.).
