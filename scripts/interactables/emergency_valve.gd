@@ -41,6 +41,10 @@ func _create_materials() -> void:
 	_mat_alarm.emission_energy_multiplier = 2.5
 
 func check_fault_active() -> bool:
+	if valve_type == "poison_gas" or valve_type == "toxic_gas":
+		if ShipState != null and "crisis_manager" in ShipState and ShipState.crisis_manager != null:
+			return not ShipState.crisis_manager.is_creature_eliminated
+		return true
 	if ShipState == null or not ("active_faults" in ShipState):
 		return false
 	if valve_type == "pressure":
@@ -51,6 +55,14 @@ func check_fault_active() -> bool:
 
 func get_prompt() -> String:
 	_is_fault_active = check_fault_active()
+	if valve_type == "poison_gas" or valve_type == "toxic_gas":
+		var target := "airlock_chamber"
+		if ShipState != null and "crisis_manager" in ShipState and ShipState.crisis_manager != null:
+			target = ShipState.crisis_manager.target_chamber_id
+		if _is_fault_active:
+			return "[E / Enter] OPEN %s (FLOOD %s WITH POISONOUS DECONTAMINATION GAS)" % [valve_name, target]
+		else:
+			return "[E / Enter] Inspect %s (Decontamination Purge Completed - Creature PURGED)" % valve_name
 	if _is_fault_active:
 		if valve_type == "pressure":
 			return "[E / Enter] Rotate %s (Seal Cabin Leak)" % valve_name
@@ -70,6 +82,19 @@ func _on_interacted(player: Node) -> void:
 		var vdev = ShipState.get_device(device_id)
 		if vdev != null and vdev.has_method("repair"):
 			vdev.repair(100.0)
+	
+	if valve_type == "poison_gas" or valve_type == "toxic_gas":
+		if ShipState != null and "crisis_manager" in ShipState and ShipState.crisis_manager != null:
+			var comp_id: String = get_parent().name.to_snake_case() if get_parent() != null else "airlock_chamber"
+			ShipState.crisis_manager.execute_poison_gas_purge(comp_id)
+		if AudioManager != null:
+			AudioManager.play_sfx("gas_hiss")
+			AudioManager.play_sfx("creature_roar")
+		var msg := "Poisonous Gas Valve OPENED! Chamber flooded with lethal decontamination gas. Mutant alien exterminated."
+		if player != null and "hud" in player and player.hud != null and player.hud.has_method("show_notification"):
+			player.hud.show_notification(msg, 5.0)
+		_update_visuals()
+		return
 	
 	if _is_fault_active:
 		var env_mgr = EnvironmentalManager.instance if ("instance" in EnvironmentalManager and EnvironmentalManager.instance != null) else (get_tree().root.find_child("EnvironmentalManager", true, false) if is_inside_tree() else null)
