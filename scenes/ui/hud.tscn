@@ -191,17 +191,29 @@ layout_mode = 2
 [node name="CompactMargin" type="MarginContainer" parent="BottomLeftMargin/CompactGearPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 6
+theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 6
+theme_override_constants/margin_bottom = 4
 
-[node name="CompactGearLabel" type="Label" parent="BottomLeftMargin/CompactGearPanel/CompactMargin"]
+[node name="HBox" type="HBoxContainer" parent="BottomLeftMargin/CompactGearPanel/CompactMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CompactGearLabel" type="Label" parent="BottomLeftMargin/CompactGearPanel/CompactMargin/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.75, 0.85, 0.95, 0.9)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_font_sizes/font_size = 11
 text = "[1] Scanner  [2] Multitool  |  [TAB] Full Info & Gear"
+
+[node name="GearInfoButton" type="Button" parent="BottomLeftMargin/CompactGearPanel/CompactMargin/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = "INFO"
 
 [node name="ScanTelemetryMargin" type="MarginContainer" parent="."]
 unique_name_in_owner = true
