@@ -18,7 +18,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.02, 0.04, 0.06, 0.85)
+color = Color(0.02, 0.04, 0.06, 0.88)
 
 [node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -29,57 +29,250 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(480, 420)
+custom_minimum_size = Vector2(980, 560)
 layout_mode = 2
 
 [node name="Margin" type="MarginContainer" parent="Center/Panel"]
 layout_mode = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 28
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
 
 [node name="VBox" type="VBoxContainer" parent="Center/Panel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="Center/Panel/Margin/VBox"]
+[node name="HeaderHBox" type="HBoxContainer" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "SYSTEM PAUSED"
-horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/VBox/HeaderHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "STATION OPERATIONS & ENVIRONMENTAL TELEMETRY [PAUSED]"
+
+[node name="SubTitle" type="Label" parent="Center/Panel/Margin/VBox/HeaderHBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 12
+text = "[TAB / ESC] Resume Operations"
 
 [node name="HSep1" type="HSeparator" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
 
-[node name="ResumeButton" type="Button" parent="Center/Panel/Margin/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 42)
+[node name="ColumnsHBox" type="HBoxContainer" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
-text = "RESUME OPERATIONS"
+size_flags_vertical = 3
+theme_override_constants/separation = 14
 
-[node name="SaveButton" type="Button" parent="Center/Panel/Margin/VBox"]
+[node name="EnvPanel" type="PanelContainer" parent="Center/Panel/Margin/VBox/ColumnsHBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-text = "SAVE PROGRESSION"
+size_flags_horizontal = 3
 
-[node name="SaveNoticeLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+[node name="EnvMargin" type="MarginContainer" parent="Center/Panel/Margin/VBox/ColumnsHBox/EnvPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="EnvVBox" type="VBoxContainer" parent="Center/Panel/Margin/VBox/ColumnsHBox/EnvPanel/EnvMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="EnvHeader" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/EnvPanel/EnvMargin/EnvVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "ATMOSPHERIC & LIFE SUPPORT"
+
+[node name="LocationLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/EnvPanel/EnvMargin/EnvVBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.9, 0.4, 1)
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "LOCATION: ENGINEERING BAY"
+
+[node name="OxygenStatusLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/EnvPanel/EnvMargin/EnvVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.9, 0.4, 1)
 theme_override_font_sizes/font_size = 12
-text = "Save notice..."
-horizontal_alignment = 1
+text = "O2 LEVEL: 100% [NOMINAL]"
+
+[node name="OxygenBar" type="ProgressBar" parent="Center/Panel/Margin/VBox/ColumnsHBox/EnvPanel/EnvMargin/EnvVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="CO2StatusLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/EnvPanel/EnvMargin/EnvVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 12
+text = "CO2: 420 ppm [NOMINAL]"
+
+[node name="AtmosphereMetricsLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/EnvPanel/EnvMargin/EnvVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 11
+text = "TEMP: 21.0°C | PRESS: 101.3 kPa"
+
+[node name="HazardLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/EnvPanel/EnvMargin/EnvVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 12
+text = "STATUS: SAFE [ALL NOMINAL]"
+
+[node name="MissionPanel" type="PanelContainer" parent="Center/Panel/Margin/VBox/ColumnsHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MissionMargin" type="MarginContainer" parent="Center/Panel/Margin/VBox/ColumnsHBox/MissionPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="MissionVBox" type="VBoxContainer" parent="Center/Panel/Margin/VBox/ColumnsHBox/MissionPanel/MissionMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MissionHeader" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "SCIENTIST MISSION DIRECTIVE"
+
+[node name="PauseMissionTitle" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/MissionPanel/MissionMargin/MissionVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "MISSION 1: RESTORE EMERGENCY GENERATOR"
+
+[node name="PauseImmediateTask" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/MissionPanel/MissionMargin/MissionVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_font_sizes/font_size = 12
+text = "IMMEDIATE TASK: Flip Generator Breaker Lever"
+
+[node name="HSepMission" type="HSeparator" parent="Center/Panel/Margin/VBox/ColumnsHBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+
+[node name="PauseMissionDesc" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/MissionPanel/MissionMargin/MissionVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 160)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.88, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 11
+text = "Detailed mission briefing..."
+autowrap_mode = 2
+
+[node name="GearPanel" type="PanelContainer" parent="Center/Panel/Margin/VBox/ColumnsHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GearMargin" type="MarginContainer" parent="Center/Panel/Margin/VBox/ColumnsHBox/GearPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="GearVBox" type="VBoxContainer" parent="Center/Panel/Margin/VBox/ColumnsHBox/GearPanel/GearMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GearHeader" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/GearPanel/GearMargin/GearVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = "ENGINEER GEAR & STORAGE"
+
+[node name="EquippedToolLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/GearPanel/GearMargin/GearVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "EQUIPPED: [1] Diagnostic Scanner"
+
+[node name="ScannerChargeLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/GearPanel/GearMargin/GearVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "SCANNER CHARGE: 100%"
+
+[node name="ScannerChargeBar" type="ProgressBar" parent="Center/Panel/Margin/VBox/ColumnsHBox/GearPanel/GearMargin/GearVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="ResourceTallyLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/GearPanel/GearMargin/GearVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 11
+text = "FUSES: 2 | COOLANT: 1 | FILTERS: 1 | CELLS: 2"
+
+[node name="QuickSlotsLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/GearPanel/GearMargin/GearVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "[1] Scanner  [2] Multitool  [3] Parts  [4] Cell"
+
+[node name="InventoryLabel" type="Label" parent="Center/Panel/Margin/VBox/ColumnsHBox/GearPanel/GearMargin/GearVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "INVENTORY: [ Empty ]"
+autowrap_mode = 2
 
 [node name="HSep2" type="HSeparator" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
 
-[node name="SensitivityLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+[node name="ControlsHBox" type="HBoxContainer" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
-text = "Mouse Sensitivity"
+theme_override_constants/separation = 16
 
-[node name="SensitivitySlider" type="HSlider" parent="Center/Panel/Margin/VBox"]
+[node name="ResumeButton" type="Button" parent="Center/Panel/Margin/VBox/ControlsHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 38)
+layout_mode = 2
+text = "RESUME OPERATIONS"
+
+[node name="SaveButton" type="Button" parent="Center/Panel/Margin/VBox/ControlsHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 38)
+layout_mode = 2
+text = "SAVE PROGRESSION"
+
+[node name="SettingsVBox" type="VBoxContainer" parent="Center/Panel/Margin/VBox/ControlsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="SensitivitySlider" type="HSlider" parent="Center/Panel/Margin/VBox/ControlsHBox/SettingsVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 min_value = 0.5
@@ -87,11 +280,12 @@ max_value = 5.0
 step = 0.1
 value = 2.0
 
-[node name="VolumeLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+[node name="SensLabel" type="Label" parent="Center/Panel/Margin/VBox/ControlsHBox/SettingsVBox"]
 layout_mode = 2
-text = "Master Volume"
+theme_override_font_sizes/font_size = 10
+text = "Mouse Sensitivity"
 
-[node name="VolumeSlider" type="HSlider" parent="Center/Panel/Margin/VBox"]
+[node name="VolumeSlider" type="HSlider" parent="Center/Panel/Margin/VBox/ControlsHBox/SettingsVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 min_value = 0.0
@@ -99,11 +293,21 @@ max_value = 100.0
 step = 1.0
 value = 100.0
 
-[node name="HSep3" type="HSeparator" parent="Center/Panel/Margin/VBox"]
+[node name="VolLabel" type="Label" parent="Center/Panel/Margin/VBox/ControlsHBox/SettingsVBox"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Master Volume"
 
-[node name="MainMenuButton" type="Button" parent="Center/Panel/Margin/VBox"]
+[node name="MainMenuButton" type="Button" parent="Center/Panel/Margin/VBox/ControlsHBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(160, 38)
 layout_mode = 2
 text = "EXIT TO MAIN MENU"
+
+[node name="SaveNoticeLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
+horizontal_alignment = 1
