@@ -396,6 +396,20 @@ func mark_breach_sealed(comp_id: String = "maintenance_crawlway") -> void:
 	breaches_sealed_count += 1
 	breach_sealed.emit(comp_id)
 
+# Milestone 7: Extended Chamber Exploration & Final Hunt Gate
+var required_chambers_for_final_hunt: int = 5
+
+func can_engage_final_hunt() -> bool:
+	return discovered_rooms.size() >= required_chambers_for_final_hunt
+
+func get_expanded_chamber_count() -> int:
+	var count: int = 0
+	if discovered_rooms.has("specimen_vault"):
+		count += 1
+	if discovered_rooms.has("research_observatory"):
+		count += 1
+	return count
+
 func get_exploration_stats() -> Dictionary:
 	return {
 		"discovered_rooms_count": discovered_rooms.size(),
@@ -404,9 +418,10 @@ func get_exploration_stats() -> Dictionary:
 		"breaches_sealed_count": breaches_sealed_count,
 		"collected_datapads_count": collected_datapads.size(),
 		"decrypted_logs_count": decrypted_logs.size(),
-		"unlocked_revelations_count": unlocked_revelations.size()
+		"unlocked_revelations_count": unlocked_revelations.size(),
+		"expanded_chambers_discovered": get_expanded_chamber_count(),
+		"can_engage_final_hunt": can_engage_final_hunt()
 	}
-
 
 func get_current_objective() -> Dictionary:
 	if current_objective_index < OBJECTIVES.size():
