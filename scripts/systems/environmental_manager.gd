@@ -233,38 +233,6 @@ func initialize_atmosphere() -> void:
 			"scrubbers_active": true,
 			"o2_generators_active": true,
 			"active_hazards": []
-		},
-		"specimen_vault": {
-			"id": "specimen_vault",
-			"name": "Deep Specimen Containment Vault",
-			"volume_m3": 280.0,
-			"o2_level": 94.0,
-			"co2_ppm": 850.0,
-			"temperature": 288.15,
-			"pressure": 99.8,
-			"vents_open": true,
-			"leak_rate": 0.0,
-			"heaters_active": true,
-			"cooling_active": true,
-			"scrubbers_active": true,
-			"o2_generators_active": true,
-			"active_hazards": []
-		},
-		"research_observatory": {
-			"id": "research_observatory",
-			"name": "Bio-Research Observatory Dome",
-			"volume_m3": 340.0,
-			"o2_level": 100.0,
-			"co2_ppm": 410.0,
-			"temperature": 294.15,
-			"pressure": 101.3,
-			"vents_open": true,
-			"leak_rate": 0.0,
-			"heaters_active": true,
-			"cooling_active": true,
-			"scrubbers_active": true,
-			"o2_generators_active": true,
-			"active_hazards": []
 		}
 	}
 	
@@ -276,6 +244,8 @@ func initialize_atmosphere() -> void:
 			var json := JSON.new()
 			if json.parse(f.get_as_text()) == OK and json.data is Dictionary:
 				for cid in json.data.keys():
+					if cid == "specimen_vault" or cid == "research_observatory":
+						continue
 					var d: Dictionary = json.data[cid]
 					if not default_comps.has(cid):
 						default_comps[cid] = {
@@ -894,11 +864,50 @@ func reset_atmosphere() -> void:
 		AudioManager.stop_alarm()
 	oxygen_level_changed.emit(oxygen_level, false)
 
+func register_expanded_chambers() -> void:
+	if not compartments.has("specimen_vault"):
+		compartments["specimen_vault"] = {
+			"id": "specimen_vault",
+			"name": "Deep Specimen Containment Vault",
+			"volume_m3": 280.0,
+			"o2_level": 94.0,
+			"co2_ppm": 850.0,
+			"temperature": 288.15,
+			"pressure": 99.8,
+			"vents_open": true,
+			"leak_rate": 0.0,
+			"heaters_active": true,
+			"cooling_active": true,
+			"scrubbers_active": true,
+			"o2_generators_active": true,
+			"active_hazards": []
+		}
+	if not compartments.has("research_observatory"):
+		compartments["research_observatory"] = {
+			"id": "research_observatory",
+			"name": "Bio-Research Observatory Dome",
+			"volume_m3": 340.0,
+			"o2_level": 100.0,
+			"co2_ppm": 410.0,
+			"temperature": 294.15,
+			"pressure": 101.3,
+			"vents_open": true,
+			"leak_rate": 0.0,
+			"heaters_active": true,
+			"cooling_active": true,
+			"scrubbers_active": true,
+			"o2_generators_active": true,
+			"active_hazards": []
+		}
+
 func get_compartment_atmosphere(cid: String) -> Dictionary:
+	if (cid == "specimen_vault" or cid == "research_observatory") and not compartments.has(cid):
+		register_expanded_chambers()
 	return compartments.get(cid, {})
 
 func get_all_compartments(include_all: bool = false, include_m7: bool = false) -> Dictionary:
 	if include_all and include_m7:
+		register_expanded_chambers()
 		return compartments
 	if include_all:
 		var m4_comps: Dictionary = {}
