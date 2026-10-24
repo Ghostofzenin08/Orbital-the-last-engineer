@@ -603,6 +603,9 @@ func engage_propulsion() -> Dictionary:
 		if not comms_online: reasons.append("Communications")
 		return {"ok": false, "reason": "Prerequisites offline: " + ", ".join(reasons)}
 	
+	if crisis_manager != null and crisis_manager.current_crisis == CrisisManagerScript.CrisisType.CREATURE_PREDATORY_HUNT and not crisis_manager.is_creature_eliminated:
+		return {"ok": false, "reason": "Station in lockdown: Mutant alien predator active. Trap and eliminate with poisonous gas before departure."}
+	
 	var prop = subsystems.get("propulsion", null)
 	if prop != null:
 		prop.set_state(SubsystemScript.State.ONLINE, "Ion thrusters ignited; departure sequence initiated")
