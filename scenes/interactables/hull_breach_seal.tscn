@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/interactables/hull_breach_seal.gd" id="1_breach"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_breach"]
+size = Vector3(1.2, 0.4, 1.2)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_flange"]
+top_radius = 0.5
+bottom_radius = 0.55
+height = 0.15
+
+[sub_resource type="BoxMesh" id="BoxMesh_patch"]
+size = Vector3(0.9, 0.08, 0.9)
+
+[node name="HullBreachSeal" type="StaticBody3D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_breach")
+mesh_path = NodePath("PatchMesh")
+warning_light_path = NodePath("WarningLight")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_breach")
+
+[node name="FlangeMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_flange")
+
+[node name="PatchMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
+mesh = SubResource("BoxMesh_patch")
+
+[node name="WarningLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+light_color = Color(1, 0.15, 0.1, 1)
+light_energy = 1.2
+omni_range = 3.0
