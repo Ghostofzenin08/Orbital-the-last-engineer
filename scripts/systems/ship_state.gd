@@ -1050,6 +1050,8 @@ func import_save_data(data: Dictionary) -> void:
 	
 	if data.has("crisis_manager") and data["crisis_manager"] is Dictionary and crisis_manager != null:
 		crisis_manager.deserialize(data["crisis_manager"])
+	elif data.has("crisis") and data["crisis"] is Dictionary and crisis_manager != null:
+		crisis_manager.deserialize(data["crisis"])
 	elif crisis_manager != null:
 		crisis_manager.reset()
 	
