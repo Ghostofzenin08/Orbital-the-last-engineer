@@ -126,12 +126,24 @@ func _pregenerate_sounds() -> void:
 	_sound_cache["recharge"] = _generate_recharge()
 	_sound_cache["datapad_decrypt"] = _generate_datapad_decrypt()
 	_sound_cache["revelation_chime"] = _generate_revelation_chime()
+	_sound_cache["creature_sound"] = _generate_creature_sound()
+	_sound_cache["creature_roar"] = _generate_creature_roar()
+	_sound_cache["crisis_alarm"] = _generate_crisis_alarm()
 
 func play_datapad_decrypt() -> void:
 	play_sfx("datapad_decrypt")
 
 func play_revelation_chime() -> void:
 	play_sfx("revelation_chime")
+
+func play_creature_sound() -> void:
+	play_sfx("creature_sound")
+
+func play_creature_roar() -> void:
+	play_sfx("creature_roar")
+
+func play_crisis_alarm() -> void:
+	play_sfx("crisis_alarm")
 
 func _generate_click() -> AudioStreamWAV:
 	var sample_rate := 22050
@@ -561,6 +573,71 @@ func _generate_revelation_chime() -> AudioStreamWAV:
 		var c4 := sin(2.0 * PI * 1108.73 * t) * 0.17
 		var val := (c1 + c2 + c3 + c4) * env
 		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
+
+func _generate_creature_sound() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 0.75
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var env := sin(PI * (t / duration)) * (0.8 + 0.2 * sin(2.0 * PI * 18.0 * t))
+		var f1 := 85.0 + sin(2.0 * PI * 7.0 * t) * 25.0
+		var sub := sin(2.0 * PI * f1 * t) * 0.45
+		var rasp := (randf() * 2.0 - 1.0) * 0.25 * (1.0 - t / duration)
+		var val := (sub + rasp) * env
+		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
+
+func _generate_creature_roar() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 1.1
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var env := sin(PI * minf(1.0, t / 0.15)) * exp(-t * 2.2)
+		var freq := 380.0 - (t / duration) * 240.0
+		var tone := sin(2.0 * PI * freq * t) * 0.4
+		var shriek := sin(2.0 * PI * (freq * 1.6) * t) * 0.25
+		var noise := (randf() * 2.0 - 1.0) * 0.35
+		var val := (tone + shriek + noise) * env
+		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
+
+func _generate_crisis_alarm() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 0.6
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var step := int(t / 0.15) % 2
+		var freq: float = 640.0 if step == 0 else 480.0
+		var tone := sin(2.0 * PI * freq * t) * 0.5
+		var sample := int(clampf(tone, -1.0, 1.0) * 32767.0)
 		data.encode_s16(i * 2, sample)
 	var wav := AudioStreamWAV.new()
 	wav.format = AudioStreamWAV.FORMAT_16_BITS
