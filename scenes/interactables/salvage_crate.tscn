@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/interactables/salvage_crate.gd" id="1_crate"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_crate"]
+size = Vector3(1.2, 1.0, 1.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_body"]
+size = Vector3(1.15, 0.95, 1.15)
+
+[sub_resource type="SphereMesh" id="SphereMesh_weld_seam"]
+radius = 0.04
+height = 0.08
+
+[node name="SalvageCrate" type="StaticBody3D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_crate")
+mesh_path = NodePath("CrateMesh")
+status_light_path = NodePath("StatusLight")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_crate")
+
+[node name="CrateMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_body")
+
+[node name="StatusLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0.6)
+light_color = Color(1, 0.5, 0.1, 1)
+light_energy = 0.8
+omni_range = 1.5
