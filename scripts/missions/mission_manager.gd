@@ -10,6 +10,8 @@ signal all_objectives_completed
 signal room_discovered(room_id: String, room_name: String)
 signal airlock_cycled
 signal breach_sealed(compartment_id: String)
+signal datapad_collected(datapad_id: String, datapad_data: Dictionary)
+signal revelation_unlocked(revelation_id: String, revelation_data: Dictionary)
 
 const OBJECTIVES: Array[Dictionary] = [
 	{
@@ -143,6 +145,8 @@ const EXPANSION_CREW_LOGS: Array[Dictionary] = [
 	}
 ]
 
+const EXPANDED_CREW_LOGS: Array[Dictionary] = EXPANSION_CREW_LOGS
+
 func get_all_crew_logs() -> Array[Dictionary]:
 	var list: Array[Dictionary] = []
 	list.append_array(CREW_LOGS)
@@ -166,10 +170,55 @@ var discovered_rooms: Dictionary = {}
 var airlock_cycles_completed: int = 0
 var breaches_sealed_count: int = 0
 
+# Milestone 5: Narrative Investigation & Crew Mystery
+var narrative_datapads: Dictionary = {}
+var narrative_datapads_order: Array[String] = []
+var narrative_revelations: Dictionary = {}
+var narrative_revelations_order: Array[String] = []
+
+var collected_datapads: Array[String] = []
+var decrypted_logs: Array[String] = []
+var unlocked_revelations: Array[String] = []
+var commander_override_code: String = ""
+var quarantine_lockout_cleared: bool = false
+
+func _init() -> void:
+	_load_narrative_config()
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_load_narrative_config()
 	# Hook into ShipSystemManager signals
 	ShipSystemManager.system_state_changed.connect(_on_system_state_changed)
+
+func _load_narrative_config() -> void:
+	var path := "res://data/narrative_config.json"
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var text := f.get_as_text()
+	f.close()
+	var json := JSON.new()
+	if json.parse(text) == OK and json.data is Dictionary:
+		var cfg: Dictionary = json.data
+		if cfg.has("datapads") and cfg["datapads"] is Dictionary:
+			narrative_datapads = cfg["datapads"].duplicate(true)
+			narrative_datapads_order.clear()
+			for k in narrative_datapads.keys():
+				var d: Dictionary = narrative_datapads[k]
+				if not d.has("compartment_id") and d.has("compartment"):
+					d["compartment_id"] = str(d["compartment"])
+				narrative_datapads_order.append(str(k))
+		if cfg.has("revelations") and cfg["revelations"] is Dictionary:
+			narrative_revelations = cfg["revelations"].duplicate(true)
+			narrative_revelations_order.clear()
+			for k in narrative_revelations.keys():
+				var r: Dictionary = narrative_revelations[k]
+				if not r.has("bonus_summary") and r.has("bonus_description"):
+					r["bonus_summary"] = str(r["bonus_description"])
+				narrative_revelations_order.append(str(k))
 
 func reset_missions() -> void:
 	current_objective_index = 0
@@ -177,10 +226,138 @@ func reset_missions() -> void:
 	discovered_rooms.clear()
 	airlock_cycles_completed = 0
 	breaches_sealed_count = 0
+	collected_datapads.clear()
+	decrypted_logs.clear()
+	unlocked_revelations.clear()
+	commander_override_code = ""
+	quarantine_lockout_cleared = false
+	if has_node("/root/ShipState"):
+		var ss = get_node("/root/ShipState")
+		ss.has_revelation_anomaly = false
+		ss.has_revelation_quarantine = false
+		ss.has_revelation_directive = false
+		ss.scrubber_efficiency_multiplier = 1.0
+		ss.commander_override_code = ""
+		ss.quarantine_lockout_cleared = false
+		ss.thruster_efficiency_boost = 1.0
+		if ss.power_system != null and ss.power_system.has_method("set_harmonic_damping"):
+			ss.power_system.set_harmonic_damping(false)
 	if has_node("/root/InventoryManager"):
 		get_node("/root/InventoryManager").reset_to_defaults()
 	inventory_changed.emit(inventory)
 	_broadcast_current_objective()
+
+func collect_datapad(datapad_id: String, mark_decrypted: bool = true) -> bool:
+	if datapad_id == "":
+		return false
+	if not collected_datapads.has(datapad_id):
+		collected_datapads.append(datapad_id)
+	var dp_info: Dictionary = get_datapad_data(datapad_id)
+	var is_enc: bool = bool(dp_info.get("is_encrypted", false))
+	if mark_decrypted or not is_enc:
+		if not decrypted_logs.has(datapad_id):
+			decrypted_logs.append(datapad_id)
+	datapad_collected.emit(datapad_id, dp_info)
+	_evaluate_revelations()
+	return true
+
+func decrypt_datapad(datapad_id: String) -> bool:
+	return collect_datapad(datapad_id, true)
+
+func is_datapad_collected(datapad_id: String) -> bool:
+	return collected_datapads.has(datapad_id)
+
+func is_datapad_decrypted(datapad_id: String) -> bool:
+	if not collected_datapads.has(datapad_id):
+		return false
+	var dp_info: Dictionary = get_datapad_data(datapad_id)
+	if not bool(dp_info.get("is_encrypted", false)):
+		return true
+	return decrypted_logs.has(datapad_id)
+
+func is_revelation_unlocked(revelation_id: String) -> bool:
+	return unlocked_revelations.has(revelation_id)
+
+func get_datapad_data(datapad_id: String) -> Dictionary:
+	if narrative_datapads.is_empty():
+		_load_narrative_config()
+	if narrative_datapads.has(datapad_id):
+		return narrative_datapads[datapad_id]
+	return {
+		"id": datapad_id,
+		"title": datapad_id.capitalize(),
+		"author": "Crew Member",
+		"date": "Cycle 2184",
+		"compartment": "engineering_bay",
+		"compartment_id": "engineering_bay",
+		"location_hint": "Ship Interior",
+		"is_encrypted": false,
+		"requires_scanner_to_decrypt": false,
+		"content": "Recovered crew data slate."
+	}
+
+func get_all_datapads() -> Array[Dictionary]:
+	if narrative_datapads.is_empty():
+		_load_narrative_config()
+	var list: Array[Dictionary] = []
+	for k in narrative_datapads_order:
+		if narrative_datapads.has(k):
+			list.append(narrative_datapads[k])
+	return list
+
+func get_all_narrative_datapads() -> Array[Dictionary]:
+	return get_all_datapads()
+
+func get_revelation_data(revelation_id: String) -> Dictionary:
+	if narrative_revelations.is_empty():
+		_load_narrative_config()
+	if narrative_revelations.has(revelation_id):
+		return narrative_revelations[revelation_id]
+	return {}
+
+func get_all_revelations() -> Array[Dictionary]:
+	if narrative_revelations.is_empty():
+		_load_narrative_config()
+	var list: Array[Dictionary] = []
+	for k in narrative_revelations_order:
+		if narrative_revelations.has(k):
+			list.append(narrative_revelations[k])
+	return list
+
+func get_all_narrative_revelations() -> Array[Dictionary]:
+	return get_all_revelations()
+
+func _evaluate_revelations() -> void:
+	if narrative_revelations.is_empty():
+		_load_narrative_config()
+	for rev_id in narrative_revelations_order:
+		if unlocked_revelations.has(rev_id):
+			continue
+		var rev_data: Dictionary = narrative_revelations[rev_id]
+		var req_list: Array = rev_data.get("required_datapads", [])
+		if req_list.is_empty():
+			continue
+		var all_met := true
+		for req_dp in req_list:
+			var dp_id := str(req_dp)
+			if not is_datapad_collected(dp_id) or not is_datapad_decrypted(dp_id):
+				all_met = false
+				break
+		if all_met:
+			unlocked_revelations.append(rev_id)
+			_apply_revelation_consequence(rev_id)
+			if AudioManager != null and AudioManager.has_method("play_revelation_chime"):
+				AudioManager.play_revelation_chime()
+			revelation_unlocked.emit(rev_id, rev_data)
+
+func _apply_revelation_consequence(rev_id: String) -> void:
+	if rev_id == "revelation_directive":
+		commander_override_code = "7394-OMEGA"
+		quarantine_lockout_cleared = true
+	if has_node("/root/ShipState"):
+		var ss = get_node("/root/ShipState")
+		if ss.has_method("apply_revelation_bonus"):
+			ss.apply_revelation_bonus(rev_id)
 
 func mark_room_discovered(room_id: String) -> void:
 	if not discovered_rooms.has(room_id):
@@ -208,7 +385,10 @@ func get_exploration_stats() -> Dictionary:
 		"discovered_rooms_count": discovered_rooms.size(),
 		"discovered_rooms": discovered_rooms.keys(),
 		"airlock_cycles_completed": airlock_cycles_completed,
-		"breaches_sealed_count": breaches_sealed_count
+		"breaches_sealed_count": breaches_sealed_count,
+		"collected_datapads_count": collected_datapads.size(),
+		"decrypted_logs_count": decrypted_logs.size(),
+		"unlocked_revelations_count": unlocked_revelations.size()
 	}
 
 
@@ -300,7 +480,12 @@ func export_save_data() -> Dictionary:
 		"inventory": inventory,
 		"discovered_rooms": discovered_rooms.duplicate(),
 		"airlock_cycles_completed": airlock_cycles_completed,
-		"breaches_sealed_count": breaches_sealed_count
+		"breaches_sealed_count": breaches_sealed_count,
+		"collected_datapads": collected_datapads.duplicate(),
+		"decrypted_logs": decrypted_logs.duplicate(),
+		"unlocked_revelations": unlocked_revelations.duplicate(),
+		"commander_override_code": commander_override_code,
+		"quarantine_lockout_cleared": quarantine_lockout_cleared
 	}
 
 func import_save_data(data: Dictionary) -> void:
@@ -314,5 +499,26 @@ func import_save_data(data: Dictionary) -> void:
 		discovered_rooms = data["discovered_rooms"].duplicate()
 	airlock_cycles_completed = int(data.get("airlock_cycles_completed", 0))
 	breaches_sealed_count = int(data.get("breaches_sealed_count", 0))
+	
+	collected_datapads.clear()
+	var loaded_dp: Array = data.get("collected_datapads", [])
+	for dp in loaded_dp:
+		collected_datapads.append(str(dp))
+	
+	decrypted_logs.clear()
+	var loaded_dec: Array = data.get("decrypted_logs", [])
+	for dl in loaded_dec:
+		decrypted_logs.append(str(dl))
+	
+	unlocked_revelations.clear()
+	var loaded_rev: Array = data.get("unlocked_revelations", [])
+	for rv in loaded_rev:
+		var rev_id := str(rv)
+		unlocked_revelations.append(rev_id)
+		_apply_revelation_consequence(rev_id)
+	
+	commander_override_code = str(data.get("commander_override_code", commander_override_code))
+	quarantine_lockout_cleared = bool(data.get("quarantine_lockout_cleared", quarantine_lockout_cleared))
+	
 	inventory_changed.emit(inventory)
 	_broadcast_current_objective()
