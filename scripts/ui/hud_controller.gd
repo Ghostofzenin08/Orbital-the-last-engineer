@@ -197,7 +197,35 @@ func update_player_status(afflictions: Array[String], telem: Dictionary) -> void
 	
 	_update_status_overlay(afflictions)
 
+# Milestone 7: Horror Boss Encounter Vignette
+var _horror_vignette_timer: float = 0.0
+var _horror_vignette_duration: float = 1.0
+
+func _process(delta: float) -> void:
+	if _horror_vignette_timer > 0.0:
+		_horror_vignette_timer -= delta
+		if _horror_vignette_timer <= 0.0 and overlay_rect != null and overlay_rect.material != null:
+			var mat: ShaderMaterial = overlay_rect.material as ShaderMaterial
+			if mat != null:
+				mat.set_shader_parameter("strength", 0.0)
+				mat.set_shader_parameter("distortion", 0.0)
+				mat.set_shader_parameter("pulse_speed", 0.0)
+
+func trigger_horror_vignette(duration: float = 1.2) -> void:
+	_horror_vignette_duration = maxf(0.1, duration)
+	_horror_vignette_timer = _horror_vignette_duration
+	if overlay_rect != null and overlay_rect.material != null:
+		var mat: ShaderMaterial = overlay_rect.material as ShaderMaterial
+		if mat != null:
+			mat.set_shader_parameter("strength", 0.95)
+			mat.set_shader_parameter("tint_color", Color(0.92, 0.04, 0.04, 0.95))
+			mat.set_shader_parameter("pulse_speed", 8.0)
+			mat.set_shader_parameter("distortion", 0.04)
+	show_notification("[!] PREDATORY ENTITY ENGAGED — EVACUATE TO AIRLOCK!", duration + 1.0)
+
 func _update_status_overlay(afflictions: Array[String]) -> void:
+	if _horror_vignette_timer > 0.0:
+		return
 	if overlay_rect == null or overlay_rect.material == null:
 		return
 	
