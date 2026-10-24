@@ -322,9 +322,10 @@ func _process(delta: float) -> void:
 		oxygen_level = total_o2 / maxf(1.0, float(compartments.size()))
 	
 	# Fallback simulation if isolated node outside tree with no player
+	var rev_scrub_mult: float = get_scrubber_optimization_multiplier()
 	if not is_inside_tree() and delta > 0.0:
 		if ls_online:
-			oxygen_level = minf(max_oxygen, old_level + (replenishment_rate * delta))
+			oxygen_level = minf(max_oxygen, old_level + (replenishment_rate * rev_scrub_mult * delta))
 		else:
 			oxygen_level = maxf(0.0, old_level - (depletion_rate * delta))
 		for c in compartments.values():
@@ -351,6 +352,11 @@ func _process(delta: float) -> void:
 	# 4. Evaluate player status effects & hazards
 	_evaluate_player_afflictions(delta)
 
+func get_scrubber_optimization_multiplier() -> float:
+	if ShipState != null and "has_revelation_quarantine" in ShipState and ShipState.has_revelation_quarantine:
+		return float(ShipState.scrubber_efficiency_multiplier) if "scrubber_efficiency_multiplier" in ShipState else 1.20
+	return 1.0
+
 func _simulate_compartment(
 	comp: Dictionary,
 	ls_online: bool,
@@ -365,6 +371,7 @@ func _simulate_compartment(
 	
 	var cid: String = comp["id"]
 	var is_player_here: bool = (cid == player_compartment_id)
+	var opt_mult: float = get_scrubber_optimization_multiplier()
 	
 	# Check auxiliary scrubber bank (rerouted power)
 	var aux_scrub_active: bool = false
@@ -374,9 +381,9 @@ func _simulate_compartment(
 	
 	# --- A. OXYGEN DYNAMICS ---
 	if ls_online and comp["o2_generators_active"]:
-		# Oxygen replenishment
+		# Oxygen replenishment (boosted +20% when Revelation II unlocked)
 		if comp["o2_level"] < max_oxygen:
-			comp["o2_level"] = minf(max_oxygen, comp["o2_level"] + (replenishment_rate * delta))
+			comp["o2_level"] = minf(max_oxygen, comp["o2_level"] + (replenishment_rate * opt_mult * delta))
 	else:
 		# Depletion
 		var dep := depletion_rate * delta
@@ -402,7 +409,7 @@ func _simulate_compartment(
 	if ls_online and comp["scrubbers_active"] and not (has_co2_fault and cid == "life_support"):
 		# Functional primary scrubber reduces CO2 towards baseline 420 ppm
 		if comp["co2_ppm"] > 420.0:
-			var scrub_rate := 75.0 if cid == "life_support" else 45.0
+			var scrub_rate := (75.0 if cid == "life_support" else 45.0) * opt_mult
 			# Thermal degradation: At elevated temperatures > 315K, amine bed efficiency falls off linearly
 			var scrub_eff := 1.0
 			if comp["temperature"] > 315.0:
@@ -411,7 +418,7 @@ func _simulate_compartment(
 	elif aux_scrub_active and cid == "life_support":
 		# Rerouted power to auxiliary scrubber restores scrubbing during primary fault
 		if comp["co2_ppm"] > 420.0:
-			co2_scrub = minf(comp["co2_ppm"] - 420.0, 50.0 * delta)
+			co2_scrub = minf(comp["co2_ppm"] - 420.0, 50.0 * opt_mult * delta)
 	
 	if has_co2_fault and cid == "life_support":
 		# Saturated filter releases back trapped gas unless auxiliary scrubber is active
