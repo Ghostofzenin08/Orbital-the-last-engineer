@@ -1,0 +1,2222 @@
+[gd_scene load_steps=76 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/ship_interior.gd" id="1_level"]
+[ext_resource type="Script" path="res://scripts/systems/environmental_manager.gd" id="2_env"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/switch.tscn" id="4_switch"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/door.tscn" id="5_door"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/repair_panel.tscn" id="6_panel"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/terminal.tscn" id="7_term"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/pickup.tscn" id="8_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/env_sensor.tscn" id="9_sensor"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/vent_damper.tscn" id="10_damper"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/scrubber_panel.tscn" id="11_scrub"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/emergency_valve.tscn" id="12_valve"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/storage_locker.tscn" id="13_locker"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/workbench_station.tscn" id="14_bench"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/multi_step_repair.tscn" id="15_multistep"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/airlock_controller.tscn" id="16_airlock"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/salvage_crate.tscn" id="17_crate"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/hull_breach_seal.tscn" id="18_breach"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.18, 0.2, 0.24, 1)
+metallic = 0.8
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_color = Color(0.14, 0.16, 0.2, 1)
+metallic = 0.5
+roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ceiling"]
+albedo_color = Color(0.1, 0.12, 0.15, 1)
+metallic = 0.3
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_machinery"]
+albedo_color = Color(0.22, 0.26, 0.3, 1)
+metallic = 0.85
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gen_core"]
+albedo_color = Color(0.1, 0.5, 0.8, 1)
+emission_enabled = true
+emission = Color(0.1, 0.6, 0.9, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_scrubber"]
+albedo_color = Color(0.18, 0.3, 0.32, 1)
+metallic = 0.7
+roughness = 0.4
+emission_enabled = true
+emission = Color(0.1, 0.7, 0.6, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o2_core"]
+albedo_color = Color(0.1, 0.8, 0.9, 1)
+emission_enabled = true
+emission = Color(0.1, 0.8, 0.9, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_holo"]
+albedo_color = Color(0.1, 0.6, 1, 0.6)
+transparency = 1
+emission_enabled = true
+emission = Color(0.2, 0.7, 1, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_planet"]
+albedo_color = Color(0.6, 0.25, 0.15, 1)
+roughness = 0.8
+emission_enabled = true
+emission = Color(0.4, 0.15, 0.08, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_window"]
+albedo_color = Color(0.1, 0.2, 0.3, 0.3)
+transparency = 1
+metallic = 0.9
+roughness = 0.1
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_room_floor"]
+size = Vector3(10.4, 0.4, 10.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_room_floor"]
+size = Vector3(10.4, 0.4, 10.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_long"]
+size = Vector3(0.4, 3.6, 10.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_long"]
+size = Vector3(0.4, 3.6, 10.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_back"]
+size = Vector3(10.4, 3.6, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_back"]
+size = Vector3(10.4, 3.6, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_door_side"]
+size = Vector3(3.8, 3.6, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_door_side"]
+size = Vector3(3.8, 3.6, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_door_header"]
+size = Vector3(2.4, 1.0, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_door_header"]
+size = Vector3(2.4, 1.0, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_corridor_floor"]
+size = Vector3(2.4, 0.4, 6.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_corridor_floor"]
+size = Vector3(2.4, 0.4, 6.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_corridor_wall"]
+size = Vector3(0.4, 3.6, 6.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_corridor_wall"]
+size = Vector3(0.4, 3.6, 6.0)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_gen"]
+top_radius = 1.6
+bottom_radius = 1.8
+height = 2.8
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_gen"]
+height = 2.8
+radius = 1.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_table"]
+size = Vector3(1.2, 0.9, 2.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_table"]
+size = Vector3(1.2, 0.9, 2.2)
+
+[sub_resource type="SphereMesh" id="SphereMesh_planet"]
+radius = 14.0
+height = 28.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wing_floor"]
+size = Vector3(10.0, 0.4, 8.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wing_floor"]
+size = Vector3(10.0, 0.4, 8.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_subdeck_floor"]
+size = Vector3(12.0, 0.4, 10.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_subdeck_floor"]
+size = Vector3(12.0, 0.4, 10.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_subdeck_wall"]
+size = Vector3(0.4, 3.8, 10.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_subdeck_wall"]
+size = Vector3(0.4, 3.8, 10.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_crawlway_floor"]
+size = Vector3(3.0, 0.4, 8.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_crawlway_floor"]
+size = Vector3(3.0, 0.4, 8.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_crawlway_wall"]
+size = Vector3(0.4, 2.2, 8.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_crawlway_wall"]
+size = Vector3(0.4, 2.2, 8.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_corridor_door_side"]
+size = Vector3(0.4, 3.6, 1.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_corridor_door_side"]
+size = Vector3(0.4, 3.6, 1.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_corridor_door_header"]
+size = Vector3(0.4, 1.0, 2.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_corridor_door_header"]
+size = Vector3(0.4, 1.0, 2.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hall_floor"]
+size = Vector3(2.8, 0.4, 2.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hall_floor"]
+size = Vector3(2.8, 0.4, 2.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hall_wall"]
+size = Vector3(2.8, 3.6, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hall_wall"]
+size = Vector3(2.8, 3.6, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_room_door_side"]
+size = Vector3(0.4, 3.6, 2.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_room_door_side"]
+size = Vector3(0.4, 3.6, 2.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_room_door_side_short"]
+size = Vector3(0.4, 3.6, 1.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_room_door_side_short"]
+size = Vector3(0.4, 3.6, 1.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_room_door_side_long"]
+size = Vector3(0.4, 3.6, 3.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_room_door_side_long"]
+size = Vector3(0.4, 3.6, 3.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ramp"]
+size = Vector3(2.4, 0.4, 5.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ramp"]
+size = Vector3(2.4, 0.4, 5.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_crawl_ramp"]
+size = Vector3(2.0, 0.4, 2.86)
+
+[sub_resource type="BoxMesh" id="BoxMesh_crawl_ramp"]
+size = Vector3(2.0, 0.4, 2.86)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_crawl_connector"]
+size = Vector3(2.5, 0.4, 2.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_crawl_connector"]
+size = Vector3(2.5, 0.4, 2.0)
+
+[node name="ShipInterior" type="Node3D"]
+script = ExtResource("1_level")
+
+[node name="EnvironmentalManager" type="Node" parent="."]
+script = ExtResource("2_env")
+
+[node name="Player" parent="." instance=ExtResource("3_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 14)
+
+[node name="SpaceWorld" type="Node3D" parent="."]
+
+[node name="Exoplanet" type="MeshInstance3D" parent="SpaceWorld"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 8, -48)
+mesh = SubResource("SphereMesh_planet")
+surface_material_override/0 = SubResource("StandardMaterial3D_planet")
+
+[node name="SunLight" type="DirectionalLight3D" parent="SpaceWorld"]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 10, 20, -30)
+light_color = Color(1, 0.92, 0.8, 1)
+light_energy = 0.5
+
+[node name="Compartments" type="Node3D" parent="."]
+
+[node name="EngineeringBay" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/Floor"]
+shape = SubResource("BoxShape3D_room_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/Floor"]
+mesh = SubResource("BoxMesh_room_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, 16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/Ceiling"]
+shape = SubResource("BoxShape3D_room_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/Ceiling"]
+mesh = SubResource("BoxMesh_room_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallLeft" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 1.8, 16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/WallLeft"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/WallLeft"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallRight" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2, 1.8, 16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/WallRight"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/WallRight"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallBackLeft" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 1.8, 21.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/WallBackLeft"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/WallBackLeft"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallBackRight" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 1.8, 21.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/WallBackRight"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/WallBackRight"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallBackHeader" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, 21.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/WallBackHeader"]
+shape = SubResource("BoxShape3D_wall_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/WallBackHeader"]
+mesh = SubResource("BoxMesh_wall_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFrontLeft" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 1.8, 11)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/WallFrontLeft"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/WallFrontLeft"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFrontRight" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 1.8, 11)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/WallFrontRight"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/WallFrontRight"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFrontHeader" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, 11)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/WallFrontHeader"]
+shape = SubResource("BoxShape3D_wall_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/WallFrontHeader"]
+mesh = SubResource("BoxMesh_wall_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="GeneratorUnit" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 18.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/GeneratorUnit"]
+shape = SubResource("CylinderShape3D_gen")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/GeneratorUnit"]
+mesh = SubResource("CylinderMesh_gen")
+surface_material_override/0 = SubResource("StandardMaterial3D_machinery")
+
+[node name="CoreGlow" type="MeshInstance3D" parent="Compartments/EngineeringBay/GeneratorUnit"]
+mesh = SubResource("CylinderMesh_gen")
+surface_material_override/0 = SubResource("StandardMaterial3D_gen_core")
+
+[node name="GeneratorBreaker" parent="Compartments/EngineeringBay" instance=ExtResource("4_switch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 17.8)
+switch_target = "primary_power"
+label_name = "Generator Primary Breaker"
+
+[node name="BusBreaker" parent="Compartments/EngineeringBay" instance=ExtResource("4_switch")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4.8, 1.3, 15.0)
+switch_target = "power_distribution"
+label_name = "Distribution Bus Relay"
+
+[node name="Workbench" type="StaticBody3D" parent="Compartments/EngineeringBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 0.45, 15.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/EngineeringBay/Workbench"]
+shape = SubResource("BoxShape3D_table")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/EngineeringBay/Workbench"]
+mesh = SubResource("BoxMesh_table")
+surface_material_override/0 = SubResource("StandardMaterial3D_machinery")
+
+[node name="SpareCouplerPickup" parent="Compartments/EngineeringBay" instance=ExtResource("8_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 1.05, 15.0)
+
+[node name="EngineeringTerminal" parent="Compartments/EngineeringBay" instance=ExtResource("7_term")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -3.5, 0, 13.0)
+terminal_type = "diagnostics"
+terminal_title = "Engineering Diagnostics Console"
+
+[node name="EngineeringSensor" parent="Compartments/EngineeringBay" instance=ExtResource("9_sensor")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4.9, 1.6, 18.0)
+compartment_id = "engineering_bay"
+sensor_name = "Engineering Atmospheric Sensor"
+
+[node name="EngineeringVentDamper" parent="Compartments/EngineeringBay" instance=ExtResource("10_damper")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 4.9, 2.4, 18.0)
+compartment_id = "engineering_bay"
+damper_name = "Engineering Vent Damper"
+
+[node name="EngineeringLocker" parent="Compartments/EngineeringBay" instance=ExtResource("13_locker")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4.9, 0, 19.5)
+interactable_id = "EngineeringLocker"
+locker_name = "Engineering Supply Locker"
+stored_items = {
+"battery_cell": 2,
+"diagnostic_scanner": 1,
+"multitool": 1,
+"spare_fuse": 3
+}
+
+[node name="EngineeringWorkbenchStation" parent="Compartments/EngineeringBay" instance=ExtResource("14_bench")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 0.9, 13.5)
+interactable_id = "EngineeringWorkbenchStation"
+station_name = "Engineering Bay Workbench & Recharge Cradle"
+
+[node name="EngineeringConduitRepair" parent="Compartments/EngineeringBay" instance=ExtResource("15_multistep")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4.9, 0.8, 16.5)
+interactable_id = "EngineeringConduitRepair"
+panel_title = "Primary Power Conduit Junction"
+device_id = "training_power_conduit"
+associated_fault_id = "CONDUIT_BLOWN_FUSE"
+required_item = "spare_fuse"
+component_name = "Power Conduit Fuse Pack"
+
+[node name="Lights" type="Node3D" parent="Compartments/EngineeringBay"]
+
+[node name="LightCenter" type="OmniLight3D" parent="Compartments/EngineeringBay/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 16)
+light_color = Color(0.9, 0.2, 0.1, 1)
+light_energy = 0.5
+omni_range = 10.0
+
+[node name="LightGen" type="OmniLight3D" parent="Compartments/EngineeringBay/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 18.0)
+light_color = Color(0.9, 0.2, 0.1, 1)
+light_energy = 0.6
+omni_range = 6.0
+
+[node name="Corridors" type="Node3D" parent="Compartments"]
+
+[node name="DoorAft" parent="Compartments/Corridors" instance=ExtResource("5_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11)
+door_name = "Engineering Bulkhead Door"
+device_id = "door_aft"
+
+[node name="FloorAft" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/FloorAft"]
+shape = SubResource("BoxShape3D_corridor_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/FloorAft"]
+mesh = SubResource("BoxMesh_corridor_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="CeilingAft" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, 8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/CeilingAft"]
+shape = SubResource("BoxShape3D_corridor_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/CeilingAft"]
+mesh = SubResource("BoxMesh_corridor_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallAftLeftNorth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 1.8, 5.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallAftLeftNorth"]
+shape = SubResource("BoxShape3D_corridor_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallAftLeftNorth"]
+mesh = SubResource("BoxMesh_corridor_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftLeftSouth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 1.8, 10.1)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallAftLeftSouth"]
+shape = SubResource("BoxShape3D_corridor_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallAftLeftSouth"]
+mesh = SubResource("BoxMesh_corridor_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftLeftHeader" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 3.1, 8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallAftLeftHeader"]
+shape = SubResource("BoxShape3D_corridor_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallAftLeftHeader"]
+mesh = SubResource("BoxMesh_corridor_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftRightNorth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 1.8, 5.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallAftRightNorth"]
+shape = SubResource("BoxShape3D_corridor_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallAftRightNorth"]
+mesh = SubResource("BoxMesh_corridor_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftRightSouth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 1.8, 10.1)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallAftRightSouth"]
+shape = SubResource("BoxShape3D_corridor_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallAftRightSouth"]
+mesh = SubResource("BoxMesh_corridor_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftRightHeader" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 3.1, 8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallAftRightHeader"]
+shape = SubResource("BoxShape3D_corridor_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallAftRightHeader"]
+mesh = SubResource("BoxMesh_corridor_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorForward" parent="Compartments/Corridors" instance=ExtResource("5_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+door_name = "Bridge Bulkhead Door"
+device_id = "door_fwd"
+
+[node name="FloorFwd" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, -8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/FloorFwd"]
+shape = SubResource("BoxShape3D_corridor_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/FloorFwd"]
+mesh = SubResource("BoxMesh_corridor_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="CeilingFwd" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, -8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/CeilingFwd"]
+shape = SubResource("BoxShape3D_corridor_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/CeilingFwd"]
+mesh = SubResource("BoxMesh_corridor_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallFwdLeftNorth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 1.8, -10.1)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallFwdLeftNorth"]
+shape = SubResource("BoxShape3D_corridor_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallFwdLeftNorth"]
+mesh = SubResource("BoxMesh_corridor_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFwdLeftSouth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 1.8, -5.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallFwdLeftSouth"]
+shape = SubResource("BoxShape3D_corridor_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallFwdLeftSouth"]
+mesh = SubResource("BoxMesh_corridor_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFwdLeftHeader" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 3.1, -8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallFwdLeftHeader"]
+shape = SubResource("BoxShape3D_corridor_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallFwdLeftHeader"]
+mesh = SubResource("BoxMesh_corridor_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFwdRightNorth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 1.8, -10.1)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallFwdRightNorth"]
+shape = SubResource("BoxShape3D_corridor_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallFwdRightNorth"]
+mesh = SubResource("BoxMesh_corridor_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFwdRightSouth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 1.8, -5.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallFwdRightSouth"]
+shape = SubResource("BoxShape3D_corridor_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallFwdRightSouth"]
+mesh = SubResource("BoxMesh_corridor_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFwdRightHeader" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 3.1, -8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/WallFwdRightHeader"]
+shape = SubResource("BoxShape3D_corridor_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/WallFwdRightHeader"]
+mesh = SubResource("BoxMesh_corridor_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="CorridorSensor" parent="Compartments/Corridors" instance=ExtResource("9_sensor")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.15, 1.6, 7.5)
+compartment_id = "corridors"
+sensor_name = "Corridor Atmospheric Sensor"
+
+[node name="CorridorVentDamper" parent="Compartments/Corridors" instance=ExtResource("10_damper")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -1.15, 2.4, -7.5)
+compartment_id = "corridors"
+damper_name = "Corridor Vent Damper"
+
+[node name="DoorWingPort" parent="Compartments/Corridors" instance=ExtResource("5_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.4, 0, -8.0)
+door_name = "Port Wing Bulkhead"
+device_id = "door_wing_port"
+
+[node name="DoorWingStarboard" parent="Compartments/Corridors" instance=ExtResource("5_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 1.4, 0, -8.0)
+door_name = "Starboard Wing Bulkhead"
+device_id = "door_wing_starboard"
+
+[node name="HallFloorCrew" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, -0.2, -8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallFloorCrew"]
+shape = SubResource("BoxShape3D_hall_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallFloorCrew"]
+mesh = SubResource("BoxMesh_hall_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="HallCeilingCrew" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 3.8, -8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallCeilingCrew"]
+shape = SubResource("BoxShape3D_hall_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallCeilingCrew"]
+mesh = SubResource("BoxMesh_hall_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="HallWallCrewNorth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 1.8, -9.4)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallWallCrewNorth"]
+shape = SubResource("BoxShape3D_hall_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallWallCrewNorth"]
+mesh = SubResource("BoxMesh_hall_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="HallWallCrewSouth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 1.8, -6.6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallWallCrewSouth"]
+shape = SubResource("BoxShape3D_hall_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallWallCrewSouth"]
+mesh = SubResource("BoxMesh_hall_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="HallFloorMedbay" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, -0.2, -8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallFloorMedbay"]
+shape = SubResource("BoxShape3D_hall_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallFloorMedbay"]
+mesh = SubResource("BoxMesh_hall_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="HallCeilingMedbay" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 3.8, -8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallCeilingMedbay"]
+shape = SubResource("BoxShape3D_hall_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallCeilingMedbay"]
+mesh = SubResource("BoxMesh_hall_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="HallWallMedbayNorth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 1.8, -9.4)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallWallMedbayNorth"]
+shape = SubResource("BoxShape3D_hall_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallWallMedbayNorth"]
+mesh = SubResource("BoxMesh_hall_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="HallWallMedbaySouth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 1.8, -6.6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallWallMedbaySouth"]
+shape = SubResource("BoxShape3D_hall_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallWallMedbaySouth"]
+mesh = SubResource("BoxMesh_hall_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="HallFloorCargo" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, -0.2, 8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallFloorCargo"]
+shape = SubResource("BoxShape3D_hall_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallFloorCargo"]
+mesh = SubResource("BoxMesh_hall_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="HallCeilingCargo" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 3.8, 8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallCeilingCargo"]
+shape = SubResource("BoxShape3D_hall_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallCeilingCargo"]
+mesh = SubResource("BoxMesh_hall_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="HallWallCargoNorth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 1.8, 6.6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallWallCargoNorth"]
+shape = SubResource("BoxShape3D_hall_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallWallCargoNorth"]
+mesh = SubResource("BoxMesh_hall_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="HallWallCargoSouth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 1.8, 9.4)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallWallCargoSouth"]
+shape = SubResource("BoxShape3D_hall_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallWallCargoSouth"]
+mesh = SubResource("BoxMesh_hall_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="HallFloorAirlock" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, -0.2, 8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallFloorAirlock"]
+shape = SubResource("BoxShape3D_hall_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallFloorAirlock"]
+mesh = SubResource("BoxMesh_hall_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="HallCeilingAirlock" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 3.8, 8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallCeilingAirlock"]
+shape = SubResource("BoxShape3D_hall_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallCeilingAirlock"]
+mesh = SubResource("BoxMesh_hall_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="HallWallAirlockNorth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 1.8, 6.6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallWallAirlockNorth"]
+shape = SubResource("BoxShape3D_hall_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallWallAirlockNorth"]
+mesh = SubResource("BoxMesh_hall_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="HallWallAirlockSouth" type="StaticBody3D" parent="Compartments/Corridors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 1.8, 9.4)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Corridors/HallWallAirlockSouth"]
+shape = SubResource("BoxShape3D_hall_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Corridors/HallWallAirlockSouth"]
+mesh = SubResource("BoxMesh_hall_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="Lights" type="Node3D" parent="Compartments/Corridors"]
+
+[node name="LightAft" type="OmniLight3D" parent="Compartments/Corridors/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 8)
+light_color = Color(0.6, 0.1, 0.1, 1)
+light_energy = 0.3
+omni_range = 6.0
+
+[node name="LightFwd" type="OmniLight3D" parent="Compartments/Corridors/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, -8)
+light_color = Color(0.6, 0.1, 0.1, 1)
+light_energy = 0.3
+omni_range = 6.0
+
+[node name="LifeSupport" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/Floor"]
+shape = SubResource("BoxShape3D_room_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/Floor"]
+mesh = SubResource("BoxMesh_room_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/Ceiling"]
+shape = SubResource("BoxShape3D_room_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/Ceiling"]
+mesh = SubResource("BoxMesh_room_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallLeft" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 1.8, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/WallLeft"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/WallLeft"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallRight" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2, 1.8, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/WallRight"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/WallRight"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftLeft" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 1.8, 5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/WallAftLeft"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/WallAftLeft"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftRight" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 1.8, 5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/WallAftRight"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/WallAftRight"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftHeader" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, 5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/WallAftHeader"]
+shape = SubResource("BoxShape3D_wall_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/WallAftHeader"]
+mesh = SubResource("BoxMesh_wall_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFwdLeft" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 1.8, -5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/WallFwdLeft"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/WallFwdLeft"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFwdRight" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 1.8, -5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/WallFwdRight"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/WallFwdRight"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallFwdHeader" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, -5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/WallFwdHeader"]
+shape = SubResource("BoxShape3D_wall_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/WallFwdHeader"]
+mesh = SubResource("BoxMesh_wall_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="ScrubberColLeft" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 1.8, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/ScrubberColLeft"]
+shape = SubResource("CylinderShape3D_gen")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/ScrubberColLeft"]
+mesh = SubResource("CylinderMesh_gen")
+surface_material_override/0 = SubResource("StandardMaterial3D_scrubber")
+
+[node name="ScrubberColRight" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1.8, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/ScrubberColRight"]
+shape = SubResource("CylinderShape3D_gen")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/ScrubberColRight"]
+mesh = SubResource("CylinderMesh_gen")
+surface_material_override/0 = SubResource("StandardMaterial3D_scrubber")
+
+[node name="CoolantRepairPanel" parent="Compartments/LifeSupport" instance=ExtResource("6_panel")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 4.9, 1.3, 2.4)
+required_item = "coolant_coupler"
+component_name = "Coolant Coupler"
+
+[node name="LifeSupportTerminal" parent="Compartments/LifeSupport" instance=ExtResource("7_term")]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -3.5, 0, -2.5)
+terminal_type = "diagnostics"
+terminal_title = "Atmospheric Diagnostics Console"
+
+[node name="OxygenGenerator" type="StaticBody3D" parent="Compartments/LifeSupport"]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 3.0, 1.0, -3.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/LifeSupport/OxygenGenerator"]
+shape = SubResource("CylinderShape3D_gen")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/LifeSupport/OxygenGenerator"]
+mesh = SubResource("CylinderMesh_gen")
+surface_material_override/0 = SubResource("StandardMaterial3D_machinery")
+
+[node name="CoreGlow" type="MeshInstance3D" parent="Compartments/LifeSupport/OxygenGenerator"]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, 0)
+mesh = SubResource("CylinderMesh_gen")
+surface_material_override/0 = SubResource("StandardMaterial3D_o2_core")
+
+[node name="LifeSupportSensor" parent="Compartments/LifeSupport" instance=ExtResource("9_sensor")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4.9, 1.6, 1.5)
+compartment_id = "life_support"
+sensor_name = "Life Support Atmospheric Sensor"
+
+[node name="LifeSupportVentDamper" parent="Compartments/LifeSupport" instance=ExtResource("10_damper")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4.9, 2.4, -1.5)
+compartment_id = "life_support"
+damper_name = "Life Support Vent Damper"
+
+[node name="ScrubberServicePanel" parent="Compartments/LifeSupport" instance=ExtResource("11_scrub")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 1.3, 1.8)
+
+[node name="PressureIsolationValve" parent="Compartments/LifeSupport" instance=ExtResource("12_valve")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 4.9, 1.3, -1.5)
+valve_type = "pressure"
+valve_name = "Emergency Pressure Isolation Valve"
+
+[node name="RadiatorBypassValve" parent="Compartments/LifeSupport" instance=ExtResource("12_valve")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 4.9, 1.3, 0.5)
+valve_type = "cooling"
+valve_name = "Radiator Cooling Bypass Valve"
+
+[node name="LifeSupportLocker" parent="Compartments/LifeSupport" instance=ExtResource("13_locker")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.9, 0, -3.5)
+interactable_id = "LifeSupportLocker"
+locker_name = "Life Support Supply Locker"
+stored_items = {
+"coolant_canister": 2,
+"coolant_coupler": 1,
+"scrubber_cartridge": 2
+}
+
+[node name="LifeSupportManifoldRepair" parent="Compartments/LifeSupport" instance=ExtResource("15_multistep")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 4.9, 0.8, 3.8)
+interactable_id = "LifeSupportManifoldRepair"
+panel_title = "Coolant Distribution Manifold"
+device_id = "coolant_distribution_manifold"
+associated_fault_id = "MANIFOLD_CLAMP_LOOSE"
+required_item = "coolant_canister"
+component_name = "Coolant Manifold Seal"
+action_name = "Torque Clamp Collar"
+required_multitool_mode = "TIGHTEN"
+
+[node name="Lights" type="Node3D" parent="Compartments/LifeSupport"]
+
+[node name="LightLS" type="OmniLight3D" parent="Compartments/LifeSupport/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+light_color = Color(0.9, 0.3, 0.1, 1)
+light_energy = 0.4
+omni_range = 10.0
+
+[node name="Bridge" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, -16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/Floor"]
+shape = SubResource("BoxShape3D_room_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/Floor"]
+mesh = SubResource("BoxMesh_room_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, -16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/Ceiling"]
+shape = SubResource("BoxShape3D_room_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/Ceiling"]
+mesh = SubResource("BoxMesh_room_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallLeft" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 1.8, -16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/WallLeft"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/WallLeft"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallRightNorth" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 5.2, 1.8, -19.3)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/WallRightNorth"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/WallRightNorth"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallRightSouth" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 5.2, 1.8, -12.7)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/WallRightSouth"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/WallRightSouth"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallRightHeader" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 5.2, 3.1, -16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/WallRightHeader"]
+shape = SubResource("BoxShape3D_wall_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/WallRightHeader"]
+mesh = SubResource("BoxMesh_wall_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftLeft" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 1.8, -11)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/WallAftLeft"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/WallAftLeft"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftRight" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 1.8, -11)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/WallAftRight"]
+shape = SubResource("BoxShape3D_wall_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/WallAftRight"]
+mesh = SubResource("BoxMesh_wall_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAftHeader" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, -11)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/WallAftHeader"]
+shape = SubResource("BoxShape3D_wall_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/WallAftHeader"]
+mesh = SubResource("BoxMesh_wall_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="CockpitWindow" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -21.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/CockpitWindow"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/CockpitWindow"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_window")
+
+[node name="HoloTable" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -15.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/HoloTable"]
+shape = SubResource("BoxShape3D_table")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/HoloTable"]
+mesh = SubResource("BoxMesh_table")
+surface_material_override/0 = SubResource("StandardMaterial3D_machinery")
+
+[node name="HoloProjector" type="MeshInstance3D" parent="Compartments/Bridge/HoloTable"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+mesh = SubResource("CylinderMesh_gen")
+surface_material_override/0 = SubResource("StandardMaterial3D_holo")
+
+[node name="HelmConsole" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -19.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/HelmConsole"]
+shape = SubResource("BoxShape3D_table")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/HelmConsole"]
+mesh = SubResource("BoxMesh_table")
+surface_material_override/0 = SubResource("StandardMaterial3D_machinery")
+
+[node name="DepartureSwitch" parent="Compartments/Bridge" instance=ExtResource("4_switch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -19.0)
+switch_target = "propulsion"
+label_name = "Orbital Departure Switch"
+
+[node name="BridgeCommsTerminal" parent="Compartments/Bridge" instance=ExtResource("7_term")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4.8, 0, -16.0)
+terminal_type = "bridge_comms"
+terminal_title = "Bridge Comms Array"
+
+[node name="BridgeSensor" parent="Compartments/Bridge" instance=ExtResource("9_sensor")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 4.9, 1.6, -16.0)
+compartment_id = "bridge"
+sensor_name = "Bridge Atmospheric Sensor"
+
+[node name="BridgeVentDamper" parent="Compartments/Bridge" instance=ExtResource("10_damper")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 4.9, 2.4, -13.5)
+compartment_id = "bridge"
+damper_name = "Bridge Vent Damper"
+
+[node name="BridgeLocker" parent="Compartments/Bridge" instance=ExtResource("13_locker")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9, 0, -19.0)
+interactable_id = "BridgeLocker"
+locker_name = "Bridge Emergency Cabinet"
+stored_items = {
+"battery_cell": 2,
+"spare_fuse": 1
+}
+
+[node name="Lights" type="Node3D" parent="Compartments/Bridge"]
+
+[node name="LightBridge" type="OmniLight3D" parent="Compartments/Bridge/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, -16)
+light_color = Color(0.4, 0.1, 0.1, 1)
+light_energy = 0.35
+omni_range = 10.0
+
+[node name="HoloLight" type="OmniLight3D" parent="Compartments/Bridge/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -15)
+light_color = Color(0.2, 0.7, 1, 1)
+light_energy = 1.0
+omni_range = 4.0
+
+[node name="AvionicsBay" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/AvionicsBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, -0.2, -16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AvionicsBay/Floor"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AvionicsBay/Floor"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/AvionicsBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 3.8, -16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AvionicsBay/Ceiling"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AvionicsBay/Ceiling"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallEast" type="StaticBody3D" parent="Compartments/AvionicsBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.0, 1.8, -16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AvionicsBay/WallEast"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AvionicsBay/WallEast"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorth" type="StaticBody3D" parent="Compartments/AvionicsBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.8, -20.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AvionicsBay/WallNorth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AvionicsBay/WallNorth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="Compartments/AvionicsBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.8, -12.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AvionicsBay/WallSouth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AvionicsBay/WallSouth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorAvionics" parent="Compartments/AvionicsBay" instance=ExtResource("5_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 5.2, 0, -16)
+door_name = "Avionics Access Door"
+device_id = "door_avionics"
+
+[node name="AvionicsRelayBank" parent="Compartments/AvionicsBay" instance=ExtResource("15_multistep")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 14.5, 0.8, -16)
+interactable_id = "AvionicsRelayBank"
+panel_title = "Flight Avionics Relay Bank"
+device_id = "avionics_relay_bank"
+associated_fault_id = "AVIONICS_BUS_FAULT"
+required_item = "spare_fuse"
+component_name = "Relay Switch Matrix"
+
+[node name="AvionicsSensor" parent="Compartments/AvionicsBay" instance=ExtResource("9_sensor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.6, -19.5)
+compartment_id = "avionics_bay"
+sensor_name = "Avionics Atmospheric Sensor"
+
+[node name="AvionicsVentDamper" parent="Compartments/AvionicsBay" instance=ExtResource("10_damper")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 2.4, -12.5)
+compartment_id = "avionics_bay"
+damper_name = "Avionics Vent Damper"
+
+[node name="Lights" type="Node3D" parent="Compartments/AvionicsBay"]
+
+[node name="LightAvionics" type="OmniLight3D" parent="Compartments/AvionicsBay/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 3.0, -16)
+light_color = Color(0.1, 0.3, 1, 1)
+light_energy = 1.2
+omni_range = 8.0
+
+[node name="CrewQuarters" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/CrewQuarters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, -0.2, -8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CrewQuarters/Floor"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CrewQuarters/Floor"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/CrewQuarters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 3.8, -8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CrewQuarters/Ceiling"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CrewQuarters/Ceiling"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallWest" type="StaticBody3D" parent="Compartments/CrewQuarters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.0, 1.8, -8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CrewQuarters/WallWest"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CrewQuarters/WallWest"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorth" type="StaticBody3D" parent="Compartments/CrewQuarters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.8, -12.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CrewQuarters/WallNorth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CrewQuarters/WallNorth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="Compartments/CrewQuarters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.8, -4.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CrewQuarters/WallSouth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CrewQuarters/WallSouth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorCrew" parent="Compartments/CrewQuarters" instance=ExtResource("5_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -4.0, 0, -8.0)
+door_name = "Crew Quarters Bulkhead Door"
+device_id = "door_crew"
+
+[node name="WallEastNorth" type="StaticBody3D" parent="Compartments/CrewQuarters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.0, 1.8, -10.6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CrewQuarters/WallEastNorth"]
+shape = SubResource("BoxShape3D_room_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CrewQuarters/WallEastNorth"]
+mesh = SubResource("BoxMesh_room_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastSouth" type="StaticBody3D" parent="Compartments/CrewQuarters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.0, 1.8, -5.4)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CrewQuarters/WallEastSouth"]
+shape = SubResource("BoxShape3D_room_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CrewQuarters/WallEastSouth"]
+mesh = SubResource("BoxMesh_room_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastHeader" type="StaticBody3D" parent="Compartments/CrewQuarters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.0, 3.1, -8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CrewQuarters/WallEastHeader"]
+shape = SubResource("BoxShape3D_corridor_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CrewQuarters/WallEastHeader"]
+mesh = SubResource("BoxMesh_corridor_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WaterRecyclerPump" parent="Compartments/CrewQuarters" instance=ExtResource("6_panel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.3, -11.5)
+required_item = "coolant_coupler"
+component_name = "Pump Impeller Seal"
+device_id = "water_recycler_pump"
+panel_title = "Water Recycler Pump Impeller"
+
+[node name="CrewLocker" parent="Compartments/CrewQuarters" instance=ExtResource("13_locker")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -5)
+interactable_id = "CrewLocker"
+locker_name = "Crew Habitation Locker"
+stored_items = {
+"battery_cell": 2,
+"spare_fuse": 2
+}
+
+[node name="CrewSensor" parent="Compartments/CrewQuarters" instance=ExtResource("9_sensor")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -13.5, 1.6, -8)
+compartment_id = "crew_quarters"
+sensor_name = "Crew Quarters Atmospheric Sensor"
+
+[node name="CrewVentDamper" parent="Compartments/CrewQuarters" instance=ExtResource("10_damper")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 2.4, -4.5)
+compartment_id = "crew_quarters"
+damper_name = "Crew Vent Damper"
+
+[node name="Lights" type="Node3D" parent="Compartments/CrewQuarters"]
+
+[node name="LightCrew" type="OmniLight3D" parent="Compartments/CrewQuarters/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 3.0, -8)
+light_color = Color(1, 0.8, 0.4, 1)
+light_energy = 1.1
+omni_range = 8.0
+
+[node name="Medbay" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/Medbay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, -0.2, -8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Medbay/Floor"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Medbay/Floor"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/Medbay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 3.8, -8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Medbay/Ceiling"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Medbay/Ceiling"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallEast" type="StaticBody3D" parent="Compartments/Medbay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.0, 1.8, -8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Medbay/WallEast"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Medbay/WallEast"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorth" type="StaticBody3D" parent="Compartments/Medbay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1.8, -12.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Medbay/WallNorth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Medbay/WallNorth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="Compartments/Medbay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1.8, -4.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Medbay/WallSouth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Medbay/WallSouth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorMedbay" parent="Compartments/Medbay" instance=ExtResource("5_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4.0, 0, -8.0)
+door_name = "Medbay Infirmary Door"
+device_id = "door_medbay"
+
+[node name="WallWestNorth" type="StaticBody3D" parent="Compartments/Medbay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.0, 1.8, -10.6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Medbay/WallWestNorth"]
+shape = SubResource("BoxShape3D_room_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Medbay/WallWestNorth"]
+mesh = SubResource("BoxMesh_room_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWestSouth" type="StaticBody3D" parent="Compartments/Medbay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.0, 1.8, -5.4)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Medbay/WallWestSouth"]
+shape = SubResource("BoxShape3D_room_door_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Medbay/WallWestSouth"]
+mesh = SubResource("BoxMesh_room_door_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWestHeader" type="StaticBody3D" parent="Compartments/Medbay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.0, 3.1, -8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Medbay/WallWestHeader"]
+shape = SubResource("BoxShape3D_corridor_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Medbay/WallWestHeader"]
+mesh = SubResource("BoxMesh_corridor_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="MedicalOxygenBooster" parent="Compartments/Medbay" instance=ExtResource("12_valve")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 13.5, 1.3, -8)
+valve_type = "pressure"
+valve_name = "Medical Oxygen Booster Unit"
+device_id = "medical_oxygen_booster"
+
+[node name="MedbayTerminal" parent="Compartments/Medbay" instance=ExtResource("7_term")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 7, 0, -11)
+terminal_type = "diagnostics"
+terminal_title = "Medbay Triage Terminal"
+
+[node name="TraumaLocker" parent="Compartments/Medbay" instance=ExtResource("13_locker")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -5)
+interactable_id = "TraumaLocker"
+locker_name = "Medbay Trauma Supply Cabinet"
+stored_items = {
+"battery_cell": 2,
+"coolant_canister": 1
+}
+
+[node name="MedbaySensor" parent="Compartments/Medbay" instance=ExtResource("9_sensor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1.6, -11.5)
+compartment_id = "medbay"
+sensor_name = "Medbay Atmospheric Sensor"
+
+[node name="MedbayVentDamper" parent="Compartments/Medbay" instance=ExtResource("10_damper")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 2.4, -4.5)
+compartment_id = "medbay"
+damper_name = "Medbay Vent Damper"
+
+[node name="Lights" type="Node3D" parent="Compartments/Medbay"]
+
+[node name="LightMedbay" type="OmniLight3D" parent="Compartments/Medbay/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 3.0, -8)
+light_color = Color(0.95, 0.98, 1, 1)
+light_energy = 1.3
+omni_range = 8.0
+
+[node name="CargoBay" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, -0.2, 9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/Floor"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/Floor"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 3.8, 9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/Ceiling"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/Ceiling"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallWest" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.0, 1.8, 9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/WallWest"]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/WallWest"]
+mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorth" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.8, 5.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/WallNorth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/WallNorth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.8, 13.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/WallSouth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/WallSouth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorCargo" parent="Compartments/CargoBay" instance=ExtResource("5_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -4.0, 0, 8.0)
+door_name = "Cargo Bay Access Door"
+device_id = "door_cargo"
+
+[node name="WallEastNorth" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.0, 1.8, 5.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/WallEastNorth"]
+shape = SubResource("BoxShape3D_room_door_side_short")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/WallEastNorth"]
+mesh = SubResource("BoxMesh_room_door_side_short")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastSouth" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.0, 1.8, 11.1)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/WallEastSouth"]
+shape = SubResource("BoxShape3D_room_door_side_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/WallEastSouth"]
+mesh = SubResource("BoxMesh_room_door_side_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastHeader" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.0, 3.1, 8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/WallEastHeader"]
+shape = SubResource("BoxShape3D_corridor_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/WallEastHeader"]
+mesh = SubResource("BoxMesh_corridor_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorCrawlwayCargo" parent="Compartments/CargoBay" instance=ExtResource("5_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 13.0)
+door_name = "Crawlway Cargo Access Hatch"
+requires_multitool_to_unlock = true
+multitool_mode_required = "CUT_WELD"
+device_id = "door_crawlway_cargo"
+
+[node name="CargoHoistJunction" parent="Compartments/CargoBay" instance=ExtResource("6_panel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.3, 5.5)
+required_item = "spare_fuse"
+component_name = "Hoist Circuit Fuse"
+device_id = "cargo_hoist_junction"
+panel_title = "Cargo Hoist Electrical Junction"
+
+[node name="SalvageCrate" parent="Compartments/CargoBay" instance=ExtResource("17_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, 10.5)
+device_id = "salvage_crate"
+
+[node name="CrawlRampCargo" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 0.908, -0.419, 0, 0.419, 0.908, -10.0, -0.6, 14.3)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/CrawlRampCargo"]
+shape = SubResource("BoxShape3D_crawl_ramp")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlRampCargo"]
+mesh = SubResource("BoxMesh_crawl_ramp")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="CrawlConnectorCargo" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.75, -1.4, 16.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/CrawlConnectorCargo"]
+shape = SubResource("BoxShape3D_crawl_connector")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlConnectorCargo"]
+mesh = SubResource("BoxMesh_crawl_connector")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="CargoSensor" parent="Compartments/CargoBay" instance=ExtResource("9_sensor")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.5, 1.6, 9)
+compartment_id = "cargo_bay"
+sensor_name = "Cargo Bay Atmospheric Sensor"
+
+[node name="CargoVentDamper" parent="Compartments/CargoBay" instance=ExtResource("10_damper")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.4, 5.5)
+compartment_id = "cargo_bay"
+damper_name = "Cargo Vent Damper"
+
+[node name="Lights" type="Node3D" parent="Compartments/CargoBay"]
+
+[node name="LightCargo" type="OmniLight3D" parent="Compartments/CargoBay/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 3.0, 9)
+light_color = Color(1, 0.6, 0.1, 1)
+light_energy = 1.2
+omni_range = 8.0
+
+[node name="AirlockChamber" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, -0.2, 9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/Floor"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/Floor"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 3.8, 9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/Ceiling"]
+shape = SubResource("BoxShape3D_wing_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/Ceiling"]
+mesh = SubResource("BoxMesh_wing_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallEastNorth" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.0, 1.8, 5.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/WallEastNorth"]
+shape = SubResource("BoxShape3D_room_door_side_short")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/WallEastNorth"]
+mesh = SubResource("BoxMesh_room_door_side_short")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastSouth" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.0, 1.8, 11.1)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/WallEastSouth"]
+shape = SubResource("BoxShape3D_room_door_side_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/WallEastSouth"]
+mesh = SubResource("BoxMesh_room_door_side_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastHeader" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.0, 3.1, 8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/WallEastHeader"]
+shape = SubResource("BoxShape3D_corridor_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/WallEastHeader"]
+mesh = SubResource("BoxMesh_corridor_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWestNorth" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.0, 1.8, 5.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/WallWestNorth"]
+shape = SubResource("BoxShape3D_room_door_side_short")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/WallWestNorth"]
+mesh = SubResource("BoxMesh_room_door_side_short")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWestSouth" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.0, 1.8, 11.1)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/WallWestSouth"]
+shape = SubResource("BoxShape3D_room_door_side_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/WallWestSouth"]
+mesh = SubResource("BoxMesh_room_door_side_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWestHeader" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.0, 3.1, 8.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/WallWestHeader"]
+shape = SubResource("BoxShape3D_corridor_door_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/WallWestHeader"]
+mesh = SubResource("BoxMesh_corridor_door_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorth" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1.8, 5.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/WallNorth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/WallNorth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="Compartments/AirlockChamber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1.8, 13.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/AirlockChamber/WallSouth"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/AirlockChamber/WallSouth"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="AirlockInner" parent="Compartments/AirlockChamber" instance=ExtResource("5_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4.0, 0, 8.0)
+door_name = "Airlock Inner Door"
+device_id = "airlock_inner"
+
+[node name="AirlockOuter" parent="Compartments/AirlockChamber" instance=ExtResource("5_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 14.0, 0, 8.0)
+door_name = "Airlock Outer EVA Door"
+device_id = "airlock_outer"
+
+[node name="AirlockController" parent="Compartments/AirlockChamber" instance=ExtResource("16_airlock")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 9, 1.3, 12.8)
+inner_door_path = NodePath("../AirlockInner")
+outer_door_path = NodePath("../AirlockOuter")
+
+[node name="AirlockSensor" parent="Compartments/AirlockChamber" instance=ExtResource("9_sensor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1.6, 5.5)
+compartment_id = "airlock_chamber"
+sensor_name = "Airlock Atmospheric Sensor"
+
+[node name="AirlockVentDamper" parent="Compartments/AirlockChamber" instance=ExtResource("10_damper")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2.4, 5.5)
+compartment_id = "airlock_chamber"
+damper_name = "Airlock Vent Damper"
+
+[node name="AirlockSuitLocker" parent="Compartments/AirlockChamber" instance=ExtResource("13_locker")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 5.5)
+interactable_id = "AirlockSuitLocker"
+locker_name = "EVA Suit & Emergency Locker"
+stored_items = {
+"battery_cell": 2
+}
+
+[node name="Lights" type="Node3D" parent="Compartments/AirlockChamber"]
+
+[node name="LightAirlock" type="OmniLight3D" parent="Compartments/AirlockChamber/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 3.0, 9)
+light_color = Color(1, 0.9, 0.2, 1)
+light_energy = 1.1
+omni_range = 8.0
+
+[node name="ReactorSubdeck" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.7, 26.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/ReactorSubdeck/Floor"]
+shape = SubResource("BoxShape3D_subdeck_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/ReactorSubdeck/Floor"]
+mesh = SubResource("BoxMesh_subdeck_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 26.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/ReactorSubdeck/Ceiling"]
+shape = SubResource("BoxShape3D_subdeck_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/ReactorSubdeck/Ceiling"]
+mesh = SubResource("BoxMesh_subdeck_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallEast" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0, -0.7, 26.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/ReactorSubdeck/WallEast"]
+shape = SubResource("BoxShape3D_subdeck_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/ReactorSubdeck/WallEast"]
+mesh = SubResource("BoxMesh_subdeck_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWest" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0, -0.7, 26.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/ReactorSubdeck/WallWest"]
+shape = SubResource("BoxShape3D_subdeck_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/ReactorSubdeck/WallWest"]
+mesh = SubResource("BoxMesh_subdeck_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallAft" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.7, 31.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/ReactorSubdeck/WallAft"]
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/ReactorSubdeck/WallAft"]
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorSubdeck" parent="Compartments/ReactorSubdeck" instance=ExtResource("5_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 21.2)
+door_name = "Reactor Subdeck Access Bulkhead"
+device_id = "door_subdeck"
+
+[node name="SubdeckRamp" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
+transform = Transform3D(1, 0, 0, 0, 0.894427, -0.447214, 0, 0.447214, 0.894427, 0, -1.25, 24.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/ReactorSubdeck/SubdeckRamp"]
+shape = SubResource("BoxShape3D_ramp")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/ReactorSubdeck/SubdeckRamp"]
+mesh = SubResource("BoxMesh_ramp")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="AuxFuelValve" parent="Compartments/ReactorSubdeck" instance=ExtResource("12_valve")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -5.5, -1.2, 26.5)
+valve_type = "cooling"
+valve_name = "Auxiliary Fuel Flow Valve"
+device_id = "aux_fuel_valve"
+
+[node name="AuxBatteryBank" parent="Compartments/ReactorSubdeck" instance=ExtResource("6_panel")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5.5, -1.2, 26.5)
+required_item = "spare_fuse"
+component_name = "Auxiliary Battery Reserve Fuse"
+device_id = "aux_battery_bank"
+panel_title = "Auxiliary Battery Reserve Bank"
+
+[node name="SubdeckTerminal" parent="Compartments/ReactorSubdeck" instance=ExtResource("7_term")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 3, -2.5, 29)
+terminal_type = "diagnostics"
+terminal_title = "Subdeck Telemetry Terminal"
+
+[node name="SubdeckSensor" parent="Compartments/ReactorSubdeck" instance=ExtResource("9_sensor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.0, 31)
+compartment_id = "reactor_subdeck"
+sensor_name = "Reactor Subdeck Atmospheric Sensor"
+
+[node name="SubdeckVentDamper" parent="Compartments/ReactorSubdeck" instance=ExtResource("10_damper")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.5, 31)
+compartment_id = "reactor_subdeck"
+damper_name = "Subdeck Vent Damper"
+
+[node name="Lights" type="Node3D" parent="Compartments/ReactorSubdeck"]
+
+[node name="LightSubdeck" type="OmniLight3D" parent="Compartments/ReactorSubdeck/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 26.5)
+light_color = Color(0.9, 0.2, 0.2, 1)
+light_energy = 1.2
+omni_range = 8.0
+
+[node name="MaintenanceCrawlway" type="Node3D" parent="Compartments"]
+
+[node name="Floor" type="StaticBody3D" parent="Compartments/MaintenanceCrawlway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, -1.4, 18)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/MaintenanceCrawlway/Floor"]
+shape = SubResource("BoxShape3D_crawlway_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/MaintenanceCrawlway/Floor"]
+mesh = SubResource("BoxMesh_crawlway_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Compartments/MaintenanceCrawlway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.8, 18)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/MaintenanceCrawlway/Ceiling"]
+shape = SubResource("BoxShape3D_crawlway_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/MaintenanceCrawlway/Ceiling"]
+mesh = SubResource("BoxMesh_crawlway_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="WallLeft" type="StaticBody3D" parent="Compartments/MaintenanceCrawlway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.0, -0.3, 18)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/MaintenanceCrawlway/WallLeft"]
+shape = SubResource("BoxShape3D_crawlway_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/MaintenanceCrawlway/WallLeft"]
+mesh = SubResource("BoxMesh_crawlway_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallRight" type="StaticBody3D" parent="Compartments/MaintenanceCrawlway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0, -0.3, 18)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/MaintenanceCrawlway/WallRight"]
+shape = SubResource("BoxShape3D_crawlway_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/MaintenanceCrawlway/WallRight"]
+mesh = SubResource("BoxMesh_crawlway_wall")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorCrawlwayEng" parent="Compartments/MaintenanceCrawlway" instance=ExtResource("5_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -5.0, -1.2, 21.5)
+door_name = "Crawlway Engineering Hatch"
+device_id = "door_crawlway_eng"
+
+[node name="HullBreachSeal" parent="Compartments/MaintenanceCrawlway" instance=ExtResource("18_breach")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, -1.2, 18)
+device_id = "hull_breach_seal"
+
+[node name="CrawlRampSubdeck" type="StaticBody3D" parent="Compartments/MaintenanceCrawlway"]
+transform = Transform3D(1, 0, 0, 0, 0.907, -0.420, 0, 0.420, 0.907, -5.0, -1.85, 22.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/MaintenanceCrawlway/CrawlRampSubdeck"]
+shape = SubResource("BoxShape3D_crawl_ramp")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/MaintenanceCrawlway/CrawlRampSubdeck"]
+mesh = SubResource("BoxMesh_crawl_ramp")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="CrawlwaySensor" parent="Compartments/MaintenanceCrawlway" instance=ExtResource("9_sensor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, -0.4, 16.5)
+compartment_id = "maintenance_crawlway"
+sensor_name = "Crawlway Pressure Sensor"
+
+[node name="CrawlwayVentDamper" parent="Compartments/MaintenanceCrawlway" instance=ExtResource("10_damper")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.2, 19.5)
+compartment_id = "maintenance_crawlway"
+damper_name = "Crawlway Vent Damper"
+
+[node name="Lights" type="Node3D" parent="Compartments/MaintenanceCrawlway"]
+
+[node name="LightCrawlway" type="OmniLight3D" parent="Compartments/MaintenanceCrawlway/Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.4, 18)
+light_color = Color(1, 0.1, 0.1, 1)
+light_energy = 1.0
+omni_range = 6.0
