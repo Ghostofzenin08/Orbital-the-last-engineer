@@ -13,6 +13,8 @@ const SalvageCrateClass = preload("res://scripts/interactables/salvage_crate.gd"
 const HullBreachSealClass = preload("res://scripts/interactables/hull_breach_seal.gd")
 const DoorClass = preload("res://scripts/interactables/door.gd")
 const DatapadPickupClass = preload("res://scripts/interactables/datapad_pickup.gd")
+const EmergencyValveClass = preload("res://scripts/interactables/emergency_valve.gd")
+const CrisisManagerClass = preload("res://scripts/systems/crisis_manager.gd")
 
 var tests_passed: int = 0
 var tests_failed: int = 0
@@ -62,6 +64,10 @@ func _ready() -> void:
 	_run_suite("Milestone 5: Datapad Interaction, Encryption & Scanner Battery Drain", _test_m5_datapad_encryption_and_scanner)
 	_run_suite("Milestone 5: Crew Mystery Revelations & Ship System Consequences", _test_m5_revelations_and_system_consequences)
 	_run_suite("Milestone 5: Terminal UI Dossier, Log Filters & Save/Load Persistence", _test_m5_terminal_ui_and_save_load)
+	_run_suite("Milestone 6: Dynamic Crisis Scenarios & Cascading Faults", _test_m6_dynamic_crisis_scenarios_and_cascades)
+	_run_suite("Milestone 6: Alien Stalking, Chamber Trap & Toxic Gas Purge", _test_m6_creature_hunt_and_poison_gas_trap)
+	_run_suite("Milestone 6: Tactical UI Telemetry, Immediate Task & Sizing", _test_m6_tactical_ui_telemetry_and_immediate_task)
+	_run_suite("Milestone 6: Crisis Save / Load Persistence & Legacy Compatibility", _test_m6_save_load_crisis_persistence)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -2245,5 +2251,216 @@ func _test_m5_terminal_ui_and_save_load() -> void:
 	SaveManager.delete_save()
 	MissionManager.reset_missions()
 	ShipState.reset_to_defaults()
+
+func _test_m6_dynamic_crisis_scenarios_and_cascades() -> void:
+	ShipState.reset_to_defaults()
+	_assert_true(ShipState.crisis_manager != null, "CrisisManager is initialized on ShipState")
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.NONE, "CrisisManager starts with no active crisis")
+	_assert_true(ShipState.crisis_manager.current_stage == CrisisManagerClass.Stage.STAGE_0_IDLE, "CrisisManager starts at STAGE_0_IDLE")
+	_assert_true(not ShipState.crisis_manager.is_cascade_active(), "No cascading faults initially active")
+
+	# Start Power Grid Cascade
+	ShipState.start_crisis(CrisisManagerClass.CrisisType.POWER_GRID_CASCADE)
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.POWER_GRID_CASCADE, "Power Grid Cascade crisis started")
+	_assert_true(ShipState.crisis_manager.current_stage == CrisisManagerClass.Stage.STAGE_1_SURGE, "Crisis starts at STAGE_1_SURGE")
+	_assert_true(ShipState.active_faults.has("GENERATOR_TRIP"), "Initial fault GENERATOR_TRIP injected on start")
+
+	# Manual cascade trigger
+	var cascaded = ShipState.trigger_cascading_fault("BUS_ISOLATION")
+	_assert_true(cascaded, "trigger_cascading_fault returns true")
+	_assert_true(ShipState.active_faults.has("BUS_ISOLATION"), "BUS_ISOLATION fault injected into active_faults")
+	_assert_true(ShipState.crisis_manager.active_cascading_faults.has("BUS_ISOLATION"), "BUS_ISOLATION recorded in active_cascading_faults")
+	_assert_true(ShipState.crisis_manager.is_cascade_active(), "is_cascade_active returns true while fault active")
+
+	# Advance stage
+	ShipState.advance_crisis_stage()
+	_assert_true(ShipState.crisis_manager.current_stage == CrisisManagerClass.Stage.STAGE_2_CASCADE, "Stage advances to STAGE_2_CASCADE")
+	_assert_true(ShipState.crisis_manager.stage_name == "BUS_ISOLATION_CASCADE", "Stage 2 name matches BUS_ISOLATION_CASCADE")
+
+	# Automatic cascade timer on tick_systems
+	ShipState.crisis_manager.cascading_timer = 7.99
+	ShipState.tick_systems(0.02)
+	_assert_true(ShipState.crisis_manager.current_stage == CrisisManagerClass.Stage.STAGE_3_CRITICAL, "Automatic timer advances stage to STAGE_3_CRITICAL")
+	_assert_true(ShipState.active_faults.has("CO2_SCRUBBER_SATURATION"), "CO2_SCRUBBER_SATURATION automatically cascaded at Stage 3")
+
+	# Resolve cascade
+	ShipState.crisis_manager.resolve_cascade("BUS_ISOLATION")
+	_assert_true(not ShipState.crisis_manager.active_cascading_faults.has("BUS_ISOLATION"), "BUS_ISOLATION removed from active cascades")
+
+	# Resolve entire crisis
+	ShipState.resolve_crisis()
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.NONE, "CrisisManager cleared to NONE on resolve")
+	_assert_true(ShipState.crisis_manager.current_stage == CrisisManagerClass.Stage.STAGE_5_RESOLVED, "Stage set to STAGE_5_RESOLVED")
+	_assert_true(not ShipState.crisis_manager.is_cascade_active(), "All active cascades cleared on resolve")
+
+	# Reset for cleanliness
+	ShipState.reset_to_defaults()
+
+func _test_m6_creature_hunt_and_poison_gas_trap() -> void:
+	ShipState.reset_to_defaults()
+	
+	# Start creature hunt crisis
+	ShipState.start_crisis(CrisisManagerClass.CrisisType.CREATURE_PREDATORY_HUNT)
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.CREATURE_PREDATORY_HUNT, "Creature Predatory Hunt crisis engaged")
+	_assert_true(ShipState.crisis_manager.creature_state == CrisisManagerClass.CreatureState.STALKING, "Creature initial state is STALKING")
+	_assert_true(not ShipState.crisis_manager.is_creature_trapped, "Creature not trapped initially")
+	_assert_true(not ShipState.crisis_manager.is_creature_eliminated, "Creature not eliminated initially")
+
+	# Advance to aggressive stage
+	ShipState.advance_crisis_stage()
+	_assert_true(ShipState.crisis_manager.creature_state == CrisisManagerClass.CreatureState.AGGRESSIVE, "Creature state transitions to AGGRESSIVE at Stage 2")
+
+	# Trap creature in airlock_chamber
+	var trap_res = ShipState.trap_creature_in_chamber("airlock_chamber")
+	_assert_true(trap_res, "trap_creature_in_chamber returns true")
+	_assert_true(ShipState.crisis_manager.is_creature_trapped, "is_creature_trapped is true")
+	_assert_true(ShipState.crisis_manager.creature_state == CrisisManagerClass.CreatureState.TRAPPED, "Creature state is TRAPPED")
+	_assert_true(ShipState.crisis_manager.target_chamber_id == "airlock_chamber", "Creature chamber is airlock_chamber")
+
+	# Test EmergencyValve with valve_type = "poison_gas"
+	var valve = EmergencyValveClass.new()
+	valve.valve_type = "poison_gas"
+	add_child(valve)
+	
+	var prompt = valve.get_prompt()
+	_assert_true(prompt.to_upper().contains("POISONOUS DECONTAMINATION GAS"), "Valve prompt reflects Poisonous Decontamination Gas")
+	_assert_true(prompt.contains("airlock_chamber"), "Valve prompt specifies targeted trapped chamber")
+
+	# Interact with valve to execute poison gas purge
+	valve._on_interacted(null)
+	_assert_true(ShipState.crisis_manager.is_creature_eliminated, "Creature is eliminated following valve interaction")
+	_assert_true(ShipState.crisis_manager.creature_state == CrisisManagerClass.CreatureState.ELIMINATED, "Creature state is ELIMINATED")
+	_assert_true(ShipState.crisis_manager.poison_gas_valve_opened, "poison_gas_valve_opened flag is true")
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.NONE, "Creature crisis resolved after purge")
+
+	# Post-purge prompt
+	var post_prompt = valve.get_prompt()
+	_assert_true(post_prompt.contains("PURGED"), "Valve prompt reflects PURGED status")
+
+	remove_child(valve)
+	valve.free()
+	ShipState.reset_to_defaults()
+
+func _test_m6_tactical_ui_telemetry_and_immediate_task() -> void:
+	MissionManager.reset_missions()
+	
+	# Verify immediate task strings across all 5 objectives
+	_assert_true(MissionManager.get_current_immediate_task().contains("Generator"), "Objective 0 immediate task points to Generator Breaker")
+	MissionManager.advance_objective()
+	_assert_true(MissionManager.get_current_immediate_task().contains("Bus") or MissionManager.get_current_immediate_task().contains("Relay"), "Objective 1 immediate task points to Distribution Bus Relay")
+	MissionManager.advance_objective()
+	_assert_true(MissionManager.get_current_immediate_task().contains("Scrubber") or MissionManager.get_current_immediate_task().contains("Coupler") or MissionManager.get_current_immediate_task().contains("Filters"), "Objective 2 immediate task points to Scrubber Coupler")
+	MissionManager.advance_objective()
+	_assert_true(MissionManager.get_current_immediate_task().contains("Dish") or MissionManager.get_current_immediate_task().contains("Research") or MissionManager.get_current_immediate_task().contains("Comms"), "Objective 3 immediate task points to Comms / Research Logs")
+	MissionManager.advance_objective()
+	_assert_true(MissionManager.get_current_immediate_task().contains("Trap") or MissionManager.get_current_immediate_task().contains("Purge") or MissionManager.get_current_immediate_task().contains("Gas"), "Objective 4 immediate task points to Trap Alien & Poison Gas Purge")
+	
+	MissionManager.reset_missions()
+
+	# Test HUD scene layout and prompt placement
+	var hud_scene = load("res://scenes/ui/hud.tscn")
+	_assert_true(hud_scene != null, "HUD scene loads successfully")
+	var hud = hud_scene.instantiate()
+	add_child(hud)
+	
+	var info_btn = hud.get_node_or_null("%InfoButton")
+	_assert_true(info_btn != null, "HUD contains %InfoButton")
+	_assert_true(info_btn.text.contains("TAB") and info_btn.text.contains("INFO"), "InfoButton displays [TAB] INFO")
+	
+	var task_lbl = hud.get_node_or_null("%ImmediateTaskLabel")
+	_assert_true(task_lbl != null, "HUD contains %ImmediateTaskLabel below ObjectiveTitle")
+	
+	var gear_lbl = hud.get_node_or_null("%CompactGearLabel")
+	_assert_true(gear_lbl != null, "HUD contains %CompactGearLabel in bottom-left")
+
+	var prompt_lbl = hud.get_node_or_null("%PromptLabel")
+	_assert_true(prompt_lbl != null, "HUD contains %PromptLabel")
+	var prompt_margin = hud.get_node_or_null("PromptMargin")
+	_assert_true(prompt_margin != null and prompt_margin.offset_top >= 130.0, "PromptMargin positioned below targeted object (offset_top >= 130px)")
+	_assert_true(prompt_lbl.get_theme_font_size("font_size") <= 12, "PromptLabel font size decreased to <= 12px (11px)")
+
+	# Verify backwards-compatibility getters on hud_controller
+	_assert_true("o2_bar" in hud, "hud controller exposes legacy o2_bar getter")
+	_assert_true("inventory_lbl" in hud, "hud controller exposes legacy inventory_lbl getter")
+
+	remove_child(hud)
+	hud.free()
+
+	# Test PauseMenu tactical dashboard
+	var pause_scene = load("res://scenes/ui/pause_menu.tscn")
+	_assert_true(pause_scene != null, "PauseMenu scene loads successfully")
+	var pause_menu = pause_scene.instantiate()
+	add_child(pause_menu)
+
+	var telemetry_box = pause_menu.get_node_or_null("%EnvPanel")
+	_assert_true(telemetry_box != null, "PauseMenu has %EnvPanel for life support telemetry")
+	var mission_box = pause_menu.get_node_or_null("%MissionPanel")
+	_assert_true(mission_box != null, "PauseMenu has %MissionPanel for scientist directives")
+	var gear_box = pause_menu.get_node_or_null("%GearPanel")
+	_assert_true(gear_box != null, "PauseMenu has %GearPanel for inventory & scanner gear")
+	var full_brief = pause_menu.get_node_or_null("%PauseMissionDesc")
+	_assert_true(full_brief != null, "PauseMenu has %PauseMissionDesc for complete storyline briefing")
+
+	# Update telemetry and verify pause sync
+	pause_menu.update_telemetry(88.0, 450.0, 101.3, 21.5, "Nominal", "Crew Quarters")
+	_assert_true(abs(pause_menu.get_node("%OxygenBar").value - 88.0) < 0.1, "Pause menu syncs O2 value")
+	_assert_true(pause_menu.get_node("%CO2StatusLabel").text.contains("450"), "Pause menu syncs CO2 reading")
+	_assert_true(pause_menu.get_node("%AtmosphereMetricsLabel").text.contains("21.5") or pause_menu.get_node("%AtmosphereMetricsLabel").text.contains("21"), "Pause menu syncs Temperature reading")
+
+	remove_child(pause_menu)
+	pause_menu.free()
+
+func _test_m6_save_load_crisis_persistence() -> void:
+	ShipState.reset_to_defaults()
+	MissionManager.reset_missions()
+	SaveManager.delete_save()
+
+	# Start crisis and set state
+	ShipState.start_crisis(CrisisManagerClass.CrisisType.CREATURE_PREDATORY_HUNT)
+	ShipState.advance_crisis_stage()
+	ShipState.trap_creature_in_chamber("airlock_chamber")
+	ShipState.trigger_cascading_fault("SPECIMEN_CHAMBER_BREACH")
+
+	var save_ok = SaveManager.save_game()
+	_assert_true(save_ok, "SaveManager.save_game() persists Milestone 6 crisis state")
+
+	# Reset
+	ShipState.reset_to_defaults()
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.NONE, "Crisis cleared on ShipState reset")
+	_assert_true(not ShipState.crisis_manager.is_creature_trapped, "is_creature_trapped cleared on reset")
+
+	# Load game
+	var load_ok = SaveManager.load_game()
+	_assert_true(load_ok, "SaveManager.load_game() succeeds")
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.CREATURE_PREDATORY_HUNT, "Crisis type restored from save")
+	_assert_true(ShipState.crisis_manager.is_creature_trapped, "is_creature_trapped restored from save")
+	_assert_true(ShipState.crisis_manager.creature_state == CrisisManagerClass.CreatureState.TRAPPED, "Creature state restored as TRAPPED")
+	_assert_true(ShipState.crisis_manager.target_chamber_id == "airlock_chamber", "Trapped chamber ID restored as airlock_chamber")
+	_assert_true(ShipState.crisis_manager.active_cascading_faults.has("SPECIMEN_CHAMBER_BREACH"), "Cascading fault restored from save")
+
+	# Legacy save test without crisis key
+	var legacy_save := {
+		"version": 1,
+		"missions": {
+			"current_objective_index": 0,
+			"inventory": []
+		},
+		"ship_state": {
+			"auxiliary_scrubber_active": false
+		}
+	}
+	var lf := FileAccess.open(SaveManager.SAVE_PATH, FileAccess.WRITE)
+	lf.store_string(JSON.stringify(legacy_save))
+	lf.close()
+
+	var leg_load_ok = SaveManager.load_game()
+	_assert_true(leg_load_ok, "Legacy save without 'crisis' key loads without error")
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.NONE, "Legacy save restores clean CrisisType.NONE")
+	_assert_true(ShipState.crisis_manager.current_stage == CrisisManagerClass.Stage.STAGE_0_IDLE, "Legacy save restores clean Stage 0")
+	_assert_true(not ShipState.crisis_manager.is_creature_trapped, "Legacy save restores creature as untrapped")
+
+	SaveManager.delete_save()
+	ShipState.reset_to_defaults()
+	MissionManager.reset_missions()
 
 
