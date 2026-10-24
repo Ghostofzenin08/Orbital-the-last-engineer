@@ -113,23 +113,36 @@ func spawn_in_chamber(chamber_id: String, pos: Vector3 = Vector3.ZERO) -> void:
 		global_position = pos
 	set_state(State.SPAWNING)
 	# Smoothly transition from spawning roar to active stalking
-	get_tree().create_timer(1.2).timeout.connect(func():
-		if current_state == State.SPAWNING:
-			set_state(State.STALKING)
-	)
+	if is_inside_tree() and get_tree() != null:
+		get_tree().create_timer(1.2).timeout.connect(func():
+			if current_state == State.SPAWNING:
+				set_state(State.STALKING)
+		)
 
 func zoom_near_player(player: Node3D, duration: float = 1.0) -> void:
 	target_player = player
 	zoom_duration = maxf(0.2, duration)
 	zoom_progress = 0.0
-	zoom_start_pos = global_position
 	
 	if player != null:
 		# Calculate face-to-face camera vector
 		var forward := -player.global_transform.basis.z.normalized()
+		# If stalker is distant or dormant, spawn/materialize in front of player
+		if global_position.distance_to(player.global_position) > 8.0 or current_state == State.DORMANT:
+			zoom_start_pos = player.global_position + (forward * 6.5)
+			zoom_start_pos.y = player.global_position.y
+			global_position = zoom_start_pos
+		else:
+			zoom_start_pos = global_position
+		
 		zoom_target_pos = player.global_position + (forward * zoom_target_distance)
 		zoom_target_pos.y = player.global_position.y
+		
+		var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(player.global_position.x, player.global_position.z))
+		if flat_dist > 0.05:
+			look_at(Vector3(player.global_position.x, global_position.y, player.global_position.z), Vector3.UP)
 	else:
+		zoom_start_pos = global_position
 		zoom_target_pos = zoom_start_pos + Vector3(0, 0, -2.0)
 	
 	set_state(State.HORROR_ZOOM)
@@ -147,6 +160,8 @@ func trap_in_chamber(chamber_id: String, pos: Vector3 = Vector3.ZERO) -> void:
 	stalk_chamber_id = chamber_id
 	if pos != Vector3.ZERO:
 		global_position = pos
+	elif chamber_id == "airlock_chamber":
+		global_position = Vector3(8.0, 0.0, 8.0)
 	set_state(State.TRAPPED)
 
 func eliminate() -> void:
@@ -161,6 +176,16 @@ func _physics_process(delta: float) -> void:
 	# Breathing & eye pulsing visuals
 	_update_animation_effects(delta)
 	
+	# Apply standard gravity when not grounded
+	if not is_on_floor() and current_state != State.ELIMINATED:
+		velocity.y -= 9.8 * delta
+	else:
+		velocity.y = 0.0
+	
+	# Ensure target player is cached when active
+	if (target_player == null or not is_instance_valid(target_player)) and is_inside_tree() and get_tree() != null:
+		target_player = get_tree().root.find_child("Player", true, false)
+	
 	match current_state:
 		State.HORROR_ZOOM:
 			zoom_progress += delta / zoom_duration
@@ -170,7 +195,9 @@ func _physics_process(delta: float) -> void:
 			global_position = zoom_start_pos.lerp(zoom_target_pos, ease_t)
 			
 			if target_player != null and is_instance_valid(target_player):
-				look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
+				var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(target_player.global_position.x, target_player.global_position.z))
+				if flat_dist > 0.1:
+					look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
 			
 			if zoom_progress >= 1.0:
 				horror_zoom_completed.emit()
@@ -182,7 +209,9 @@ func _physics_process(delta: float) -> void:
 				dir.y = 0.0
 				velocity.x = dir.x * walk_speed
 				velocity.z = dir.z * walk_speed
-				look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
+				var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(target_player.global_position.x, target_player.global_position.z))
+				if flat_dist > 0.1:
+					look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
 				move_and_slide()
 		
 		State.AGGRESSIVE:
@@ -191,7 +220,9 @@ func _physics_process(delta: float) -> void:
 				dir.y = 0.0
 				velocity.x = dir.x * (walk_speed * 1.5)
 				velocity.z = dir.z * (walk_speed * 1.5)
-				look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
+				var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(target_player.global_position.x, target_player.global_position.z))
+				if flat_dist > 0.1:
+					look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
 				move_and_slide()
 		
 		State.TRAPPED:
