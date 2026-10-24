@@ -74,6 +74,7 @@ func _ready() -> void:
 	_run_suite("Milestone 7: 3D Physical Alien Stalker Entity & Horror Boss Zoom Mechanics", _test_m7_physical_stalker_and_horror_zoom)
 	_run_suite("Milestone 7: Extended Exploration & Crisis Stalking Progression Flow", _test_m7_exploration_and_crisis_stalking_flow)
 	_run_suite("Milestone 7: Production Release Polish, Save/Load Persistence & End-Game Verification", _test_m7_production_polish_and_persistence)
+	_run_suite("Milestone 7: Architectural Chamber Connectivity & Horror Encounter Stalking Rigor", _test_m7_chamber_connectivity_and_horror_rigor)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -2850,6 +2851,98 @@ func _test_m7_production_polish_and_persistence() -> void:
 	ShipState.reset_to_defaults()
 	ShipSystemManager.reset_to_defaults()
 	MissionManager.reset_missions()
+
+func _test_m7_chamber_connectivity_and_horror_rigor() -> void:
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+	
+	# 1. Verify 3D level geometry accessibility and doorway connections
+	var level_scene = load("res://scenes/levels/ship_interior.tscn")
+	_assert_true(level_scene != null, "ship_interior.tscn loads for geometry connectivity check")
+	var level = level_scene.instantiate()
+	add_child(level)
+	
+	# Verify Subdeck -> Specimen Vault doorway archway & access ramp
+	_assert_true(level.has_node("Compartments/ReactorSubdeck/WallAftLeft"), "ReactorSubdeck has WallAftLeft archway post")
+	_assert_true(level.has_node("Compartments/ReactorSubdeck/WallAftRight"), "ReactorSubdeck has WallAftRight archway post")
+	_assert_true(level.has_node("Compartments/ReactorSubdeck/WallAftHeader"), "ReactorSubdeck has WallAftHeader doorway lintel")
+	_assert_true(level.has_node("Compartments/ReactorSubdeck/VaultAccessRamp"), "ReactorSubdeck has VaultAccessRamp connector")
+	
+	# Verify Bridge -> Research Observatory doorway archway & corridor connector
+	_assert_true(level.has_node("Compartments/Bridge/WallLeftNorth"), "Bridge has WallLeftNorth archway post")
+	_assert_true(level.has_node("Compartments/Bridge/WallLeftSouth"), "Bridge has WallLeftSouth archway post")
+	_assert_true(level.has_node("Compartments/Bridge/WallLeftHeader"), "Bridge has WallLeftHeader doorway lintel")
+	_assert_true(level.has_node("Compartments/ResearchObservatory/CorridorFloor"), "ResearchObservatory has CorridorFloor connector")
+	_assert_true(level.has_node("Compartments/ResearchObservatory/CorridorCeiling"), "ResearchObservatory has CorridorCeiling connector")
+	_assert_true(level.has_node("Compartments/ResearchObservatory/CorridorWallNorth"), "ResearchObservatory has CorridorWallNorth")
+	_assert_true(level.has_node("Compartments/ResearchObservatory/CorridorWallSouth"), "ResearchObservatory has CorridorWallSouth")
+	
+	# Verify Specimen Vault front doorway & salvage crate
+	_assert_true(level.has_node("Compartments/SpecimenVault/WallFrontLeft"), "SpecimenVault has WallFrontLeft")
+	_assert_true(level.has_node("Compartments/SpecimenVault/WallFrontRight"), "SpecimenVault has WallFrontRight")
+	_assert_true(level.has_node("Compartments/SpecimenVault/WallFrontHeader"), "SpecimenVault has WallFrontHeader")
+	_assert_true(level.has_node("Compartments/SpecimenVault/CrateVault"), "SpecimenVault has CrateVault")
+	_assert_true(level.has_node("Compartments/ResearchObservatory/CrateObservatory"), "ResearchObservatory has CrateObservatory")
+	
+	# Verify level controller methods for horror encounter
+	_assert_true(level.has_method("_check_trigger_final_hunt"), "Level controller has _check_trigger_final_hunt")
+	_assert_true(level.has_method("trigger_creature_horror_encounter"), "Level controller has trigger_creature_horror_encounter")
+	_assert_true(level.has_method("_flicker_lights_for_encounter"), "Level controller has _flicker_lights_for_encounter")
+	
+	remove_child(level)
+	level.free()
+	
+	# 2. Verify exploration task gating in Objective 4
+	MissionManager.current_objective_index = 4
+	_assert_true(not MissionManager.can_engage_final_hunt(), "can_engage_final_hunt starts false")
+	var task_unexplored := MissionManager.get_current_immediate_task()
+	_assert_true(task_unexplored.contains("Explore"), "Immediate task prompts exploration when chambers undiscovered")
+	_assert_true(task_unexplored.contains("Trap") and task_unexplored.contains("Gas"), "Immediate task maintains Trap and Gas keywords")
+	
+	# Discover 5 chambers
+	var chambers := ["engineering_bay", "corridors", "life_support", "bridge", "specimen_vault"]
+	for ch in chambers:
+		MissionManager.mark_room_discovered(ch)
+	_assert_true(MissionManager.can_engage_final_hunt(), "can_engage_final_hunt is true after 5 chambers")
+	var task_explored := MissionManager.get_current_immediate_task()
+	_assert_true(task_explored == "Trap Alien & Open Poison Gas Valve", "Immediate task transitions to Trap Alien once explored")
+	
+	# 3. Verify AlienStalker horror jumpscare repositioning and airlock placement
+	var stalker_scene = load("res://scenes/entities/alien_stalker.tscn")
+	var stalker: AlienStalker = stalker_scene.instantiate()
+	add_child(stalker)
+	
+	var player_scene = load("res://scenes/player/player.tscn")
+	var player: PlayerController = player_scene.instantiate()
+	add_child(player)
+	player.global_position = Vector3(0, 0, 0)
+	stalker.global_position = Vector3(0, -2, 50) # Far away in lower deck
+	
+	stalker.zoom_near_player(player, 0.4)
+	_assert_true(stalker.zoom_start_pos.distance_to(player.global_position) < 8.0, "Distant stalker materializes in front of player for jumpscare")
+	_assert_true(stalker.current_state == AlienStalkerClass.State.HORROR_ZOOM, "Stalker is in HORROR_ZOOM")
+	
+	# Test airlock trap default placement
+	stalker.trap_in_chamber("airlock_chamber")
+	_assert_true(stalker.global_position == Vector3(8.0, 0.0, 8.0), "Stalker placed at nominal airlock quarantine position")
+	_assert_true(stalker.current_state == AlienStalkerClass.State.TRAPPED, "Stalker is TRAPPED")
+	
+	# Test auto target acquisition in physics process
+	stalker.target_player = null
+	stalker.set_state(AlienStalkerClass.State.STALKING)
+	stalker._physics_process(0.016)
+	_assert_true(stalker.target_player == player, "Stalker automatically acquires Player reference from scene tree")
+	
+	remove_child(player)
+	remove_child(stalker)
+	player.free()
+	stalker.free()
+	
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+
 
 
 
