@@ -1,0 +1,27 @@
+{
+  "reactor": {
+    "nominal_output": 150.0,
+    "idle_output": 0.0,
+    "fuel_consumption_rate": 0.05,
+    "temperature_nominal": 320.0,
+    "temperature_critical": 650.0,
+    "cooldown_rate": 2.5
+  },
+  "battery": {
+    "capacity": 60.0,
+    "initial_charge": 25.0,
+    "max_charge_rate": 15.0,
+    "max_discharge_rate": 30.0,
+    "efficiency": 0.92
+  },
+  "bus": {
+    "voltage_nominal": 480.0,
+    "breaker_trip_threshold": 180.0,
+    "line_loss_factor": 0.02
+  },
+  "priorities": {
+    "critical": ["life_support_scrubber", "coolant_pump", "emergency_lighting"],
+    "operational": ["door_aft", "door_fwd", "eng_terminal", "ls_terminal", "bridge_terminal"],
+    "mission": ["comms_array", "ion_propulsion"]
+  }
+}
