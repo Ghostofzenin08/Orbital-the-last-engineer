@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/interactables/switch.gd" id="1_switch"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_switch"]
+size = Vector3(0.4, 0.6, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_base"]
+size = Vector3(0.35, 0.55, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_handle"]
+size = Vector3(0.06, 0.25, 0.12)
+
+[sub_resource type="SphereMesh" id="SphereMesh_led"]
+radius = 0.04
+height = 0.08
+
+[node name="BreakerSwitch" type="StaticBody3D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_switch")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_switch")
+
+[node name="BaseMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_base")
+
+[node name="Handle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.06)
+
+[node name="HandleMesh" type="MeshInstance3D" parent="Handle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0)
+mesh = SubResource("BoxMesh_handle")
+
+[node name="IndicatorLED" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0.06)
+mesh = SubResource("SphereMesh_led")
+
+[node name="IndicatorLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0.15)
+light_color = Color(1, 0.1, 0.1, 1)
+light_energy = 0.8
+omni_range = 1.2
