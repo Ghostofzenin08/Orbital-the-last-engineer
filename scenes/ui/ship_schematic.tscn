@@ -1,0 +1,790 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/ship_schematic.gd" id="1_schematic"]
+
+[node name="ShipSchematic" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_schematic")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.05, 0.08, 0.94)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="MainVBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderHBox" type="HBoxContainer" parent="Margin/MainVBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Margin/MainVBox/HeaderHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "ASTRAEA-7 TACTICAL SCHEMATIC // 11 COMPARTMENTS & POWER GRID"
+
+[node name="GridStatusLabel" type="Label" parent="Margin/MainVBox/HeaderHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "GRID STATUS: MAIN BUS ISOLATED"
+
+[node name="BtnCloseSchematic" type="Button" parent="Margin/MainVBox/HeaderHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 32)
+layout_mode = 2
+text = "[X] Close"
+
+[node name="AdvisoryPanel" type="PanelContainer" parent="Margin/MainVBox"]
+layout_mode = 2
+
+[node name="AdvMargin" type="MarginContainer" parent="Margin/MainVBox/AdvisoryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="AdvVBox" type="VBoxContainer" parent="Margin/MainVBox/AdvisoryPanel/AdvMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="AdviceWarningLabel" type="Label" parent="Margin/MainVBox/AdvisoryPanel/AdvMargin/AdvVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = "PRIMARY GENERATOR TRIPPED // TOTAL GRID POWER LOSS IMMINENT"
+
+[node name="AdviceActionLabel" type="Label" parent="Margin/MainVBox/AdvisoryPanel/AdvMargin/AdvVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "RECOMMENDED ACTION: Investigate Engineering Bay: Close primary generator breaker."
+
+[node name="ContentHBox" type="HBoxContainer" parent="Margin/MainVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="SchematicScroll" type="ScrollContainer" parent="Margin/MainVBox/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.3
+
+[node name="BlueprintVBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="LabelForward" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.6, 0.7, 1)
+theme_override_font_sizes/font_size = 11
+text = "^ FORWARD (BOW) - MAIN DECK ^"
+horizontal_alignment = 1
+
+[node name="BridgeRowHBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BridgePanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/BridgePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/BridgePanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/BridgePanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/BridgePanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "[01] COMMAND BRIDGE"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/BridgePanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "OFFLINE // UNPOWERED"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/BridgePanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectBridge" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/BridgePanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="AvionicsBayPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/AvionicsBayPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/AvionicsBayPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/AvionicsBayPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/AvionicsBayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "[02] AVIONICS BAY"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/AvionicsBayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "OFFLINE // RELAY ISOLATED"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/AvionicsBayPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectAvionics" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/AvionicsBayPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="FwdWingHBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CrewQuartersPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/CrewQuartersPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/CrewQuartersPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/CrewQuartersPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/CrewQuartersPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "[03] CREW QUARTERS"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/CrewQuartersPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "NOMINAL // HABITABLE"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/CrewQuartersPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectCrew" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/CrewQuartersPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="MedbayPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/MedbayPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/MedbayPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/MedbayPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/MedbayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "[04] MEDICAL INFIRMARY"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/MedbayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "O2 BOOSTER STANDBY"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/MedbayPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectMedbay" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/FwdWingHBox/MedbayPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="LifeSupportPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LifeSupportPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LifeSupportPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LifeSupportPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LifeSupportPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "[05] LIFE SUPPORT MODULE"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LifeSupportPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "FAULT: Coupler fractured"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LifeSupportPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectLs" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LifeSupportPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="CenterConduit3" type="CenterContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+
+[node name="ConduitLsToBridge" type="ColorRect" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CenterConduit3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(8, 14)
+layout_mode = 2
+color = Color(0.4, 0.1, 0.1, 0.5)
+
+[node name="CorridorPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CorridorPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CorridorPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CorridorPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CorridorPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "[06] CENTRAL TRANSIT SPINE & BULKHEAD DOORS"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CorridorPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "DOORS UNPOWERED"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CorridorPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectCorr" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CorridorPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="CenterConduit2" type="CenterContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+
+[node name="ConduitCorrToLs" type="ColorRect" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CenterConduit2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(8, 14)
+layout_mode = 2
+color = Color(0.4, 0.1, 0.1, 0.5)
+
+[node name="AftWingHBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CargoBayPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/CargoBayPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/CargoBayPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/CargoBayPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/CargoBayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = "[07] CARGO BAY"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/CargoBayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "NOMINAL // CRANE STAGED"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/CargoBayPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectCargo" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/CargoBayPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="AirlockPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/AirlockPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/AirlockPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/AirlockPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/AirlockPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = "[08] AIRLOCK CHAMBER"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/AirlockPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "SEALED // CABIN PRESSURE"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/AirlockPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectAirlock" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/AftWingHBox/AirlockPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="CenterConduit1" type="CenterContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+
+[node name="ConduitEngToCorr" type="ColorRect" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/CenterConduit1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(8, 14)
+layout_mode = 2
+color = Color(0.4, 0.1, 0.1, 0.5)
+
+[node name="EngBayPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/EngBayPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/EngBayPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/EngBayPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/EngBayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "[09] ENGINEERING BAY (REACTOR & MAIN BUS)"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/EngBayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "FAULT: Generator breaker open"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/EngBayPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectEng" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/EngBayPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="LabelLowerDeck" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.5, 0.7, 1)
+theme_override_font_sizes/font_size = 11
+text = "=== LOWER DECK & SUB-LEVEL ACCESS ==="
+horizontal_alignment = 1
+
+[node name="LowerDeckHBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MaintenanceCrawlwayPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/MaintenanceCrawlwayPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/MaintenanceCrawlwayPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/MaintenanceCrawlwayPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/MaintenanceCrawlwayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = "[11] MAINTENANCE CRAWLWAY"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/MaintenanceCrawlwayPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "HAZARD: PARTIAL HULL BREACH"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/MaintenanceCrawlwayPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectCrawlway" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/MaintenanceCrawlwayPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="ReactorSubdeckPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/ReactorSubdeckPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/ReactorSubdeckPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/ReactorSubdeckPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/ReactorSubdeckPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 13
+text = "[10] REACTOR SUBDECK"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/ReactorSubdeckPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "AUX FUEL & BATTERY VAULT"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/ReactorSubdeckPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectSubdeck" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/ReactorSubdeckPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="LabelAft" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.6, 0.7, 1)
+theme_override_font_sizes/font_size = 11
+text = "v AFT (STERN) v"
+horizontal_alignment = 1
+
+[node name="SidebarVBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="TelemetryPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TelemHeader" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "POWER GRID TELEMETRY"
+
+[node name="GridHBox1" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="GenLbl" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/GridHBox1"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Turbine Output:"
+
+[node name="GenValueLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/GridHBox1"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.0 kW"
+
+[node name="GridHBox2" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="DemandLbl" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/GridHBox2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Grid Power Demand:"
+
+[node name="DemandValueLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/GridHBox2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.0 kW"
+
+[node name="GridHBox3" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="NetLbl" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/GridHBox3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Net Grid Balance:"
+
+[node name="NetValueLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/GridHBox3"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+0.0 kW"
+
+[node name="GridHBox4" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="BusLbl" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/GridHBox4"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Distribution Bus:"
+
+[node name="BusStatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/GridHBox4"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
+text = "ISOLATED (OPEN)"
+
+[node name="BatHBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="BatLbl" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/BatHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Auxiliary Battery Reserve:"
+
+[node name="BatteryValueLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox/BatHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "25.0 / 60.0 kWh (41%)"
+
+[node name="BatteryBar" type="ProgressBar" parent="Margin/MainVBox/ContentHBox/SidebarVBox/TelemetryPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+value = 41.0
+show_percentage = false
+
+[node name="InspectorPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SelectedRoomTitle" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "ENGINEERING BAY"
+
+[node name="SelectedRoomPower" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "POWER STATUS: OFFLINE"
+
+[node name="SelectedRoomDraw" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "TOTAL COMPARTMENT DRAW: 0.0 kW"
+
+[node name="SelectedRoomAtmosphere" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "ATMOSPHERE: NOMINAL (O2: 100% | CO2: 420ppm | 21°C | 101.3kPa)"
+autowrap_mode = 2
+
+[node name="BtnRerouteRoomPower" type="Button" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "⚡ Direct Power Reroute to Compartment"
+
+[node name="HSep" type="HSeparator" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="DevHeader" type="Label" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "CONNECTED DEVICES & CIRCUITS:"
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SelectedRoomDevices" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SidebarVBox/InspectorPanel/Margin/VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
