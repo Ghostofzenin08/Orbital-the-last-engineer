@@ -1,24 +1,48 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/interactables/storage_locker.gd" id="1_locker"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_locker"]
-size = Vector3(0.8, 1.8, 0.6)
+size = Vector3(0.85, 1.85, 0.65)
+
+[sub_resource type="BoxMesh" id="BoxMesh_frame"]
+size = Vector3(0.86, 1.86, 0.62)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frame"]
+albedo_color = Color(0.12, 0.14, 0.17, 1)
+metallic = 0.9
+roughness = 0.25
 
 [sub_resource type="BoxMesh" id="BoxMesh_body"]
-size = Vector3(0.8, 1.8, 0.6)
+size = Vector3(0.8, 1.8, 0.58)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_metal"]
-albedo_color = Color(0.2, 0.24, 0.28, 1)
+albedo_color = Color(0.22, 0.26, 0.3, 1)
 metallic = 0.85
 roughness = 0.35
 
+[sub_resource type="BoxMesh" id="BoxMesh_door"]
+size = Vector3(0.72, 1.68, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_door"]
+albedo_color = Color(0.18, 0.21, 0.25, 1)
+metallic = 0.8
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_louver"]
+size = Vector3(0.5, 0.04, 0.02)
+
 [sub_resource type="BoxMesh" id="BoxMesh_handle"]
-size = Vector3(0.08, 0.3, 0.08)
+size = Vector3(0.06, 0.32, 0.06)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_handle"]
+albedo_color = Color(0.9, 0.55, 0.1, 1)
+metallic = 0.8
+roughness = 0.3
 
 [sub_resource type="SphereMesh" id="SphereMesh_led"]
-radius = 0.04
-height = 0.08
+radius = 0.035
+height = 0.07
 
 [node name="StorageLocker" type="StaticBody3D"]
 collision_layer = 4
@@ -29,21 +53,42 @@ script = ExtResource("1_locker")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("BoxShape3D_locker")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="."]
+[node name="ChassisFrame" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("BoxMesh_frame")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0.02)
 mesh = SubResource("BoxMesh_body")
 surface_material_override/0 = SubResource("StandardMaterial3D_metal")
 
+[node name="DoorPanel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0.31)
+mesh = SubResource("BoxMesh_door")
+surface_material_override/0 = SubResource("StandardMaterial3D_door")
+
+[node name="VentLouverTop" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0.33)
+mesh = SubResource("BoxMesh_louver")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="VentLouverBottom" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0.33)
+mesh = SubResource("BoxMesh_louver")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
 [node name="HandleMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1.0, 0.32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.95, 0.35)
 mesh = SubResource("BoxMesh_handle")
+surface_material_override/0 = SubResource("StandardMaterial3D_handle")
 
 [node name="IndicatorLED" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0.32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.68, 0.33)
 mesh = SubResource("SphereMesh_led")
 
 [node name="IndicatorLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0.45)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.68, 0.45)
 light_color = Color(0.2, 1, 0.4, 1)
 light_energy = 0.8
 omni_range = 2.0
