@@ -1,0 +1,126 @@
+{
+  "bridge": {
+    "name": "Command Bridge",
+    "volume_m3": 320.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 410.0,
+    "initial_temp_k": 293.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["corridors", "avionics_bay"],
+    "door_id": "door_fwd",
+    "deck": "main"
+  },
+  "avionics_bay": {
+    "name": "Server Core & Avionics",
+    "volume_m3": 180.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 420.0,
+    "initial_temp_k": 291.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["bridge"],
+    "door_id": "door_avionics",
+    "deck": "main"
+  },
+  "crew_quarters": {
+    "name": "Crew Habitation & Bunks",
+    "volume_m3": 220.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 430.0,
+    "initial_temp_k": 295.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["corridors"],
+    "door_id": "door_crew",
+    "deck": "main"
+  },
+  "medbay": {
+    "name": "Medical Infirmary",
+    "volume_m3": 200.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 415.0,
+    "initial_temp_k": 294.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["corridors"],
+    "door_id": "door_medbay",
+    "deck": "main"
+  },
+  "life_support": {
+    "name": "Life Support Module",
+    "volume_m3": 360.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 450.0,
+    "initial_temp_k": 294.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["corridors"],
+    "deck": "main"
+  },
+  "corridors": {
+    "name": "Central Transit Spine",
+    "volume_m3": 240.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 420.0,
+    "initial_temp_k": 294.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["bridge", "crew_quarters", "medbay", "life_support", "cargo_bay", "airlock_chamber", "engineering_bay"],
+    "door_aft_id": "door_aft",
+    "door_fwd_id": "door_fwd",
+    "deck": "main"
+  },
+  "cargo_bay": {
+    "name": "Cargo Hold & Machine Staging",
+    "volume_m3": 380.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 425.0,
+    "initial_temp_k": 292.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["corridors", "maintenance_crawlway"],
+    "door_id": "door_cargo",
+    "deck": "main"
+  },
+  "airlock_chamber": {
+    "name": "Airlock & EVA Staging",
+    "volume_m3": 120.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 420.0,
+    "initial_temp_k": 293.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["corridors"],
+    "door_inner_id": "airlock_inner",
+    "door_outer_id": "airlock_outer",
+    "deck": "main"
+  },
+  "engineering_bay": {
+    "name": "Engineering Bay",
+    "volume_m3": 360.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 420.0,
+    "initial_temp_k": 296.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["corridors", "reactor_subdeck", "maintenance_crawlway"],
+    "door_id": "door_aft",
+    "deck": "main"
+  },
+  "reactor_subdeck": {
+    "name": "Fuel Vault & Auxiliary Battery Deck",
+    "volume_m3": 260.0,
+    "initial_o2_pct": 100.0,
+    "initial_co2_ppm": 425.0,
+    "initial_temp_k": 297.15,
+    "initial_pressure_kpa": 101.3,
+    "connected_to": ["engineering_bay", "maintenance_crawlway"],
+    "door_id": "door_subdeck",
+    "deck": "lower"
+  },
+  "maintenance_crawlway": {
+    "name": "Breached Maintenance Crawlway",
+    "volume_m3": 90.0,
+    "initial_o2_pct": 98.0,
+    "initial_co2_ppm": 430.0,
+    "initial_temp_k": 286.15,
+    "initial_pressure_kpa": 98.5,
+    "leak_rate": 0.3,
+    "connected_to": ["cargo_bay", "reactor_subdeck", "engineering_bay"],
+    "door_cargo_id": "door_crawlway_cargo",
+    "door_eng_id": "door_crawlway_eng",
+    "deck": "lower"
+  }
+}
