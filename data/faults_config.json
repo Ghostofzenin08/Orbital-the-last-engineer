@@ -224,6 +224,54 @@
     "workaround": "Radiator bypass loop reroute",
     "consequence": "Gradual loss of thermal dissipation capacity",
     "narrative_clue": "Vibration loosened the high-pressure pneumatic clamps on header B."
+  },
+  "SPECIMEN_CHAMBER_BREACH": {
+    "fault_id": "SPECIMEN_CHAMBER_BREACH",
+    "subsystem": "doors",
+    "device_id": "door_aft",
+    "initial_active": false,
+    "root_cause": "Mutant alien specimen tore through biological research chamber interlocks",
+    "symptoms": [
+      "Scratching and claw impacts on bulkhead plating",
+      "Biometric lock shorted with creature venom",
+      "Warning lights flashing amber"
+    ],
+    "diagnostic_method": [
+      "Inspect chamber bulkhead locking mechanism",
+      "Check security panel circuit status"
+    ],
+    "required_parts": [],
+    "repair_steps": [
+      "Isolate chamber security bus",
+      "Engage manual magnetic lockdown"
+    ],
+    "workaround": "Lure creature into adjacent decontamination chamber",
+    "consequence": "Hostile predator loose in station corridors stalking the scientist",
+    "narrative_clue": "Thorne noted the creature shredded the chamber's electronic lock."
+  },
+  "TOXIC_GAS_LINE_ARMED": {
+    "fault_id": "TOXIC_GAS_LINE_ARMED",
+    "subsystem": "life_support",
+    "device_id": "pressure_relief_valve",
+    "initial_active": false,
+    "root_cause": "Emergency poisonous gas decontamination line primed for creature trap",
+    "symptoms": [
+      "Poisonous gas line pressure at 400 bar",
+      "Amber status glow on emergency isolation valve",
+      "Pneumatic hiss in chamber manifold"
+    ],
+    "diagnostic_method": [
+      "Check emergency valve pressure dial",
+      "Verify decontamination gas reservoir integrity"
+    ],
+    "required_parts": [],
+    "repair_steps": [
+      "Lure alien into decontamination chamber",
+      "Rotate emergency valve to discharge lethal gas"
+    ],
+    "workaround": "None; only poisonous gas can exterminate the adapted creature",
+    "consequence": "Imminent ambush if the creature is not exterminated",
+    "narrative_clue": "Reyes rigged the poisonous gas line to flood the sealed chamber."
   }
 }
 
