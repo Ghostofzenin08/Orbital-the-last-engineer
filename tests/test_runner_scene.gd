@@ -12,6 +12,7 @@ const AirlockControllerClass = preload("res://scripts/interactables/airlock_cont
 const SalvageCrateClass = preload("res://scripts/interactables/salvage_crate.gd")
 const HullBreachSealClass = preload("res://scripts/interactables/hull_breach_seal.gd")
 const DoorClass = preload("res://scripts/interactables/door.gd")
+const DatapadPickupClass = preload("res://scripts/interactables/datapad_pickup.gd")
 
 var tests_passed: int = 0
 var tests_failed: int = 0
@@ -57,6 +58,10 @@ func _ready() -> void:
 	_run_suite("Milestone 4: Breach Sealing, Salvage Cutting & Shortcut Traversal", _test_m4_breach_salvage_shortcuts)
 	_run_suite("Milestone 4: Save / Load Persistence of Expanded Vessel", _test_m4_save_load_persistence)
 	_run_suite("Milestone 4: Narrative Crew Logs & Objective Exploration Tracking", _test_m4_narrative_logs_and_exploration)
+	_run_suite("Milestone 5: Narrative Config & Physical Datapad Placement Integrity", _test_m5_narrative_config_and_scene_placement)
+	_run_suite("Milestone 5: Datapad Interaction, Encryption & Scanner Battery Drain", _test_m5_datapad_encryption_and_scanner)
+	_run_suite("Milestone 5: Crew Mystery Revelations & Ship System Consequences", _test_m5_revelations_and_system_consequences)
+	_run_suite("Milestone 5: Terminal UI Dossier, Log Filters & Save/Load Persistence", _test_m5_terminal_ui_and_save_load)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -1877,3 +1882,287 @@ func _test_m4_narrative_logs_and_exploration() -> void:
 	term.close_terminal()
 	remove_child(term)
 	term.free()
+
+func _test_m5_narrative_config_and_scene_placement() -> void:
+	MissionManager.reset_missions()
+	ShipState.reset_to_defaults()
+	
+	var datapads: Array = MissionManager.get_all_narrative_datapads()
+	var revelations: Array = MissionManager.get_all_narrative_revelations()
+	_assert_true(datapads.size() == 10, "narrative_config.json defines 10 physical crew datapads")
+	_assert_true(revelations.size() == 3, "narrative_config.json defines 3 major crew mystery revelations")
+	
+	var encrypted_cfg_count: int = 0
+	for dp in datapads:
+		var has_fields: bool = dp.has("id") and dp.has("title") and dp.has("author") and dp.has("compartment_id") and dp.has("revelation_id") and dp.has("location_hint") and dp.has("content")
+		_assert_true(has_fields, "Datapad config %s has complete schema fields" % str(dp.get("id", "unknown")))
+		if bool(dp.get("is_encrypted", false)):
+			encrypted_cfg_count += 1
+	_assert_true(encrypted_cfg_count == 3, "Exactly 3 datapads are configured as encrypted requiring Diagnostic Scanner")
+	
+	var rev_ids: Array[String] = []
+	for rev in revelations:
+		rev_ids.append(str(rev.get("id", "")))
+	_assert_true(rev_ids.has("revelation_anomaly") and rev_ids.has("revelation_quarantine") and rev_ids.has("revelation_directive"), "All 3 major revelation IDs present in config")
+	
+	# Verify 3D scene placement of all 10 DatapadPickup instances in ship_interior.tscn
+	var level_scene = load("res://scenes/levels/ship_interior.tscn")
+	var level = level_scene.instantiate()
+	add_child(level)
+	
+	var env_mgr = level.get_node_or_null("EnvironmentalManager")
+	var dp_nodes = level.find_children("*", "DatapadPickup", true, false)
+	_assert_true(dp_nodes.size() == 10, "ship_interior.tscn contains 10 physical DatapadPickup instances")
+	
+	var seen_ids: Dictionary = {}
+	var scene_encrypted_count: int = 0
+	for node in dp_nodes:
+		seen_ids[node.datapad_id] = true
+		if node.is_encrypted:
+			scene_encrypted_count += 1
+		var cfg_info: Dictionary = MissionManager.get_datapad_data(node.datapad_id)
+		var expected_comp: String = str(cfg_info.get("compartment_id", ""))
+		if env_mgr != null and expected_comp != "":
+			var actual_comp: String = env_mgr.get_compartment_for_position(node.global_position)
+			_assert_true(actual_comp == expected_comp, "Datapad %s placed in compartment %s (got %s)" % [node.datapad_id, expected_comp, actual_comp])
+	
+	_assert_true(seen_ids.size() == 10, "All 10 DatapadPickup instances in ship_interior.tscn have unique datapad_ids")
+	_assert_true(scene_encrypted_count == 3, "3 DatapadPickup instances in ship_interior.tscn are marked encrypted")
+	
+	remove_child(level)
+	level.free()
+
+func _test_m5_datapad_encryption_and_scanner() -> void:
+	MissionManager.reset_missions()
+	ShipState.reset_to_defaults()
+	InventoryManager.reset_to_defaults()
+	
+	var dp_scene = load("res://scenes/interactables/datapad_pickup.tscn")
+	
+	# 1. Unencrypted DatapadPickup collection
+	var unenc_dp = dp_scene.instantiate()
+	unenc_dp.datapad_id = "datapad_eng_vasquez"
+	unenc_dp.datapad_title = "Vasquez's Harmonic Log Slate"
+	unenc_dp.is_encrypted = false
+	unenc_dp.requires_scanner_to_decrypt = false
+	add_child(unenc_dp)
+	
+	_assert_true(not unenc_dp.is_collected, "Unencrypted datapad starts uncollected")
+	_assert_true(unenc_dp.get_prompt().contains("Recover"), "Unencrypted datapad prompt shows Recover")
+	unenc_dp.interact(null)
+	_assert_true(unenc_dp.is_collected and unenc_dp.is_decrypted, "Interacting with unencrypted datapad collects and decrypts it")
+	_assert_true(MissionManager.is_datapad_collected("datapad_eng_vasquez"), "MissionManager records datapad_eng_vasquez in collected_datapads")
+	_assert_true(MissionManager.is_datapad_decrypted("datapad_eng_vasquez"), "MissionManager records datapad_eng_vasquez in decrypted_logs")
+	
+	# 2. Encrypted DatapadPickup rejection without Diagnostic Scanner equipped
+	var enc_dp = dp_scene.instantiate()
+	enc_dp.datapad_id = "datapad_medbay_autopsy"
+	enc_dp.datapad_title = "Encrypted Autopsy & Triage Slate"
+	enc_dp.is_encrypted = true
+	enc_dp.requires_scanner_to_decrypt = true
+	add_child(enc_dp)
+	
+	InventoryManager.equip_slot(2) # Equip Multitool (not Diagnostic Scanner)
+	_assert_true(enc_dp.get_prompt() == DatapadPickupClass.ENCRYPTED_PROMPT_MSG, "Encrypted datapad prompt instructs player to equip Diagnostic Scanner [1]")
+	
+	var rejected_reason: Array = [""]
+	enc_dp.decryption_rejected.connect(func(_id: String, reason: String): rejected_reason[0] = reason)
+	enc_dp.interact(null)
+	_assert_true(not enc_dp.is_collected and not enc_dp.is_decrypted, "Encrypted datapad rejects interaction when Diagnostic Scanner is not equipped")
+	_assert_true(rejected_reason[0] == DatapadPickupClass.ENCRYPTED_PROMPT_MSG, "Encrypted datapad emits decryption_rejected with exact scanner prompt")
+	_assert_true(not MissionManager.is_datapad_decrypted("datapad_medbay_autopsy"), "MissionManager does not unlock encrypted datapad on rejection")
+	
+	# 3. Encrypted DatapadPickup rejection when Scanner battery < 5%
+	InventoryManager.equip_slot(1) # Diagnostic Scanner
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 3.0
+	enc_dp.interact(null)
+	_assert_true(not enc_dp.is_collected and not enc_dp.is_decrypted, "Encrypted datapad rejects decryption when scanner battery < 5%")
+	
+	# 4. Encrypted DatapadPickup successful decryption with Diagnostic Scanner equipped (drains 5% battery)
+	InventoryManager.tools["diagnostic_scanner"]["battery"] = 100.0
+	enc_dp.interact(null)
+	_assert_true(enc_dp.is_collected and enc_dp.is_decrypted, "Encrypted datapad decrypts and collects when Diagnostic Scanner is equipped with charge")
+	_assert_true(abs(InventoryManager.get_scanner_battery() - 95.0) < 0.01, "Decrypting encrypted datapad drains 5.0% scanner battery (100% -> 95%)")
+	_assert_true(MissionManager.is_datapad_decrypted("datapad_medbay_autopsy"), "MissionManager records decrypted datapad_medbay_autopsy")
+	
+	# 5. Subsystem repair alternative decryption (AvionicsRelayBank repaired allows decrypting datapad_avionics_telemetry without scanner)
+	var mock_relay = RepairPanel.new()
+	mock_relay.name = "AvionicsRelayBank"
+	mock_relay.is_repaired = true
+	add_child(mock_relay)
+	
+	var av_dp = dp_scene.instantiate()
+	av_dp.datapad_id = "datapad_avionics_telemetry"
+	av_dp.is_encrypted = true
+	av_dp.requires_scanner_to_decrypt = true
+	add_child(av_dp)
+	
+	InventoryManager.equip_slot(2) # Multitool equipped (not scanner)
+	av_dp.interact(null)
+	_assert_true(av_dp.is_collected and av_dp.is_decrypted, "Repaired AvionicsRelayBank allows decrypting datapad_avionics_telemetry without scanner battery drain")
+	
+	remove_child(mock_relay)
+	mock_relay.free()
+	remove_child(av_dp)
+	av_dp.free()
+	remove_child(unenc_dp)
+	unenc_dp.free()
+	remove_child(enc_dp)
+	enc_dp.free()
+
+func _test_m5_revelations_and_system_consequences() -> void:
+	MissionManager.reset_missions()
+	ShipState.reset_to_defaults()
+	
+	var rev_signals: Array[String] = []
+	var conn = func(rev_id: String, _data: Dictionary):
+		rev_signals.append(rev_id)
+	MissionManager.revelation_unlocked.connect(conn)
+	
+	# --- Revelation I: The Anomaly's True Nature (revelation_anomaly) ---
+	_assert_true(not ShipState.has_revelation_anomaly, "ShipState.has_revelation_anomaly starts false")
+	_assert_true(not ShipState.power_system.harmonic_damping_active, "PowerSystem harmonic_damping_active starts false")
+	
+	MissionManager.collect_datapad("datapad_eng_vasquez", true)
+	MissionManager.collect_datapad("datapad_subdeck_throttle", true)
+	_assert_true(not MissionManager.is_revelation_unlocked("revelation_anomaly"), "Revelation I stays locked with 2/3 clues")
+	
+	# Edge case: collecting encrypted 3rd datapad WITHOUT decrypting it does NOT unlock Revelation I
+	MissionManager.collect_datapad("datapad_avionics_telemetry", false)
+	_assert_true(MissionManager.is_datapad_collected("datapad_avionics_telemetry"), "datapad_avionics_telemetry marked collected")
+	_assert_true(not MissionManager.is_datapad_decrypted("datapad_avionics_telemetry"), "datapad_avionics_telemetry remains un-decrypted when mark_decrypted=false")
+	_assert_true(not MissionManager.is_revelation_unlocked("revelation_anomaly"), "Revelation I does NOT unlock while 3rd clue is still encrypted")
+	
+	# Now decrypt the 3rd clue
+	MissionManager.decrypt_datapad("datapad_avionics_telemetry")
+	_assert_true(MissionManager.is_revelation_unlocked("revelation_anomaly"), "Revelation I unlocks automatically upon decrypting 3rd datapad")
+	_assert_true(rev_signals.has("revelation_anomaly"), "revelation_unlocked signal emitted for revelation_anomaly")
+	_assert_true(ShipState.has_revelation_anomaly, "ShipState.has_revelation_anomaly is true after Revelation I")
+	_assert_true(ShipState.power_system.harmonic_damping_active, "PowerSystem.harmonic_damping_active is true after Revelation I")
+	_assert_true(abs(ShipState.power_system.thermal_accumulation_multiplier - 0.85) < 0.001, "PowerSystem thermal_accumulation_multiplier is 0.85 (-15% thermal rate)")
+	_assert_true(abs(ShipState.power_system.auxiliary_headroom_kw - 10.0) < 0.001, "PowerSystem auxiliary_headroom_kw is +10.0 kW")
+	
+	# Verify PowerSystem effective capacity includes +10.0 kW headroom
+	ShipState.power_system.set_generator(true)
+	ShipState.power_system.set_bus_relay(true)
+	ShipState.power_system.tick(0.1)
+	_assert_true(ShipState.power_system.current_generation >= 150.0, "Reactor with +10 kW harmonic headroom generates >= 150 kW at full integrity")
+	
+	# --- Revelation II: The Quarantine Protocol (revelation_quarantine) ---
+	_assert_true(not ShipState.has_revelation_quarantine, "ShipState.has_revelation_quarantine starts false")
+	MissionManager.collect_datapad("datapad_ls_contamination", true)
+	MissionManager.collect_datapad("datapad_crew_quarantine", true)
+	_assert_true(not MissionManager.is_revelation_unlocked("revelation_quarantine"), "Revelation II stays locked with 2/3 clues")
+	
+	MissionManager.collect_datapad("datapad_medbay_autopsy", true)
+	_assert_true(MissionManager.is_revelation_unlocked("revelation_quarantine"), "Revelation II unlocks automatically upon 3rd decrypted datapad")
+	_assert_true(ShipState.has_revelation_quarantine, "ShipState.has_revelation_quarantine is true after Revelation II")
+	_assert_true(abs(ShipState.get_scrubber_efficiency_multiplier() - 1.20) < 0.001, "ShipState scrubber efficiency multiplier is 1.20 (+20%)")
+	
+	var env_node = EnvManagerScript.new()
+	add_child(env_node)
+	_assert_true(abs(env_node.get_scrubber_optimization_multiplier() - 1.20) < 0.001, "EnvironmentalManager applies 1.20x (+20%) scrubber optimization multiplier")
+	remove_child(env_node)
+	env_node.free()
+	
+	# --- Revelation III: The Abandoned Directive (revelation_directive) ---
+	_assert_true(not ShipState.has_revelation_directive, "ShipState.has_revelation_directive starts false")
+	MissionManager.collect_datapad("datapad_cargo_manifest", true)
+	MissionManager.collect_datapad("datapad_crawlway_blackbox", true)
+	MissionManager.collect_datapad("datapad_airlock_jettison", true)
+	_assert_true(not MissionManager.is_revelation_unlocked("revelation_directive"), "Revelation III stays locked with 3/4 clues")
+	
+	MissionManager.collect_datapad("datapad_bridge_directive", true)
+	_assert_true(MissionManager.is_revelation_unlocked("revelation_directive"), "Revelation III unlocks automatically upon 4th decrypted datapad")
+	_assert_true(ShipState.has_revelation_directive, "ShipState.has_revelation_directive is true after Revelation III")
+	_assert_true(ShipState.commander_override_code == "7394-OMEGA", "Commander override code 7394-OMEGA unlocked on ShipState")
+	_assert_true(ShipState.quarantine_lockout_cleared, "ShipState quarantine_lockout_cleared is true")
+	_assert_true(abs(ShipState.thruster_efficiency_boost - 1.25) < 0.001, "ShipState thruster_efficiency_boost is 1.25")
+	
+	MissionManager.revelation_unlocked.disconnect(conn)
+
+func _test_m5_terminal_ui_and_save_load() -> void:
+	MissionManager.reset_missions()
+	ShipState.reset_to_defaults()
+	
+	# Collect 3 datapads to unlock Revelation I, leave 7 unrecovered
+	MissionManager.collect_datapad("datapad_eng_vasquez", true)
+	MissionManager.collect_datapad("datapad_subdeck_throttle", true)
+	MissionManager.collect_datapad("datapad_avionics_telemetry", true)
+	
+	var term_scene = load("res://scenes/ui/terminal_dialog.tscn")
+	var term = term_scene.instantiate()
+	add_child(term)
+	term.open_terminal("diagnostics", "Bridge Investigation Console")
+	
+	# Default category is crew_logs (14 items)
+	_assert_true(term.logs_list.item_count == 14, "TerminalDialog defaults to 14 standard crew logs")
+	
+	# Switch to Datapads filter in Incident Logs
+	term.set_log_category("datapads")
+	_assert_true(term.logs_list.item_count == 10, "TerminalDialog datapads filter displays all 10 datapad slots")
+	_assert_true(term.logs_list.get_item_text(0).begins_with("[DECRYPTED]"), "Recovered datapad displays [DECRYPTED] prefix in TerminalDialog")
+	_assert_true(term.logs_list.get_item_text(3).begins_with("[UNRECOVERED -"), "Unrecovered datapad displays [UNRECOVERED - Location Hint] in TerminalDialog")
+	
+	term._on_log_selected(0)
+	_assert_true(term.log_title_label.text.contains("[DECRYPTED]"), "Selecting recovered datapad shows [DECRYPTED] header")
+	_assert_true(term.log_content_label.text.contains("47.3 Hz"), "Selecting recovered datapad displays full decrypted log content")
+	
+	term._on_log_selected(3)
+	_assert_true(term.log_title_label.text.contains("[UNRECOVERED]"), "Selecting unrecovered datapad shows [UNRECOVERED] header")
+	_assert_true(term.log_content_label.text.contains("Last Known Telemetry Ping"), "Selecting unrecovered datapad shows location hint")
+	
+	# Switch to Revelations filter in Incident Logs
+	term.set_log_category("revelations")
+	_assert_true(term.logs_list.item_count == 3, "TerminalDialog revelations filter displays all 3 major revelations")
+	_assert_true(term.logs_list.get_item_text(0).begins_with("[UNLOCKED]"), "Unlocked Revelation I displays [UNLOCKED] in TerminalDialog")
+	_assert_true(term.logs_list.get_item_text(1).begins_with("[LOCKED - 0/3 Clues]"), "Locked Revelation II displays [LOCKED - 0/3 Clues] in TerminalDialog")
+	
+	# Switch to Crew Mystery Investigation Dossier tab
+	term._show_tab("investigation")
+	_assert_true(term.investigation_summary_label.text.contains("DATAPADS RECOVERED: 3/10"), "Investigation summary shows 3/10 datapads recovered")
+	_assert_true(term.investigation_summary_label.text.contains("REVELATIONS UNLOCKED: 1/3"), "Investigation summary shows 1/3 revelations unlocked")
+	_assert_true(term.datapads_dossier_list.get_child_count() == 11, "DatapadsDossierList contains header + 10 datapad cards")
+	_assert_true(term.revelations_dossier_list.get_child_count() == 4, "RevelationsDossierList contains header + 3 revelation cards")
+	
+	term.close_terminal()
+	remove_child(term)
+	term.free()
+	
+	# Test Save / Load roundtrip persistence of Datapads, Revelations, and System Bonuses
+	var dp_scene = load("res://scenes/interactables/datapad_pickup.tscn")
+	var dp_node = dp_scene.instantiate()
+	dp_node.datapad_id = "datapad_eng_vasquez"
+	dp_node.is_encrypted = false
+	add_child(dp_node)
+	dp_node.is_collected = true
+	dp_node.is_decrypted = true
+	
+	var save_ok: bool = SaveManager.save_game()
+	_assert_true(save_ok, "SaveManager.save_game() succeeds with Milestone 5 state")
+	
+	# Reset everything
+	MissionManager.reset_missions()
+	ShipState.reset_to_defaults()
+	dp_node.is_collected = false
+	dp_node.is_decrypted = false
+	_assert_true(MissionManager.collected_datapads.is_empty(), "MissionManager collected_datapads cleared on reset")
+	_assert_true(not ShipState.has_revelation_anomaly, "ShipState.has_revelation_anomaly cleared on reset")
+	_assert_true(not ShipState.power_system.harmonic_damping_active, "PowerSystem harmonic_damping_active cleared on reset")
+	
+	# Load saved game
+	var load_ok: bool = SaveManager.load_game()
+	_assert_true(load_ok, "SaveManager.load_game() succeeds")
+	_assert_true(MissionManager.collected_datapads.size() == 3, "MissionManager restores 3 collected datapads on load")
+	_assert_true(MissionManager.decrypted_logs.size() == 3, "MissionManager restores 3 decrypted logs on load")
+	_assert_true(MissionManager.is_revelation_unlocked("revelation_anomaly"), "MissionManager restores unlocked revelation_anomaly on load")
+	_assert_true(ShipState.has_revelation_anomaly, "ShipState restores has_revelation_anomaly on load")
+	_assert_true(ShipState.power_system.harmonic_damping_active, "PowerSystem restores harmonic_damping_active on load")
+	_assert_true(dp_node.is_collected and dp_node.is_decrypted, "DatapadPickup node restores is_collected and is_decrypted on load")
+	
+	remove_child(dp_node)
+	dp_node.free()
+	SaveManager.delete_save()
+	MissionManager.reset_missions()
+	ShipState.reset_to_defaults()
+
