@@ -1,0 +1,116 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/alien_stalker.gd" id="1_stalker"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_root"]
+radius = 0.65
+height = 2.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_chitin"]
+albedo_color = Color(0.08, 0.09, 0.11, 1)
+metallic = 0.85
+roughness = 0.25
+emission_enabled = true
+emission = Color(0.8, 0.05, 0.05, 1)
+emission_energy_multiplier = 0.4
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_torso"]
+material = SubResource("StandardMaterial3D_chitin")
+radius = 0.42
+height = 1.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bone"]
+albedo_color = Color(0.18, 0.05, 0.05, 1)
+metallic = 0.5
+roughness = 0.4
+emission_enabled = true
+emission = Color(0.9, 0.1, 0.1, 1)
+emission_energy_multiplier = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_head"]
+material = SubResource("StandardMaterial3D_chitin")
+size = Vector3(0.45, 0.38, 0.75)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye"]
+albedo_color = Color(1, 0.05, 0.05, 1)
+emission_enabled = true
+emission = Color(1, 0.05, 0.05, 1)
+emission_energy_multiplier = 3.5
+
+[sub_resource type="SphereMesh" id="SphereMesh_eye"]
+material = SubResource("StandardMaterial3D_eye")
+radius = 0.05
+height = 0.1
+
+[sub_resource type="PrismMesh" id="PrismMesh_claw"]
+material = SubResource("StandardMaterial3D_chitin")
+size = Vector3(0.14, 0.85, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_spines"]
+material = SubResource("StandardMaterial3D_bone")
+size = Vector3(0.2, 0.8, 0.25)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_tail"]
+material = SubResource("StandardMaterial3D_chitin")
+top_radius = 0.08
+bottom_radius = 0.22
+height = 1.2
+
+[node name="AlienStalker" type="CharacterBody3D"]
+collision_layer = 1
+collision_mask = 3
+script = ExtResource("1_stalker")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("CapsuleShape3D_root")
+
+[node name="Torso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 1.15, 0)
+mesh = SubResource("CapsuleMesh_torso")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 1.95, 0.32)
+mesh = SubResource("BoxMesh_head")
+
+[node name="EyeLeft" type="MeshInstance3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 0.04, 0.36)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="EyeRight" type="MeshInstance3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 0.04, 0.36)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="EyeLeftLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 1.95, 0.72)
+light_color = Color(1, 0.08, 0.08, 1)
+light_energy = 2.4
+omni_range = 4.5
+
+[node name="EyeRightLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 1.95, 0.72)
+light_color = Color(1, 0.08, 0.08, 1)
+light_energy = 2.4
+omni_range = 4.5
+
+[node name="ClawLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0, 1, -0.62, 1.25, 0.35)
+mesh = SubResource("PrismMesh_claw")
+
+[node name="ClawRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 0, 0, 1, 0.62, 1.25, 0.35)
+mesh = SubResource("PrismMesh_claw")
+
+[node name="Spines" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 1.35, -0.42)
+mesh = SubResource("BoxMesh_spines")
+
+[node name="Tail" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0.75, -0.65)
+mesh = SubResource("CylinderMesh_tail")
+
+[node name="AuraLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+light_color = Color(0.9, 0.08, 0.08, 1)
+light_energy = 1.2
+omni_range = 5.5
