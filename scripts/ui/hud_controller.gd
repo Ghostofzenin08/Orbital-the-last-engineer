@@ -42,6 +42,8 @@ extends CanvasLayer
 @onready var tutorial_desc_lbl: Label = get_node_or_null("%TutorialDescLabel")
 
 var _notif_timer: SceneTreeTimer
+var _notif_seq: int = 0
+var _last_recovered_datapad_title: String = ""
 var _scan_timer: SceneTreeTimer
 
 func _ready() -> void:
@@ -60,13 +62,17 @@ func _ready() -> void:
 	if MissionManager.has_signal("datapad_collected"):
 		MissionManager.datapad_collected.connect(func(_dp_id: String, dp_data: Dictionary):
 			var dp_title: String = str(dp_data.get("title", _dp_id))
+			_last_recovered_datapad_title = dp_title
 			show_notification("DATAPAD RECOVERED: %s [Review in Terminal]" % dp_title, 4.0)
 		)
 	if MissionManager.has_signal("revelation_unlocked"):
 		MissionManager.revelation_unlocked.connect(func(_rev_id: String, rev_data: Dictionary):
 			var rev_title: String = str(rev_data.get("title", _rev_id))
 			var rev_bonus: String = str(rev_data.get("bonus_summary", "System Optimization Active"))
-			show_notification("REVELATION UNLOCKED: %s // %s" % [rev_title, rev_bonus], 5.5)
+			if _last_recovered_datapad_title != "":
+				show_notification("DATAPAD RECOVERED: %s // REVELATION UNLOCKED: %s (%s)" % [_last_recovered_datapad_title, rev_title, rev_bonus], 5.5)
+			else:
+				show_notification("REVELATION UNLOCKED: %s // %s" % [rev_title, rev_bonus], 5.5)
 		)
 	
 	# Connect to InventoryManager signals
@@ -229,11 +235,14 @@ func _on_inventory_changed(items: Array[String]) -> void:
 
 func show_notification(msg: String, duration: float = 3.0) -> void:
 	notification_lbl.text = msg
-	if _notif_timer != null:
-		_notif_timer = null
+	_notif_seq += 1
+	var seq: int = _notif_seq
+	if not is_inside_tree() or get_tree() == null:
+		return
 	_notif_timer = get_tree().create_timer(duration)
 	_notif_timer.timeout.connect(func():
-		notification_lbl.text = ""
+		if _notif_seq == seq and is_instance_valid(notification_lbl):
+			notification_lbl.text = ""
 	)
 
 func _on_tool_equipped(_slot_idx: int, _item_id: String) -> void:
