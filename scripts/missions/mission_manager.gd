@@ -371,6 +371,7 @@ func mark_room_discovered(room_id: String) -> void:
 			if ss.COMPARTMENTS.has(room_id):
 				room_name = ss.COMPARTMENTS[room_id].get("name", room_name)
 		room_discovered.emit(room_id, room_name)
+		_broadcast_current_objective()
 	
 	if current_objective_index == 4 and (room_id == "airlock_chamber" or room_id == "cargo_bay"):
 		if has_node("/root/ShipState"):
@@ -438,7 +439,9 @@ func get_current_immediate_task() -> String:
 	if current_objective_index == 4 and has_node("/root/ShipState"):
 		var ss = get_node("/root/ShipState")
 		if ss.crisis_manager != null:
-			if not ss.crisis_manager.is_creature_trapped:
+			if not can_engage_final_hunt() and not ss.crisis_manager.is_creature_trapped and not ss.crisis_manager.is_creature_eliminated:
+				return "Explore Chambers to Trap Alien & Prepare Gas Purge"
+			elif not ss.crisis_manager.is_creature_trapped:
 				return "Trap Alien & Open Poison Gas Valve"
 			elif not ss.crisis_manager.is_creature_eliminated:
 				return "Open Poison Gas Valve to Purge Alien"
