@@ -1,37 +1,94 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/interactables/hull_breach_seal.gd" id="1_breach"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_breach"]
-size = Vector3(1.2, 0.4, 1.2)
+size = Vector3(1.3, 0.45, 1.3)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_flange"]
-top_radius = 0.5
-bottom_radius = 0.55
-height = 0.15
+top_radius = 0.55
+bottom_radius = 0.6
+height = 0.16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flange"]
+albedo_color = Color(0.2, 0.22, 0.26, 1)
+metallic = 0.85
+roughness = 0.35
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_rupture_hole"]
+top_radius = 0.42
+bottom_radius = 0.42
+height = 0.18
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rupture"]
+albedo_color = Color(0.02, 0.03, 0.04, 1)
+metallic = 0.95
+roughness = 0.15
 
 [sub_resource type="BoxMesh" id="BoxMesh_patch"]
-size = Vector3(0.9, 0.08, 0.9)
+size = Vector3(0.95, 0.08, 0.95)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_patch"]
+albedo_color = Color(0.4, 0.45, 0.5, 1)
+metallic = 0.9
+roughness = 0.25
+
+[sub_resource type="BoxMesh" id="BoxMesh_weld_seam"]
+size = Vector3(0.92, 0.03, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_weld"]
+albedo_color = Color(0.3, 0.8, 1, 1)
+emission_enabled = true
+emission = Color(0.3, 0.8, 1, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_led"]
+albedo_color = Color(1, 0.2, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.2, 0.1, 1)
+emission_energy_multiplier = 2.0
 
 [node name="HullBreachSeal" type="StaticBody3D"]
 collision_layer = 4
 collision_mask = 0
 script = ExtResource("1_breach")
 mesh_path = NodePath("PatchMesh")
-warning_light_path = NodePath("WarningLight")
+warning_light_path = NodePath("BreachLight")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_breach")
 
 [node name="FlangeMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("CylinderMesh_flange")
+surface_material_override/0 = SubResource("StandardMaterial3D_flange")
+
+[node name="RuptureCore" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_rupture_hole")
+surface_material_override/0 = SubResource("StandardMaterial3D_rupture")
 
 [node name="PatchMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
 mesh = SubResource("BoxMesh_patch")
+surface_material_override/0 = SubResource("StandardMaterial3D_patch")
+
+[node name="WeldSeamFront" type="MeshInstance3D" parent="PatchMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0.44)
+mesh = SubResource("BoxMesh_weld_seam")
+surface_material_override/0 = SubResource("StandardMaterial3D_weld")
+
+[node name="WeldSeamBack" type="MeshInstance3D" parent="PatchMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, -0.44)
+mesh = SubResource("BoxMesh_weld_seam")
+surface_material_override/0 = SubResource("StandardMaterial3D_weld")
+
+[node name="BreachLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+light_color = Color(1, 0.15, 0.1, 1)
+light_energy = 1.2
+omni_range = 3.0
 
 [node name="WarningLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
 light_color = Color(1, 0.15, 0.1, 1)
 light_energy = 1.2
 omni_range = 3.0
