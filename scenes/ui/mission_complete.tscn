@@ -54,7 +54,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 14
-text = "Astraea-7 Propulsion Online // Kharon-4 Gravity Well Broken"
+text = "Astraea Biological Observatory Secured // Alien Threat Exterminated"
 horizontal_alignment = 1
 
 [node name="HSep" type="HSeparator" parent="Center/Panel/Margin/VBox"]
@@ -63,11 +63,13 @@ layout_mode = 2
 [node name="BodyText" type="RichTextLabel" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-text = "The plasma conduits roared to life as the ion drives engaged. With the primary generator stabilized, the distribution bus energized, life support scrubbers running clear, and communications relay synchronizing orbital beacons, Astraea-7 has broken orbit.
+text = "As the Lead Scientist engaged the ion drives, the Astraea Biological Research Station safely broke orbit.
 
-You have completed all 5 engineering objectives and preserved the vessel. The crew incident logs have been transmitted to deep-space command.
+Arriving at the silent facility, you found the generators tripped, security panels dark, and the atmosphere choked with bio-spores. Step by step, you restored the massive plant and animal observatory chambers, tracked down the secret biological experiment that birthed the mutant alien predator, tactically lured the beast into the sealed chamber, and opened the emergency poisonous gas valve to exterminate it.
 
-The standby engineer's duty is fulfilled."
+The research facility is secured, the fallen crew's memory honored, and Earth command notified.
+
+The Lead Scientist's mission is accomplished."
 
 [node name="ReturnButton" type="Button" parent="Center/Panel/Margin/VBox"]
 unique_name_in_owner = true
