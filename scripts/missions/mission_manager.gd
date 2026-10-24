@@ -17,131 +17,136 @@ const OBJECTIVES: Array[Dictionary] = [
 	{
 		"id": "obj_primary_power",
 		"title": "Restore Emergency Generator",
-		"desc": "Locate the primary fusion generator in the Engineering Bay and close the manual generator breaker."
+		"immediate_task": "Flip Generator Breaker Lever",
+		"desc": "Lead Scientist docked at the research facility finding massive chambers in dark disarray and zero power. Proceed to Engineering and engage the primary generator breaker to restore baseline chamber systems."
 	},
 	{
 		"id": "obj_power_distribution",
 		"title": "Energize Main Electrical Bus",
-		"desc": "Flip the main distribution bus switch in the Engineering Bay to route power to bulkhead doors and ship modules."
+		"immediate_task": "Close Main Distribution Bus Relay",
+		"desc": "Close the high-voltage distribution bus relay in Engineering to restore power to chamber doors, key-security panels, and the central corridor."
 	},
 	{
 		"id": "obj_life_support",
-		"title": "Repair Atmospheric Coolant Coupler",
-		"desc": "Retrieve a spare coupler from the Engineering storage rack, proceed through the corridor to the Life Support Module, and install it into the coolant manifold."
+		"title": "Repair Scrubber Coolant Manifold",
+		"immediate_task": "Install Replacement Coupler in Scrubber",
+		"desc": "The facility air is choked with toxic bio-spores, leaving it impossible to breathe. Retrieve a spare coupler and install it into Life Support to restore breathable oxygen."
 	},
 	{
 		"id": "obj_communications",
-		"title": "Align Comms Array & Access Logs",
-		"desc": "Enter the Bridge, access the Communications Terminal, calibrate the antenna dish, and review the crew's emergency logs."
+		"title": "Align Comms & Review Research",
+		"immediate_task": "Calibrate Dish & Access Research Logs",
+		"desc": "Access Bridge communications to review the science team's logs, uncovering the secret biological experiment and the creature that slaughtered the crew."
 	},
 	{
 		"id": "obj_propulsion",
-		"title": "Initiate Orbital Departure Burn",
-		"desc": "At the Bridge Helm Console, verify all subsystems nominal and engage the orbital departure thruster switch."
+		"title": "Trap Alien & Poison Gas Purge",
+		"immediate_task": "Trap Alien & Open Poison Gas Valve",
+		"desc": "The adapted alien predator stalks the observatory. Lure the creature into the sealed chamber, open the emergency poisonous gas valve to exterminate it, and engage departure thrusters."
 	}
 ]
 
 const CREW_LOGS: Array[Dictionary] = [
 	{
 		"id": "log_01",
-		"author": "Chief Engineer Vasquez",
+		"author": "Lead Scientist Elena Vasquez",
 		"date": "Cycle 2184.102",
-		"title": "Turbine Harmonic Resonance",
-		"content": "Generator turbine 2 is showing high-frequency harmonic vibration following our braking burn near Kharon-4. Diagnostics report no blade deformation, but the magnetic containment coils are running 14% hotter than spec. I've locked the breaker on local manual override until we calibrate the bus."
+		"title": "Biological Observatory Sortie Notes",
+		"content": "Our science team has expanded genetic observation across the massive botanical and zoological chambers. Before departing on the external orbital survey, I verified the primary generators and security grid were operating within nominal parameters. Dr. Thorne remained behind to monitor the cellular incubators."
 	},
 	{
 		"id": "log_02",
-		"author": "Commander Hayes",
+		"author": "Dr. Aris Thorne",
 		"date": "Cycle 2184.105",
-		"title": "Orbital Capture Anomalies",
-		"content": "Navigation confirmed we are locked in low orbit around Kharon-4. The planet's magnetic field is erratic—far denser than spectroscopic models predicted. We caught a high-intensity microwave pulse from the southern hemisphere during perigee. All telemetry instruments flickered for three seconds."
+		"title": "Secret Chamber Gene Synthesis",
+		"content": "Without the Lead Scientist's interference, I have initiated Project Chimera in the sealed subdeck chamber. By cross-splicing Kharon-4 apex predator DNA into our synthetic embryonic stock, we can engineer a resilient organism capable of surviving deep orbital radiation."
 	},
 	{
 		"id": "log_03",
-		"author": "Specialist Chen",
+		"author": "Specialist Jian Chen",
 		"date": "Cycle 2184.107",
-		"title": "Coolant Cavitation Notice",
-		"content": "Atmospheric scrubber loop B experienced violent cavitation during the last orbital transit. The primary ceramic coupler fractured cleanly at the seal. I've salvaged two functional spare couplers and placed them in the Engineering Bay storage rack near the generator."
+		"title": "Severe Genetic Mutation Warning",
+		"content": "Thorne made a critical miscalculation during nucleotide transcription. The specimen in Chamber 4 did not incubate as a passive animal subject—it underwent accelerated adaptation, developing armored chitin and intense predatory aggression. It has doubled in size in six hours."
 	},
 	{
 		"id": "log_04",
-		"author": "Dr. Aris Thorne",
+		"author": "Quartermaster David Reyes",
 		"date": "Cycle 2184.110",
-		"title": "Physiological Advisory",
-		"content": "Three crew members reported severe auditory illusions—specifically, rhythmic metallic tapping through the bulkheads that does not correlate with hull vibration sensors. Sleep architecture in all subjects is degraded. The planet below radiates an ELF resonance directly through our shielding."
+		"title": "Stalking Sounds in the Ventilation",
+		"content": "Strange, guttural animal growls and claw scratches are vibrating through the ventilation ducts. Thorne claims the holding cell is secure, but I found the secondary biometric lock torn open. Something massive is crawling inside the bulkheads, stalking our movements."
 	},
 	{
 		"id": "log_05",
-		"author": "Chief Engineer Vasquez",
+		"author": "Chief Engineer Elena Vasquez",
 		"date": "Cycle 2184.112",
-		"title": "Bus Isolation Implemented",
-		"content": "To protect flight avionics from whatever is pulsing from the planet's surface, I have severed the main electrical distribution bus. Only emergency battery conduits remain live. Re-engaging the bus requires closing the primary generator breaker first."
+		"title": "Generator Sabotage & Bus Severing",
+		"content": "The mutant beast broke out of the secret chamber! It attacked the main engineering conduit, deliberately tripping the primary generator breaker to shut down the electronic security panels and lock the science team inside the dark corridors. I had to manually sever the main bus."
 	},
 	{
 		"id": "log_06",
-		"author": "Commander Hayes",
+		"author": "Commander Evelyn Hayes",
 		"date": "Cycle 2184.114",
-		"title": "Evacuation of Pod Bay 1",
-		"content": "Catastrophic electrical surge occurred at 0400 hours. Pod Bay 1 jettisoned prematurely with six crew members aboard. Orbital vectors indicate their trajectory descended toward Kharon-4's upper stratosphere. Sub-space comms are completely scrambled."
+		"title": "Slaughter of the Science Team",
+		"content": "The creature is hunting us down one by one with terrifying anger. Thorne, Chen, and Lin were ambushed in the observatory chambers; not even kinetic sidearms slowed it down. It slashed through the life support lines, releasing toxic bio-spores so that no one in the facility can breathe."
 	},
 	{
 		"id": "log_07",
-		"author": "Specialist Chen",
+		"author": "Specialist Jian Chen",
 		"date": "Cycle 2184.115",
-		"title": "Atmospheric Containment Loss",
-		"content": "Scrubber loop failed completely. Ambient oxygen levels are bleeding into the venting conduits whenever main bus power is lost. If life support is not supplied with both electrical power and a sound coupler, atmospheric asphyxiation is inevitable."
+		"title": "Scrubber Loop Toxic Contamination",
+		"content": "The atmospheric scrubber loop is clogged with creature venom. Ambient oxygen is bleeding away while toxic gases flood the corridors. Unless the scrubber's fractured coolant coupler is replaced, any crew survivor will asphyxiate in minutes."
 	},
 	{
 		"id": "log_08",
-		"author": "Nav Officer Lin",
+		"author": "Dr. Aris Thorne",
 		"date": "Cycle 2184.117",
-		"title": "Orbital Decay Calculation",
-		"content": "Atmospheric drag at 220 km is pulling Astraea-7 inward. Without an immediate orbital departure burn from the ion engines, the hull will enter thermal re-entry in approximately 12 hours. We cannot ignite the drives until power, life support, and comms telemetry are restored."
+		"title": "Creature Vulnerability: Neuro-Toxic Gas",
+		"content": "My dying realization: the adapted organism's hyper-developed respiratory system is completely vulnerable to concentrated decontamination gas. Weapons cannot penetrate its carapace, but trapping it in a sealed chamber and opening the poisonous gas valve will destroy it instantly."
 	},
 	{
 		"id": "log_09",
-		"author": "Chief Engineer Vasquez",
+		"author": "Quartermaster David Reyes",
 		"date": "Cycle 2184.118",
-		"title": "Final Engineering Directive",
-		"content": "The commander and remaining bridge officers have gone dark. I am sealing the Engineering Bay and setting the automated stasis pod to awaken the standby engineer if life support drops below threshold. If you are reading this: follow the restoration sequence, prime the drives, and get Astraea-7 out of this orbit."
+		"title": "Setting the Chamber Poison Gas Trap",
+		"content": "I managed to route the high-pressure poisonous gas line to the starboard chamber isolation valve. Whoever arrives at this facility: do not try to fight the beast directly. Lure it inside the sealed chamber, lock the bulkhead door, and rotate the emergency valve to flood it with gas!"
 	},
 	{
 		"id": "log_10",
-		"author": "Astraea-7 Central Computer",
+		"author": "Astraea Research Station Computer",
 		"date": "Cycle 2184.120",
-		"title": "Automated Beacon Status",
-		"content": "SYSTEM SUMMARY: Distress beacon broadcast pending antenna servo alignment. Ion propulsion primed upon bus re-energization and atmospheric stabilization. Standby engineer awaken signal dispatched."
+		"title": "Automated Docking Advisory to Scientist",
+		"content": "ATTENTION LEAD SCIENTIST: Docking sequence complete. Station in catastrophic status. All research personnel missing. Primary generators offline, security panels dark, and cabin atmosphere toxic. Follow sequential restoration tasks and eliminate the predatory organism to save the station."
 	}
 ]
 
 const EXPANSION_CREW_LOGS: Array[Dictionary] = [
 	{
 		"id": "log_11",
-		"author": "Commander Hayes",
+		"author": "Commander Evelyn Hayes",
 		"date": "Cycle 2184.116",
 		"title": "Bridge Command Directives",
-		"content": "With telemetry failing and Kharon-4's pulse disabling avionics, I have ordered all non-essential crew to pod staging. The navigation holotable is locked with departure coordinates to the jump gate. If engineering can stabilize the reactor and bus, engage the departure burn immediately."
+		"content": "With key-security panels offline and the mutant beast stalking the corridors, I have locked departure clearance behind authorization code 7394-OMEGA. Restore power to the chambers and exterminate the alien menace before initiating orbital burn."
 	},
 	{
 		"id": "log_12",
 		"author": "Dr. Aris Thorne",
 		"date": "Cycle 2184.111",
 		"title": "Infirmary Triage Log",
-		"content": "Infirmary is flooded with acute carbon dioxide and hypoxia casualties. We've depleted half our trauma kits. The medical oxygen booster in Medbay is operational but requires auxiliary bus power. Do not let the scrubber loop offline again."
+		"content": "The organism secretes aerosolized toxins that disable human lung function within thirty seconds. If you enter unscrubbed chambers, monitor your O2 level immediately. The medical oxygen booster in Medbay can stabilize acute respiratory trauma."
 	},
 	{
 		"id": "log_13",
-		"author": "Quartermaster Reyes",
+		"author": "Quartermaster David Reyes",
 		"date": "Cycle 2184.113",
 		"title": "Cargo Staging & Crawlway Breach",
-		"content": "Cargo staging crane is jammed from the inertia dampener failure. We stashed high-capacity battery cells and salvage crates near the aft maintenance access hatch. Beware: the crawlway plating took a direct micrometeoroid strike during braking—hull integrity is breached in there."
+		"content": "We attempted to barricade the Cargo Bay with heavy storage crates, but the alien ripped through the hydraulic lift framework like paper. I stashed spare batteries and cutting tools near the crawlway access hatch."
 	},
 	{
 		"id": "log_14",
-		"author": "Chief Engineer Vasquez",
+		"author": "Chief Engineer Elena Vasquez",
 		"date": "Cycle 2184.119",
 		"title": "Reactor Subdeck Vaults",
-		"content": "I've locked the auxiliary fuel flow valve in the subdeck. If the primary turbine trips or starves, manual feed override from this deck can inject auxiliary deuterium. I have left the secondary battery vault online. Keep this ship alive."
+		"content": "I verified the auxiliary toxic decontamination tanks on the subdeck manifold. Opening the emergency valve in the sealed chamber will discharge 500 liters of lethal gas—guaranteeing the destruction of the mutant specimen."
 	}
 ]
 
@@ -396,8 +401,13 @@ func get_current_objective() -> Dictionary:
 	return {
 		"id": "obj_completed",
 		"title": "Mission Accomplished",
-		"desc": "Astraea-7 is breaking orbit. All systems restored."
+		"desc": "Astraea Research Station secured. Mutant alien exterminated. All systems restored.",
+		"immediate_task": "Station Secure"
 	}
+
+func get_current_immediate_task() -> String:
+	var obj := get_current_objective()
+	return str(obj.get("immediate_task", "Follow Mission Directives"))
 
 func get_objective_count() -> int:
 	return OBJECTIVES.size()
@@ -417,6 +427,9 @@ func complete_objective(index: int) -> void:
 			all_objectives_completed.emit()
 		else:
 			_broadcast_current_objective()
+
+func advance_objective() -> void:
+	complete_objective(current_objective_index)
 
 func add_inventory_item(item_id: String) -> void:
 	if not inventory.has(item_id):
