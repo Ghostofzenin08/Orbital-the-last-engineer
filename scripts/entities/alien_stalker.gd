@@ -96,6 +96,12 @@ func set_state(new_state: int) -> void:
 			is_eliminated = true
 			if collision_shape != null:
 				collision_shape.disabled = true
+			if eye_left_light != null:
+				eye_left_light.light_energy = 0.0
+			if eye_right_light != null:
+				eye_right_light.light_energy = 0.0
+			if aura_light != null:
+				aura_light.light_energy = 0.0
 			stalker_eliminated.emit()
 	
 	_refresh_visuals()
@@ -230,6 +236,13 @@ func _update_animation_effects(_delta: float) -> void:
 func _refresh_visuals() -> void:
 	var active := (current_state != State.DORMANT)
 	visible = active
+	if current_state == State.ELIMINATED:
+		if eye_left_light != null:
+			eye_left_light.light_energy = 0.0
+		if eye_right_light != null:
+			eye_right_light.light_energy = 0.0
+		if aura_light != null:
+			aura_light.light_energy = 0.0
 	if eye_left_light != null:
 		eye_left_light.visible = (active and current_state != State.ELIMINATED)
 	if eye_right_light != null:
