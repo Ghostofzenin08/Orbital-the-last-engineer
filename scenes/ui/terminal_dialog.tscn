@@ -62,35 +62,41 @@ text = "[X] Close"
 
 [node name="TabBar" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="TabDiagnostics" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 36)
 layout_mode = 2
 text = "DIAGNOSTICS"
 
 [node name="TabSchematic" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(145, 36)
 layout_mode = 2
 text = "SHIP SCHEMATIC"
 
 [node name="TabAtmosphere" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 36)
 layout_mode = 2
 text = "ATMOSPHERE"
 
 [node name="TabLogs" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 36)
 layout_mode = 2
 text = "INCIDENT LOGS"
 
+[node name="TabInvestigation" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 36)
+layout_mode = 2
+text = "CREW MYSTERY"
+
 [node name="TabComms" type="Button" parent="CenterContainer/Panel/Margin/VBox/TabBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 36)
 layout_mode = 2
 text = "COMMS ARRAY"
 
@@ -128,10 +134,39 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 16
 
-[node name="LogsList" type="ItemList" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(320, 0)
+[node name="LogsLeftVBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="CategoryBar" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView/LogsLeftVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="BtnFilterCrewLogs" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView/LogsLeftVBox/CategoryBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "CREW LOGS"
+
+[node name="BtnFilterDatapads" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView/LogsLeftVBox/CategoryBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "DATAPADS"
+
+[node name="BtnFilterRevelations" type="Button" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView/LogsLeftVBox/CategoryBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "REVELATIONS"
+
+[node name="LogsList" type="ItemList" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView/LogsLeftVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="LogDetailVBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/LogsView"]
 layout_mode = 2
@@ -157,6 +192,47 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 text = "Select a log entry from the terminal directory."
+
+[node name="InvestigationView" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="InvestigationSummaryLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/InvestigationView"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "CREW MYSTERY DOSSIER // DATAPADS RECOVERED: 0/10 | REVELATIONS UNLOCKED: 0/3"
+
+[node name="DossierHBox" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/InvestigationView"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="DatapadsScroll" type="ScrollContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/InvestigationView/DossierHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DatapadsDossierList" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/InvestigationView/DossierHBox/DatapadsScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="RevelationsScroll" type="ScrollContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/InvestigationView/DossierHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RevelationsDossierList" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer/InvestigationView/DossierHBox/RevelationsScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
 
 [node name="CommsView" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ContentContainer"]
 unique_name_in_owner = true
