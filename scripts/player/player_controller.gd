@@ -44,6 +44,10 @@ var _horror_zoom_duration: float = 1.0
 var _base_fov: float = 75.0
 var _target_fov: float = 75.0
 
+var is_arrow_look: bool:
+	get:
+		return SaveManager.look_mode == "arrow_keys" or SaveManager.look_mode == "arrows"
+
 func _ready() -> void:
 	collision_layer = 2 # bit 1 = Player
 	collision_mask = 1  # bit 0 = Environment
@@ -71,12 +75,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		var sens: float = SaveManager.mouse_sensitivity
-		# Yaw on body
-		rotate_y(-event.relative.x * sens)
-		# Pitch on camera pivot
-		_pitch = clampf(_pitch - (event.relative.y * sens), deg_to_rad(-85.0), deg_to_rad(85.0))
-		camera_pivot.rotation.x = _pitch
+		if not is_arrow_look:
+			var sens: float = SaveManager.mouse_sensitivity
+			# Yaw on body
+			rotate_y(-event.relative.x * sens)
+			# Pitch on camera pivot
+			_pitch = clampf(_pitch - (event.relative.y * sens), deg_to_rad(-85.0), deg_to_rad(85.0))
+			camera_pivot.rotation.x = _pitch
 	
 	if event.is_action_pressed("pause"):
 		_toggle_pause()
@@ -136,38 +141,68 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 	
-	# Laptop-friendly Keyboard Rotation (Left / Right Arrow keys turn the character sideways)
-	var turn_input: float = 0.0
-	if Input.is_key_pressed(KEY_LEFT):
-		turn_input += 1.0
-	if Input.is_key_pressed(KEY_RIGHT):
-		turn_input -= 1.0
-	if turn_input != 0.0:
-		var turn_speed: float = 2.4 # radians per second (~137 deg/s)
-		rotate_y(turn_input * turn_speed * delta)
-	
-	# Optional keyboard pitch (Page Up / Page Down to look up/down)
-	var pitch_input: float = 0.0
-	if Input.is_key_pressed(KEY_PAGEUP):
-		pitch_input += 1.0
-	if Input.is_key_pressed(KEY_PAGEDOWN):
-		pitch_input -= 1.0
-	if pitch_input != 0.0:
-		_pitch = clampf(_pitch + (pitch_input * 2.0 * delta), deg_to_rad(-85.0), deg_to_rad(85.0))
-		camera_pivot.rotation.x = _pitch
+	if is_arrow_look:
+		# Dedicated 360-degree viewing using arrow keys
+		var arrow_yaw: float = 0.0
+		if Input.is_key_pressed(KEY_LEFT):
+			arrow_yaw += 1.0
+		if Input.is_key_pressed(KEY_RIGHT):
+			arrow_yaw -= 1.0
+		if arrow_yaw != 0.0:
+			var yaw_speed: float = 2.8 # radians per second (~160 deg/s)
+			rotate_y(arrow_yaw * yaw_speed * delta)
+		
+		var arrow_pitch: float = 0.0
+		if Input.is_key_pressed(KEY_UP):
+			arrow_pitch += 1.0
+		if Input.is_key_pressed(KEY_DOWN):
+			arrow_pitch -= 1.0
+		if arrow_pitch != 0.0:
+			var pitch_speed: float = 2.2 # radians per second (~126 deg/s)
+			_pitch = clampf(_pitch + (arrow_pitch * pitch_speed * delta), deg_to_rad(-85.0), deg_to_rad(85.0))
+			camera_pivot.rotation.x = _pitch
+	else:
+		# Mouse look mode: Left/Right arrows turn sideways as a helpful backup, PageUp/PageDown pitch
+		var turn_input: float = 0.0
+		if Input.is_key_pressed(KEY_LEFT):
+			turn_input += 1.0
+		if Input.is_key_pressed(KEY_RIGHT):
+			turn_input -= 1.0
+		if turn_input != 0.0:
+			var turn_speed: float = 2.4
+			rotate_y(turn_input * turn_speed * delta)
+		
+		var pitch_input: float = 0.0
+		if Input.is_key_pressed(KEY_PAGEUP):
+			pitch_input += 1.0
+		if Input.is_key_pressed(KEY_PAGEDOWN):
+			pitch_input -= 1.0
+		if pitch_input != 0.0:
+			_pitch = clampf(_pitch + (pitch_input * 2.0 * delta), deg_to_rad(-85.0), deg_to_rad(85.0))
+			camera_pivot.rotation.x = _pitch
 
 	# Determine movement input
 	var input_dir := Vector2.ZERO
-	
-	# Movement checks: W / Up Arrow for forward, S / Down Arrow for backward, A / D for strafe
-	if Input.is_action_pressed("move_forward") or Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
-		input_dir.y -= 1.0
-	if Input.is_action_pressed("move_backward") or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
-		input_dir.y += 1.0
-	if Input.is_key_pressed(KEY_A) or (Input.is_action_pressed("move_left") and not Input.is_key_pressed(KEY_LEFT)):
-		input_dir.x -= 1.0
-	if Input.is_key_pressed(KEY_D) or (Input.is_action_pressed("move_right") and not Input.is_key_pressed(KEY_RIGHT)):
-		input_dir.x += 1.0
+	if is_arrow_look:
+		# In Arrow Look mode, WASD is dedicated to movement so Arrow keys are exclusively for looking
+		if Input.is_key_pressed(KEY_W):
+			input_dir.y -= 1.0
+		if Input.is_key_pressed(KEY_S):
+			input_dir.y += 1.0
+		if Input.is_key_pressed(KEY_A):
+			input_dir.x -= 1.0
+		if Input.is_key_pressed(KEY_D):
+			input_dir.x += 1.0
+	else:
+		# In Mouse Look mode, WASD + Arrow keys can move
+		if Input.is_action_pressed("move_forward") or Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+			input_dir.y -= 1.0
+		if Input.is_action_pressed("move_backward") or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+			input_dir.y += 1.0
+		if Input.is_key_pressed(KEY_A) or (Input.is_action_pressed("move_left") and not Input.is_key_pressed(KEY_LEFT)):
+			input_dir.x -= 1.0
+		if Input.is_key_pressed(KEY_D) or (Input.is_action_pressed("move_right") and not Input.is_key_pressed(KEY_RIGHT)):
+			input_dir.x += 1.0
 	
 	input_dir = input_dir.normalized()
 	
@@ -251,10 +286,14 @@ func take_damage(amount: float, source: String = "creature") -> void:
 		hud.trigger_horror_vignette(0.6)
 	
 	if AudioManager != null:
+		if AudioManager.has_method("play_impact_hit"):
+			AudioManager.play_impact_hit()
 		AudioManager.play_sfx("cough_gasp", 0.9)
 	
 	if player_health <= 0.0:
 		is_dead = true
+		if AudioManager != null and AudioManager.has_method("play_player_death_scream"):
+			AudioManager.play_player_death_scream()
 		player_died.emit(source)
 		_handle_player_death(source)
 
