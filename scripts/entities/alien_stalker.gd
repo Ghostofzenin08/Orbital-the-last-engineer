@@ -29,6 +29,7 @@ signal stalker_eliminated
 @export var attack_damage: float = 35.0
 @export var attack_range: float = 2.0
 @export var attack_interval: float = 1.4
+@export var safe_chamber_id: String = "medbay"
 
 var current_state: int = State.DORMANT
 var is_trapped: bool = false
@@ -123,8 +124,27 @@ func spawn_in_chamber(chamber_id: String, pos: Vector3 = Vector3.ZERO) -> void:
 				set_state(State.STALKING)
 		)
 
+func is_player_in_safe_room() -> bool:
+	if target_player == null or not is_instance_valid(target_player):
+		return false
+	if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
+		var env = EnvironmentalManager.instance
+		if "player_compartment_id" in env and env.player_compartment_id == safe_chamber_id:
+			return true
+		if env.has_method("get_compartment_for_position"):
+			return env.get_compartment_for_position(target_player.global_position) == safe_chamber_id
+	elif is_inside_tree() and has_node("/root/EnvironmentalManager"):
+		var env = get_node("/root/EnvironmentalManager")
+		if "player_compartment_id" in env and env.player_compartment_id == safe_chamber_id:
+			return true
+		if env.has_method("get_compartment_for_position"):
+			return env.get_compartment_for_position(target_player.global_position) == safe_chamber_id
+	return false
+
 func zoom_near_player(player: Node3D, duration: float = 1.0) -> void:
 	target_player = player
+	if is_player_in_safe_room():
+		return
 	zoom_duration = maxf(0.2, duration)
 	zoom_progress = 0.0
 	
@@ -174,6 +194,8 @@ func eliminate() -> void:
 		AudioManager.play_creature_roar()
 
 func _execute_claw_attack() -> void:
+	if is_player_in_safe_room():
+		return
 	_attack_cooldown = attack_interval
 	if claw_left != null:
 		claw_left.rotation.x = deg_to_rad(-55.0)
@@ -221,7 +243,11 @@ func _physics_process(delta: float) -> void:
 				set_state(State.AGGRESSIVE)
 		
 		State.STALKING:
-			if target_player != null and is_instance_valid(target_player):
+			if is_player_in_safe_room():
+				velocity.x = move_toward(velocity.x, 0.0, 5.0 * delta)
+				velocity.z = move_toward(velocity.z, 0.0, 5.0 * delta)
+				move_and_slide()
+			elif target_player != null and is_instance_valid(target_player):
 				var dir := (target_player.global_position - global_position).normalized()
 				dir.y = 0.0
 				velocity.x = dir.x * walk_speed
@@ -235,7 +261,12 @@ func _physics_process(delta: float) -> void:
 				move_and_slide()
 		
 		State.AGGRESSIVE:
-			if target_player != null and is_instance_valid(target_player):
+			if is_player_in_safe_room():
+				velocity.x = move_toward(velocity.x, 0.0, 6.0 * delta)
+				velocity.z = move_toward(velocity.z, 0.0, 6.0 * delta)
+				move_and_slide()
+				set_state(State.STALKING)
+			elif target_player != null and is_instance_valid(target_player):
 				var dir := (target_player.global_position - global_position).normalized()
 				dir.y = 0.0
 				velocity.x = dir.x * (walk_speed * 1.5)
