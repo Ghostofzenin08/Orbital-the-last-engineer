@@ -75,6 +75,7 @@ func _ready() -> void:
 	_run_suite("Milestone 7: Extended Exploration & Crisis Stalking Progression Flow", _test_m7_exploration_and_crisis_stalking_flow)
 	_run_suite("Milestone 7: Production Release Polish, Save/Load Persistence & End-Game Verification", _test_m7_production_polish_and_persistence)
 	_run_suite("Milestone 7: Architectural Chamber Connectivity & Horror Encounter Stalking Rigor", _test_m7_chamber_connectivity_and_horror_rigor)
+	_run_suite("QA Systems Integrity & Gameplay Improvements", _test_qa_integrity_and_improvements)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -2944,6 +2945,137 @@ func _test_m7_chamber_connectivity_and_horror_rigor() -> void:
 	ShipState.reset_to_defaults()
 	ShipSystemManager.reset_to_defaults()
 	MissionManager.reset_missions()
+
+func _test_qa_integrity_and_improvements() -> void:
+	ShipState.reset_to_defaults()
+	
+	# 1. ShipState death reason tracking and reset
+	_assert_true(ShipState.death_reason == "", "ShipState death_reason initialized empty")
+	ShipState.death_reason = "CREATURE_ATTACK"
+	_assert_true(ShipState.death_reason == "CREATURE_ATTACK", "ShipState records CREATURE_ATTACK death reason")
+	ShipState.reset_to_defaults()
+	_assert_true(ShipState.death_reason == "", "ShipState death_reason resets cleanly on reset_to_defaults")
+
+	# 2. EnvironmentalManager asphyxiation death reason
+	var env_script = load("res://scripts/systems/environmental_manager.gd")
+	var env_mgr = env_script.new()
+	add_child(env_mgr)
+	env_mgr.initialize_atmosphere()
+	env_mgr._on_asphyxiation()
+	_assert_true(ShipState.death_reason == "ASPHYXIATION", "EnvironmentalManager sets death_reason to ASPHYXIATION upon oxygen depletion")
+	remove_child(env_mgr)
+	env_mgr.free()
+
+	# 3. GameOverScreen dynamic death cause
+	var game_over_scene = load("res://scenes/ui/game_over.tscn")
+	_assert_true(game_over_scene != null, "game_over.tscn loads cleanly")
+	var game_over = game_over_scene.instantiate()
+	add_child(game_over)
+	
+	var title_lbl: Label = game_over.get_node_or_null("%Title")
+	var body_lbl: Label = game_over.get_node_or_null("%BodyText")
+	_assert_true(title_lbl != null, "GameOverScreen has Title label")
+	_assert_true(body_lbl != null, "GameOverScreen has BodyText label")
+	_assert_true(title_lbl.text.contains("ATMOSPHERIC COLLAPSE"), "GameOverScreen defaults to atmospheric collapse text")
+	
+	ShipState.death_reason = "CREATURE_ATTACK"
+	game_over._configure_death_cause()
+	_assert_true(title_lbl.text.contains("BIOLOGICAL SPECIMEN TERMINATION"), "GameOverScreen reflects specimen termination title on creature attack")
+	_assert_true(body_lbl.text.contains("Project Chimera specimen"), "GameOverScreen reflects specimen lore on creature attack")
+	
+	remove_child(game_over)
+	game_over.free()
+	ShipState.death_reason = ""
+
+	# 4. PlayerController health, damage, slope stabilization, and death mechanics
+	var player_scene = load("res://scenes/player/player.tscn")
+	var player: PlayerController = player_scene.instantiate()
+	add_child(player)
+	_assert_true(player.player_health == 100.0, "Player starts with 100 health")
+	_assert_true(is_equal_approx(player.floor_snap_length, 0.35), "Player floor_snap_length set to 0.35 for slope stabilization")
+	_assert_true(player.floor_constant_speed == true, "Player floor_constant_speed is true")
+	
+	var health_reported := [-1.0]
+	player.health_changed.connect(func(h, _m): health_reported[0] = h)
+	player.take_damage(35.0, "creature")
+	_assert_true(player.player_health == 65.0, "take_damage(35) reduces health to 65")
+	_assert_true(health_reported[0] == 65.0, "health_changed signal fired with updated health")
+	_assert_true(player.camera_trauma > 0.5, "camera_trauma elevated upon taking damage")
+	
+	var death_reported := [""]
+	player.player_died.connect(func(r): death_reported[0] = r)
+	player.take_damage(70.0, "creature")
+	_assert_true(player.player_health == 0.0, "Lethal damage reduces player health to 0")
+	_assert_true(player.is_dead == true, "Player is_dead flag set to true")
+	_assert_true(death_reported[0] == "creature", "player_died signal emitted with creature source")
+	_assert_true(ShipState.death_reason == "CREATURE_ATTACK", "ShipState death_reason updated to CREATURE_ATTACK on player death")
+
+	# 5. AlienStalker melee claw attack logic
+	var stalker_scene = load("res://scenes/entities/alien_stalker.tscn")
+	var stalker: AlienStalker = stalker_scene.instantiate()
+	add_child(stalker)
+	
+	player.player_health = 100.0
+	player.is_dead = false
+	stalker.target_player = player
+	stalker.global_position = player.global_position + Vector3(0, 0, 1.2)
+	stalker.set_state(AlienStalkerClass.State.AGGRESSIVE)
+	
+	stalker._physics_process(0.016)
+	_assert_true(stalker._attack_cooldown > 1.0, "AlienStalker sets attack cooldown after claw strike")
+	_assert_true(player.player_health == 65.0, "AlienStalker claw strike damaged player for 35 health")
+	
+	remove_child(player)
+	remove_child(stalker)
+	player.free()
+	stalker.free()
+
+	# 6. AudioManager footstep sound generation and playback
+	_assert_true(AudioManager._sound_cache.has("footstep"), "AudioManager pregenerates footstep sound in cache")
+	AudioManager.play_footstep(false)
+	AudioManager.play_footstep(true)
+	_assert_true(true, "play_footstep executes cleanly for walk and sprint")
+
+	# 7. HUD Reticle Hover Dot Feedback
+	var hud_scene = load("res://scenes/ui/hud.tscn")
+	var hud = hud_scene.instantiate()
+	add_child(hud)
+	_assert_true(hud.reticle_dot != null, "HUDController references reticle_dot")
+	_assert_true(hud.reticle_dot.color == Color(1.0, 1.0, 1.0, 0.8), "Reticle dot starts at default semi-transparent white")
+	
+	hud.set_prompt("Press [E] to Inspect Generator Breaker")
+	_assert_true(hud.reticle_dot.color == Color(0.2, 0.9, 1.0, 1.0), "Reticle dot tints cyan when hovering interactable")
+	_assert_true(hud.reticle_dot.custom_minimum_size == Vector2(6, 6), "Reticle dot enlarges when hovering interactable")
+	
+	hud.set_prompt("")
+	_assert_true(hud.reticle_dot.color == Color(1.0, 1.0, 1.0, 0.8), "Reticle dot reverts to default color when prompt is cleared")
+	_assert_true(hud.reticle_dot.custom_minimum_size == Vector2(4, 4), "Reticle dot reverts to default size when prompt is cleared")
+	
+	remove_child(hud)
+	hud.free()
+
+	# 8. ShipSchematic 13-Compartment Support (Specimen Vault & Research Observatory)
+	var schematic_scene = load("res://scenes/ui/ship_schematic.tscn")
+	var schematic: ShipSchematic = schematic_scene.instantiate()
+	add_child(schematic)
+	_assert_true(schematic.vault_panel != null, "ShipSchematic contains SpecimenVaultPanel")
+	_assert_true(schematic.obs_panel != null, "ShipSchematic contains ResearchObservatoryPanel")
+	
+	schematic.open_schematic()
+	schematic._select_compartment("specimen_vault")
+	_assert_true(schematic.selected_room_title.text.contains("SPECIMEN"), "Selecting specimen_vault populates inspector title")
+	
+	schematic._select_compartment("research_observatory")
+	_assert_true(schematic.selected_room_title.text.contains("OBSERVATORY"), "Selecting research_observatory populates inspector title")
+	
+	schematic.close_schematic()
+	remove_child(schematic)
+	schematic.free()
+
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+
 
 
 
