@@ -94,13 +94,6 @@ As the Lead Scientist docking at the *Astraea Biological Research Facility*, you
 
 ---
 
-## Running & Testing the Project
-
-### Play in Godot:
-```powershell
-& "D:\EREN\Godot_v4.7.2-stable_win64_console.exe" --path "C:\Users\HARSHAL\OneDrive\Desktop\Godot\lost-from-space"
-```
-
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.  
