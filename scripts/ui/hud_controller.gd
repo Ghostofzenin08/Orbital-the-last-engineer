@@ -6,6 +6,7 @@ extends CanvasLayer
 # upper-left immediate task display, decreased prompt sizing at object bottom, and paused telemetry.
 
 @onready var prompt_label: Label = %PromptLabel
+@onready var reticle_dot: ColorRect = get_node_or_null("%Dot")
 @onready var objective_title_lbl: Label = %ObjectiveTitle
 @onready var immediate_task_lbl: Label = get_node_or_null("%ImmediateTaskLabel")
 @onready var objective_desc_lbl: Label = get_node_or_null("%ObjectiveDesc")
@@ -178,6 +179,13 @@ func toggle_schematic() -> void:
 
 func set_prompt(text: String) -> void:
 	prompt_label.text = text
+	if reticle_dot != null:
+		if text != "":
+			reticle_dot.color = Color(0.2, 0.9, 1.0, 1.0)
+			reticle_dot.custom_minimum_size = Vector2(6, 6)
+		else:
+			reticle_dot.color = Color(1.0, 1.0, 1.0, 0.8)
+			reticle_dot.custom_minimum_size = Vector2(4, 4)
 
 func update_oxygen(level: float, is_depleting: bool) -> void:
 	if pause_menu != null and pause_menu.has_method("update_oxygen"):
