@@ -36,6 +36,8 @@ signal closed
 @onready var eng_panel: PanelContainer = %EngBayPanel
 @onready var subdeck_panel: PanelContainer = %ReactorSubdeckPanel
 @onready var crawlway_panel: PanelContainer = %MaintenanceCrawlwayPanel
+@onready var vault_panel: PanelContainer = get_node_or_null("%SpecimenVaultPanel")
+@onready var obs_panel: PanelContainer = get_node_or_null("%ResearchObservatoryPanel")
 
 # Power Flow Conduit Lines
 @onready var conduit_eng_to_corr: ColorRect = %ConduitEngToCorr
@@ -88,6 +90,10 @@ func _ready() -> void:
 		%BtnSelectSubdeck: "reactor_subdeck",
 		%BtnSelectCrawlway: "maintenance_crawlway"
 	}
+	if has_node("%BtnSelectVault"):
+		button_bindings[%BtnSelectVault] = "specimen_vault"
+	if has_node("%BtnSelectObservatory"):
+		button_bindings[%BtnSelectObservatory] = "research_observatory"
 	
 	for btn in button_bindings.keys():
 		if btn != null:
@@ -217,7 +223,9 @@ func _update_ui_from_data(data: Dictionary) -> void:
 		"airlock_chamber": airlock_panel,
 		"engineering_bay": eng_panel,
 		"reactor_subdeck": subdeck_panel,
-		"maintenance_crawlway": crawlway_panel
+		"maintenance_crawlway": crawlway_panel,
+		"specimen_vault": vault_panel,
+		"research_observatory": obs_panel
 	}
 	
 	for cid in panel_map.keys():
