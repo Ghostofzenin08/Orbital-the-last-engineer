@@ -400,6 +400,15 @@ func mark_breach_sealed(comp_id: String = "maintenance_crawlway") -> void:
 # Milestone 7: Extended Chamber Exploration & Final Hunt Gate
 var required_chambers_for_final_hunt: int = 5
 
+func are_all_repairs_complete() -> bool:
+	if current_objective_index >= 4:
+		return true
+	if has_node("/root/ShipSystemManager"):
+		var ssm = get_node("/root/ShipSystemManager")
+		if ssm.is_system_online("primary_power") and ssm.is_system_online("power_distribution") and ssm.is_system_online("life_support") and ssm.is_system_online("communications"):
+			return true
+	return false
+
 func can_engage_final_hunt() -> bool:
 	return discovered_rooms.size() >= required_chambers_for_final_hunt
 
