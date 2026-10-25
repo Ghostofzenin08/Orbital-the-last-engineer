@@ -76,6 +76,7 @@ func _ready() -> void:
 	_run_suite("Milestone 7: Production Release Polish, Save/Load Persistence & End-Game Verification", _test_m7_production_polish_and_persistence)
 	_run_suite("Milestone 7: Architectural Chamber Connectivity & Horror Encounter Stalking Rigor", _test_m7_chamber_connectivity_and_horror_rigor)
 	_run_suite("QA Systems Integrity & Gameplay Improvements", _test_qa_integrity_and_improvements)
+	_run_suite("Paced Alien Stalker Emergence & Safe Room Sanctuary", _test_alien_pacing_and_safe_room)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -3072,6 +3073,100 @@ func _test_qa_integrity_and_improvements() -> void:
 	remove_child(schematic)
 	schematic.free()
 
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+
+func _test_alien_pacing_and_safe_room() -> void:
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+	
+	# 1. Pacing: Alien cannot appear until all spaceship repairs are complete
+	MissionManager.current_objective_index = 0
+	_assert_true(not MissionManager.are_all_repairs_complete(), "are_all_repairs_complete is false at start (Obj 0)")
+	
+	MissionManager.current_objective_index = 3
+	_assert_true(not MissionManager.are_all_repairs_complete(), "are_all_repairs_complete is false while comms repair pending (Obj 3)")
+	
+	MissionManager.current_objective_index = 4
+	_assert_true(MissionManager.are_all_repairs_complete(), "are_all_repairs_complete is true once repairs finished (Obj 4)")
+
+	# 2. Check level controller refuses to trigger hunt while repairs pending even if 5 chambers explored
+	var level_scene = load("res://scenes/levels/ship_interior.tscn")
+	var level = level_scene.instantiate()
+	add_child(level)
+	
+	MissionManager.current_objective_index = 2
+	var chambers := ["engineering_bay", "corridors", "life_support", "bridge", "specimen_vault"]
+	for ch in chambers:
+		MissionManager.mark_room_discovered(ch)
+	_assert_true(MissionManager.can_engage_final_hunt(), "5 chambers discovered")
+	
+	level._check_trigger_final_hunt()
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.NONE, "Final hunt not triggered while repairs pending")
+	
+	remove_child(level)
+	level.free()
+
+	# 3. Vibration Alert upon repair completion
+	var player_scene = load("res://scenes/player/player.tscn")
+	var player: PlayerController = player_scene.instantiate()
+	add_child(player)
+	
+	_assert_true(not player.is_vibrating, "Player not vibrating initially")
+	player.trigger_vibration_alert(3.0, 0.65)
+	_assert_true(player.is_vibrating, "Player enters vibration alert state")
+	_assert_true(player.camera_trauma > 0.4, "Camera trauma raised by vibration alert")
+	
+	# 4. Safe Room (Medbay Sanctuary) Mechanics
+	var stalker_scene = load("res://scenes/entities/alien_stalker.tscn")
+	var stalker: AlienStalker = stalker_scene.instantiate()
+	add_child(stalker)
+	stalker.target_player = player
+	
+	_assert_true(stalker.safe_chamber_id == "medbay", "AlienStalker designates medbay as safe_chamber_id")
+	
+	var env_script = load("res://scripts/systems/environmental_manager.gd")
+	var env_mgr = env_script.new()
+	add_child(env_mgr)
+	env_mgr.initialize_atmosphere()
+	
+	# Position player inside Medbay: z in [-13.0, -3.5], x > 2.0 (e.g. Vector3(4.0, 0.0, -8.0))
+	player.global_position = Vector3(4.0, 0.0, -8.0)
+	env_mgr.player_compartment_id = "medbay"
+	
+	_assert_true(stalker.is_player_in_safe_room(), "AlienStalker recognizes player is inside safe room")
+	
+	# Stalker attempts claw attack while player is in safe room
+	player.player_health = 100.0
+	stalker.global_position = Vector3(1.5, 0.0, -8.0) # in corridor just outside medbay
+	stalker.set_state(AlienStalkerClass.State.AGGRESSIVE)
+	stalker._execute_claw_attack()
+	_assert_true(player.player_health == 100.0, "Player takes zero damage inside safe room")
+	
+	# Stalker physics tick when player in safe room: halts and drops from AGGRESSIVE to STALKING
+	stalker.velocity = Vector3(3.0, 0.0, 3.0)
+	stalker._physics_process(0.8)
+	_assert_true(stalker.current_state == AlienStalkerClass.State.STALKING, "Stalker drops from AGGRESSIVE to STALKING when player in safe room")
+	_assert_true(Vector2(stalker.velocity.x, stalker.velocity.z).length() == 0.0, "Stalker decelerates and halts outside safe room")
+	
+	# Stalker attempts zoom_near_player while player in safe room
+	stalker.zoom_near_player(player, 0.5)
+	_assert_true(stalker.current_state != AlienStalkerClass.State.HORROR_ZOOM, "Alien cannot zoom/lunge at player inside safe room")
+	
+	# Move player outside Medbay into Corridor: Vector3(0.0, 0.0, 0.0)
+	player.global_position = Vector3(0.0, 0.0, 0.0)
+	env_mgr.player_compartment_id = "corridors"
+	_assert_true(not stalker.is_player_in_safe_room(), "AlienStalker recognizes player has left safe room")
+	
+	remove_child(env_mgr)
+	remove_child(player)
+	remove_child(stalker)
+	env_mgr.free()
+	player.free()
+	stalker.free()
+	
 	ShipState.reset_to_defaults()
 	ShipSystemManager.reset_to_defaults()
 	MissionManager.reset_missions()
