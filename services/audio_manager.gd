@@ -132,6 +132,7 @@ func _pregenerate_sounds() -> void:
 	_sound_cache["boss_screech"] = _generate_boss_screech()
 	_sound_cache["horror_zoom"] = _generate_horror_zoom()
 	_sound_cache["heartbeat_rapid"] = _generate_heartbeat_rapid()
+	_sound_cache["footstep"] = _generate_footstep()
 
 func play_datapad_decrypt() -> void:
 	play_sfx("datapad_decrypt")
@@ -156,6 +157,10 @@ func play_horror_zoom() -> void:
 
 func play_heartbeat_rapid() -> void:
 	play_sfx("heartbeat_rapid")
+
+func play_footstep(is_sprint: bool = false) -> void:
+	var pitch := randf_range(1.15, 1.35) if is_sprint else randf_range(0.92, 1.08)
+	play_sfx("footstep", pitch)
 
 func _generate_click() -> AudioStreamWAV:
 	var sample_rate := 22050
@@ -716,6 +721,28 @@ func _generate_heartbeat_rapid() -> AudioStreamWAV:
 		var b2 := exp(-pow((t - 0.28) * 40.0, 2.0)) * 0.8
 		var tone := sin(2.0 * PI * 55.0 * t) * (b1 + b2)
 		var val := tone * 0.75
+		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
+
+func _generate_footstep() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 0.12
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var env := exp(-t * 32.0)
+		var thud := sin(2.0 * PI * 85.0 * t) * 0.45
+		var clang := sin(2.0 * PI * 420.0 * t) * 0.25 * exp(-t * 45.0)
+		var hiss := (randf() * 2.0 - 1.0) * 0.18 * exp(-t * 60.0)
+		var val := (thud + clang + hiss) * env * 0.5
 		var sample := int(clampf(val, -1.0, 1.0) * 32767.0)
 		data.encode_s16(i * 2, sample)
 	var wav := AudioStreamWAV.new()
