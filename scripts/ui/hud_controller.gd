@@ -149,6 +149,25 @@ func _ready() -> void:
 	var cur_obj := MissionManager.get_current_objective()
 	_on_objective_updated(MissionManager.current_objective_index, cur_obj.get("title", ""), cur_obj.get("desc", ""))
 	_on_inventory_changed(MissionManager.inventory)
+	
+	if SaveManager.has_signal("game_mode_changed"):
+		SaveManager.game_mode_changed.connect(func(_m): _apply_game_mode())
+	_apply_game_mode()
+
+func _apply_game_mode() -> void:
+	var is_feel: bool = (SaveManager.game_mode == "feel")
+	var bottom_right = get_node_or_null("BottomRightMargin")
+	if bottom_right != null:
+		bottom_right.visible = not is_feel
+	if tutorial_margin != null and is_feel:
+		tutorial_margin.visible = false
+	if scan_telemetry_margin != null and is_feel:
+		scan_telemetry_margin.visible = false
+	if info_btn != null:
+		info_btn.text = "[TAB] PAUSE" if is_feel else "[TAB] INFO"
+	if gear_info_btn != null:
+		gear_info_btn.visible = not is_feel
+	_update_tool_and_resource_hud()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -163,6 +182,8 @@ func toggle_info() -> void:
 		pause_menu.toggle_pause()
 
 func toggle_schematic() -> void:
+	if SaveManager.game_mode == "feel":
+		return
 	if ship_schematic != null:
 		if ship_schematic.visible:
 			if ship_schematic.has_method("close_schematic"):
@@ -293,6 +314,7 @@ func _on_objective_completed(_idx: int, title: String) -> void:
 func _on_inventory_changed(items: Array[String]) -> void:
 	if pause_menu != null and pause_menu.has_method("update_inventory"):
 		pause_menu.update_inventory(items)
+	_update_tool_and_resource_hud()
 
 func show_notification(msg: String, duration: float = 3.0) -> void:
 	notification_lbl.text = msg
@@ -314,6 +336,8 @@ func _on_tool_used(tool_id: String, details: Dictionary) -> void:
 		display_scan_telemetry(details)
 
 func show_tutorial_step(_step: int, title: String, instruction: String) -> void:
+	if SaveManager.game_mode == "feel":
+		return
 	if tutorial_margin != null:
 		tutorial_margin.visible = true
 	if tutorial_title_lbl != null:
@@ -339,6 +363,42 @@ func _update_tool_and_resource_hud() -> void:
 	var battery: float = im.get_scanner_battery()
 	var mode: String = im.get_multitool_mode().capitalize()
 	
+	if SaveManager.game_mode == "feel":
+		if compact_gear_lbl != null:
+			var inv_list: Array[String] = MissionManager.inventory
+			var inv_str: String = "Empty"
+			if not inv_list.is_empty():
+				var names: Array[String] = []
+				for item in inv_list:
+					match item:
+						"coolant_coupler": names.append("Coolant Coupler")
+						"scrubber_cartridge": names.append("Scrubber Filter")
+						"spare_fuse": names.append("Spare Fuse")
+						"battery_cell": names.append("Battery")
+						_: names.append(item.capitalize())
+				inv_str = ", ".join(names)
+			
+			var eq_name: String = "Hands"
+			match equipped:
+				"diagnostic_scanner": eq_name = "Scanner"
+				"multitool": eq_name = "Repair Tool"
+				"spare_fuse": eq_name = "Spare Fuse"
+				"battery_cell": eq_name = "Battery"
+				_:
+					if equipped != "":
+						eq_name = equipped.capitalize()
+			
+			compact_gear_lbl.text = "EQUIPPED: %s  |  INVENTORY: [ %s ]" % [eq_name, inv_str]
+		if pause_menu != null and pause_menu.has_method("update_gear"):
+			var res: Dictionary = {
+				"spare_fuse": im.get_item_count("spare_fuse"),
+				"coolant_canister": im.get_item_count("coolant_canister"),
+				"scrubber_cartridge": im.get_item_count("scrubber_cartridge"),
+				"battery_cell": im.get_item_count("battery_cell")
+			}
+			pause_menu.update_gear(equipped, battery, res)
+		return
+	
 	if compact_gear_lbl != null:
 		match equipped:
 			"diagnostic_scanner":
@@ -362,6 +422,11 @@ func _update_tool_and_resource_hud() -> void:
 		pause_menu.update_gear(equipped, battery, res)
 
 func display_scan_telemetry(data: Dictionary) -> void:
+	if SaveManager.game_mode == "feel":
+		if scan_telemetry_margin != null:
+			scan_telemetry_margin.visible = false
+		return
+	
 	if scan_telemetry_margin == null:
 		return
 	
