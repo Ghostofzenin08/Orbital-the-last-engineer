@@ -43,7 +43,7 @@ func get_volume() -> float:
 func play_sfx(sound_name: String, pitch_scale: float = 1.0) -> void:
 	if not _sound_cache.has(sound_name):
 		return
-	var stream: AudioStreamWAV = _sound_cache[sound_name]
+	var stream: AudioStream = _sound_cache[sound_name]
 	for player in _sfx_players:
 		if not player.playing:
 			player.stream = stream
@@ -60,7 +60,7 @@ func play_sfx(sound_name: String, pitch_scale: float = 1.0) -> void:
 func play_ambient(sound_name: String) -> void:
 	if not _sound_cache.has(sound_name):
 		return
-	var stream: AudioStreamWAV = _sound_cache[sound_name]
+	var stream: AudioStream = _sound_cache[sound_name]
 	if _ambient_player.stream != stream or not _ambient_player.playing:
 		_ambient_player.stream = stream
 		_ambient_player.play()
@@ -85,7 +85,7 @@ func stop_ambient() -> void:
 func play_alarm_loop(sound_name: String = "alarm") -> void:
 	if not _sound_cache.has(sound_name):
 		return
-	var stream: AudioStreamWAV = _sound_cache[sound_name]
+	var stream: AudioStream = _sound_cache[sound_name]
 	if is_instance_valid(_alarm_player) and not _alarm_player.playing:
 		_alarm_player.stream = stream
 		_alarm_player.play()
@@ -103,6 +103,15 @@ func stop_all() -> void:
 		if is_instance_valid(p):
 			p.stop()
 			p.stream = null
+
+func _load_or_fallback(sound_name: String, res_path: String, fallback: AudioStream) -> void:
+	if ResourceLoader.exists(res_path):
+		var res = load(res_path)
+		if res is AudioStream:
+			_sound_cache[sound_name] = res
+			return
+	if fallback != null:
+		_sound_cache[sound_name] = fallback
 
 func _pregenerate_sounds() -> void:
 	_sound_cache["click"] = _generate_click()
@@ -133,6 +142,38 @@ func _pregenerate_sounds() -> void:
 	_sound_cache["horror_zoom"] = _generate_horror_zoom()
 	_sound_cache["heartbeat_rapid"] = _generate_heartbeat_rapid()
 	_sound_cache["footstep"] = _generate_footstep()
+
+	# Load authentic recorded audio files from resources/audio
+	_load_or_fallback("alien_footsteps", "res://resources/audio/alien_footsteps.mp3", null)
+	_load_or_fallback("alien_sound", "res://resources/audio/alien_sound.mp3", _sound_cache["creature_sound"])
+	_load_or_fallback("creature_sound", "res://resources/audio/alien_sound.mp3", _sound_cache["creature_sound"])
+	_load_or_fallback("creature_roar", "res://resources/audio/alien_sound.mp3", _sound_cache["creature_roar"])
+	_load_or_fallback("background_horror", "res://resources/audio/background_horror.mp3", _sound_cache["generator_hum"])
+	_load_or_fallback("gate_opening", "res://resources/audio/gate_opening.mp3", _sound_cache["door"])
+	_load_or_fallback("door", "res://resources/audio/gate_opening.mp3", _sound_cache["door"])
+	_load_or_fallback("impact_hit", "res://resources/audio/impact_hit.mp3", _sound_cache["click"])
+	_load_or_fallback("player_death_scream", "res://resources/audio/player_death_scream.mp3", _sound_cache["creature_sound"])
+	_load_or_fallback("player_footsteps", "res://resources/audio/player_footsteps.mp3", _sound_cache["footstep"])
+	_load_or_fallback("footstep", "res://resources/audio/player_footsteps.mp3", _sound_cache["footstep"])
+
+func play_alien_footstep() -> void:
+	if _sound_cache.has("alien_footsteps"):
+		play_sfx("alien_footsteps", randf_range(0.92, 1.08))
+
+func play_alien_sound() -> void:
+	play_sfx("alien_sound", randf_range(0.95, 1.05))
+
+func play_gate_opening() -> void:
+	play_sfx("gate_opening")
+
+func play_impact_hit() -> void:
+	play_sfx("impact_hit", randf_range(0.95, 1.05))
+
+func play_player_death_scream() -> void:
+	play_sfx("player_death_scream")
+
+func play_background_horror() -> void:
+	play_ambient("background_horror")
 
 func play_datapad_decrypt() -> void:
 	play_sfx("datapad_decrypt")
