@@ -248,6 +248,30 @@ theme_override_font_sizes/font_size = 12
 text = "INVENTORY: [ Empty ]"
 autowrap_mode = 2
 
+[node name="TogglesHBox" type="HBoxContainer" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LookModeButton" type="Button" parent="Center/Panel/Margin/VBox/TogglesHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 32)
+layout_mode = 2
+text = "LOOK: MOUSE (360°)"
+
+[node name="GameModeButton" type="Button" parent="Center/Panel/Margin/VBox/TogglesHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 32)
+layout_mode = 2
+text = "MODE: LOGICAL (ENGINEERING)"
+
+[node name="ModeDescLabel" type="Label" parent="Center/Panel/Margin/VBox/TogglesHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.65, 0.75, 0.85, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "Logical Mode: Full engineering diagnostics & science telemetry."
+
 [node name="HSep2" type="HSeparator" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
 
