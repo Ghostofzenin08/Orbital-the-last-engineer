@@ -19,6 +19,15 @@ var _pitch: float = 0.0
 var speed_modifier: float = 1.0
 var shiver_intensity: float = 0.0
 
+# Health & Survival Mechanics
+var player_health: float = 100.0
+var max_health: float = 100.0
+var is_dead: bool = false
+var _footstep_timer: float = 0.0
+
+signal health_changed(new_health: float, max_health: float)
+signal player_died(reason: String)
+
 # Milestone 7: Horror Boss Zoom & Camera Trauma Mechanics
 var camera_trauma: float = 0.0
 var _horror_zoom_timer: float = 0.0
@@ -29,6 +38,8 @@ var _target_fov: float = 75.0
 func _ready() -> void:
 	collision_layer = 2 # bit 1 = Player
 	collision_mask = 1  # bit 0 = Environment
+	floor_snap_length = 0.35
+	floor_constant_speed = true
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	
 	if camera != null:
@@ -188,6 +199,18 @@ func _physics_process(delta: float) -> void:
 			else:
 				camera.rotation.z = 0.0
 	
+	# Footstep audio triggering when grounded and moving
+	var horiz_vel := Vector2(velocity.x, velocity.z).length()
+	if is_on_floor() and horiz_vel > 0.6:
+		var step_interval := 0.32 if is_sprinting else 0.48
+		_footstep_timer += delta
+		if _footstep_timer >= step_interval:
+			_footstep_timer = 0.0
+			if AudioManager != null and AudioManager.has_method("play_footstep"):
+				AudioManager.play_footstep(is_sprinting)
+	else:
+		_footstep_timer = 0.0
+	
 	move_and_slide()
 
 var is_shivering: bool:
@@ -197,6 +220,37 @@ var is_shivering: bool:
 var is_in_horror_shock: bool:
 	get:
 		return _horror_zoom_timer > 0.0 or camera_trauma > 0.15
+
+func take_damage(amount: float, source: String = "creature") -> void:
+	if is_dead:
+		return
+	player_health = maxf(0.0, player_health - amount)
+	health_changed.emit(player_health, max_health)
+	
+	# Violent camera trauma kick and horror vignette
+	camera_trauma = clampf(camera_trauma + 0.85, 0.0, 1.0)
+	if hud != null and hud.has_method("trigger_horror_vignette"):
+		hud.trigger_horror_vignette(0.6)
+	
+	if AudioManager != null:
+		AudioManager.play_sfx("cough_gasp", 0.9)
+	
+	if player_health <= 0.0:
+		is_dead = true
+		player_died.emit(source)
+		_handle_player_death(source)
+
+func _handle_player_death(source: String) -> void:
+	if ShipState != null and "death_reason" in ShipState:
+		if source == "creature":
+			ShipState.death_reason = "CREATURE_ATTACK"
+		else:
+			ShipState.death_reason = source
+	if is_inside_tree() and get_tree() != null:
+		var cur := get_tree().current_scene
+		if cur != null and cur.scene_file_path.contains("test_runner"):
+			return
+		get_tree().change_scene_to_file.call_deferred("res://scenes/ui/game_over.tscn")
 
 func trigger_horror_zoom(duration: float = 1.2, fov_drop: float = 24.0, trauma: float = 0.85) -> void:
 	if camera != null:
