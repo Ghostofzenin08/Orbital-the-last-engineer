@@ -851,8 +851,13 @@ func _on_asphyxiation() -> void:
 	if AudioManager != null:
 		AudioManager.stop_all()
 	oxygen_depleted.emit()
-	if is_inside_tree():
-		get_tree().change_scene_to_file("res://scenes/ui/game_over.tscn")
+	if ShipState != null and "death_reason" in ShipState:
+		ShipState.death_reason = "ASPHYXIATION"
+	if is_inside_tree() and get_tree() != null:
+		var cur := get_tree().current_scene
+		if cur != null and cur.scene_file_path.contains("test_runner"):
+			return
+		get_tree().change_scene_to_file.call_deferred("res://scenes/ui/game_over.tscn")
 
 func reset_atmosphere() -> void:
 	initialize_atmosphere()
