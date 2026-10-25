@@ -26,11 +26,15 @@ signal stalker_eliminated
 @export var zoom_speed: float = 16.0
 @export var zoom_target_distance: float = 1.8
 @export var stalk_chamber_id: String = "specimen_vault"
+@export var attack_damage: float = 35.0
+@export var attack_range: float = 2.0
+@export var attack_interval: float = 1.4
 
 var current_state: int = State.DORMANT
 var is_trapped: bool = false
 var is_eliminated: bool = false
 var horror_zoom_executed: bool = false
+var _attack_cooldown: float = 0.0
 
 var target_player: Node3D = null
 var zoom_progress: float = 0.0
@@ -169,9 +173,22 @@ func eliminate() -> void:
 	if AudioManager != null:
 		AudioManager.play_creature_roar()
 
+func _execute_claw_attack() -> void:
+	_attack_cooldown = attack_interval
+	if claw_left != null:
+		claw_left.rotation.x = deg_to_rad(-55.0)
+	if claw_right != null:
+		claw_right.rotation.x = deg_to_rad(-55.0)
+	if AudioManager != null and AudioManager.has_method("play_creature_roar"):
+		AudioManager.play_creature_roar()
+	if target_player != null and is_instance_valid(target_player) and target_player.has_method("take_damage"):
+		target_player.take_damage(attack_damage, "creature")
+
 func _physics_process(delta: float) -> void:
 	_pulse_timer += delta * 5.0
 	_bob_timer += delta * 3.0
+	if _attack_cooldown > 0.0:
+		_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
 	
 	# Breathing & eye pulsing visuals
 	_update_animation_effects(delta)
@@ -212,6 +229,9 @@ func _physics_process(delta: float) -> void:
 				var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(target_player.global_position.x, target_player.global_position.z))
 				if flat_dist > 0.1:
 					look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
+				if flat_dist <= attack_range and _attack_cooldown <= 0.0:
+					set_state(State.AGGRESSIVE)
+					_execute_claw_attack()
 				move_and_slide()
 		
 		State.AGGRESSIVE:
@@ -223,6 +243,8 @@ func _physics_process(delta: float) -> void:
 				var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(target_player.global_position.x, target_player.global_position.z))
 				if flat_dist > 0.1:
 					look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
+				if flat_dist <= attack_range and _attack_cooldown <= 0.0:
+					_execute_claw_attack()
 				move_and_slide()
 		
 		State.TRAPPED:
@@ -256,11 +278,21 @@ func _update_animation_effects(_delta: float) -> void:
 	if aura_light != null:
 		aura_light.light_energy = 1.0 + sin(_pulse_timer * 0.5) * 0.4
 	
-	# Claws & Spine bobbing
-	if claw_left != null:
-		claw_left.rotation.z = deg_to_rad(sin(_bob_timer) * 6.0)
-	if claw_right != null:
-		claw_right.rotation.z = deg_to_rad(-sin(_bob_timer) * 6.0)
+	# Claws & Spine bobbing or strike attack pose
+	if _attack_cooldown > 0.8:
+		if claw_left != null:
+			claw_left.rotation.x = deg_to_rad(-55.0)
+			claw_left.rotation.z = deg_to_rad(30.0)
+		if claw_right != null:
+			claw_right.rotation.x = deg_to_rad(-55.0)
+			claw_right.rotation.z = deg_to_rad(-30.0)
+	else:
+		if claw_left != null:
+			claw_left.rotation.x = 0.0
+			claw_left.rotation.z = deg_to_rad(sin(_bob_timer) * 6.0)
+		if claw_right != null:
+			claw_right.rotation.x = 0.0
+			claw_right.rotation.z = deg_to_rad(-sin(_bob_timer) * 6.0)
 	if tail != null:
 		tail.rotation.x = deg_to_rad(-20.0 + sin(_bob_timer * 1.5) * 8.0)
 
