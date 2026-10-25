@@ -9,6 +9,41 @@ const CURRENT_SAVE_VERSION: int = 1
 
 var mouse_sensitivity: float = 0.002
 var master_volume: float = 1.0
+var look_mode: String = "mouse" # "mouse" or "arrow_keys"
+var game_mode: String = "logical" # "feel" or "logical"
+
+signal look_mode_changed(new_mode: String)
+signal game_mode_changed(new_mode: String)
+
+func set_look_mode(new_mode: String) -> void:
+	if new_mode != "mouse" and new_mode != "arrow_keys" and new_mode != "arrows":
+		new_mode = "mouse"
+	if new_mode == "arrows":
+		new_mode = "arrow_keys"
+	look_mode = new_mode
+	save_settings()
+	look_mode_changed.emit(look_mode)
+
+func toggle_look_mode() -> String:
+	if look_mode == "mouse":
+		set_look_mode("arrow_keys")
+	else:
+		set_look_mode("mouse")
+	return look_mode
+
+func set_game_mode(new_mode: String) -> void:
+	if new_mode != "feel" and new_mode != "logical":
+		new_mode = "logical"
+	game_mode = new_mode
+	save_settings()
+	game_mode_changed.emit(game_mode)
+
+func toggle_game_mode() -> String:
+	if game_mode == "logical":
+		set_game_mode("feel")
+	else:
+		set_game_mode("logical")
+	return game_mode
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -45,6 +80,8 @@ func save_game(player: Node3D = null, environmental_mgr: Node = null) -> bool:
 		"timestamp": Time.get_datetime_string_from_system(),
 		"missions": MissionManager.export_save_data(),
 		"systems": ShipSystemManager.export_save_data(),
+		"game_mode": game_mode,
+		"look_mode": look_mode,
 	}
 	
 	if environmental_mgr != null and environmental_mgr.has_method("export_save_data"):
@@ -277,6 +314,11 @@ func load_game(player: Node3D = null, environmental_mgr: Node = null) -> bool:
 
 
 	
+	if data.has("game_mode"):
+		set_game_mode(str(data["game_mode"]))
+	if data.has("look_mode"):
+		set_look_mode(str(data["look_mode"]))
+
 	if player != null and is_instance_valid(player) and data.has("player"):
 		var pdata: Dictionary = data["player"]
 		player.global_position = Vector3(
@@ -311,7 +353,9 @@ func get_save_summary() -> Dictionary:
 func save_settings() -> void:
 	var settings := {
 		"mouse_sensitivity": mouse_sensitivity,
-		"master_volume": master_volume
+		"master_volume": master_volume,
+		"look_mode": look_mode,
+		"game_mode": game_mode
 	}
 	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if file != null:
@@ -331,4 +375,8 @@ func load_settings() -> void:
 	if json.parse(content) == OK and json.data is Dictionary:
 		mouse_sensitivity = float(json.data.get("mouse_sensitivity", 0.002))
 		master_volume = float(json.data.get("master_volume", 1.0))
+		look_mode = str(json.data.get("look_mode", "mouse"))
+		game_mode = str(json.data.get("game_mode", "logical"))
 		AudioManager.set_volume(master_volume)
+		look_mode_changed.emit(look_mode)
+		game_mode_changed.emit(game_mode)
