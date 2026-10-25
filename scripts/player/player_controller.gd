@@ -25,6 +25,15 @@ var max_health: float = 100.0
 var is_dead: bool = false
 var _footstep_timer: float = 0.0
 
+# Vibration & Structural Tremor Mechanics
+var _vibration_timer: float = 0.0
+var _vibration_duration: float = 0.0
+var _vibration_intensity: float = 0.0
+
+var is_vibrating: bool:
+	get:
+		return _vibration_timer > 0.0
+
 signal health_changed(new_health: float, max_health: float)
 signal player_died(reason: String)
 
@@ -199,6 +208,15 @@ func _physics_process(delta: float) -> void:
 			else:
 				camera.rotation.z = 0.0
 	
+	if _vibration_timer > 0.0:
+		_vibration_timer -= delta
+		if camera != null:
+			var t := _vibration_timer / _vibration_duration
+			var v_amp := _vibration_intensity * t * 0.14
+			camera.h_offset += (randf() * 2.0 - 1.0) * v_amp
+			camera.v_offset += (randf() * 2.0 - 1.0) * v_amp
+			camera.rotation.z += (randf() * 2.0 - 1.0) * 0.05 * _vibration_intensity * t
+	
 	# Footstep audio triggering when grounded and moving
 	var horiz_vel := Vector2(velocity.x, velocity.z).length()
 	if is_on_floor() and horiz_vel > 0.6:
@@ -261,6 +279,14 @@ func trigger_horror_zoom(duration: float = 1.2, fov_drop: float = 24.0, trauma: 
 	camera_trauma = clampf(camera_trauma + trauma, 0.0, 1.0)
 	if hud != null and hud.has_method("trigger_horror_vignette"):
 		hud.trigger_horror_vignette(duration)
+
+func trigger_vibration_alert(duration: float = 3.5, intensity: float = 0.6) -> void:
+	_vibration_duration = maxf(0.1, duration)
+	_vibration_timer = _vibration_duration
+	_vibration_intensity = intensity
+	camera_trauma = clampf(camera_trauma + intensity * 0.75, 0.0, 1.0)
+	if hud != null and hud.has_method("show_notification"):
+		hud.show_notification("WARNING: SEISMIC VIBRATION DETECTED // BULKHEAD STRUCTURAL ANOMALY", duration)
 
 func apply_environmental_afflictions(afflictions: Array) -> void:
 	if afflictions.has("DECOMPRESSION"):
