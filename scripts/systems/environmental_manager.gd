@@ -766,6 +766,11 @@ func _update_player_compartment() -> void:
 				var mm = get_node("/root/MissionManager")
 				if mm.has_method("mark_room_discovered"):
 					mm.mark_room_discovered(player_compartment_id)
+			if player_compartment_id == "medbay" and ShipState != null and ShipState.crisis_manager != null:
+				if ShipState.crisis_manager.current_crisis == CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT and not ShipState.crisis_manager.is_creature_eliminated:
+					var hud_node: Node = player.get_node_or_null("HUD")
+					if hud_node != null and hud_node.has_method("show_notification"):
+						hud_node.show_notification("SANCTUARY: Medical Bay decontamination field active. Alien cannot seek you here.", 4.5)
 
 func _evaluate_player_afflictions(delta: float) -> void:
 	var comp: Dictionary = compartments.get(player_compartment_id, {})
