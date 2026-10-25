@@ -142,6 +142,12 @@ size = Vector3(1.2, 0.9, 2.2)
 radius = 14.0
 height = 28.0
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_cargo_floor"]
+size = Vector3(11.0, 0.4, 8.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cargo_floor"]
+size = Vector3(11.0, 0.4, 8.0)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_wing_floor"]
 size = Vector3(10.0, 0.4, 8.0)
 
@@ -1738,27 +1744,27 @@ omni_range = 8.0
 [node name="CargoBay" type="Node3D" parent="Compartments"]
 
 [node name="Floor" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, -0.2, 9)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, -0.2, 9)
 collision_layer = 1
 collision_mask = 0
 
 [node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/Floor"]
-shape = SubResource("BoxShape3D_wing_floor")
+shape = SubResource("BoxShape3D_cargo_floor")
 
 [node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/Floor"]
-mesh = SubResource("BoxMesh_wing_floor")
+mesh = SubResource("BoxMesh_cargo_floor")
 surface_material_override/0 = SubResource("StandardMaterial3D_floor")
 
 [node name="Ceiling" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 3.8, 9)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 3.8, 9)
 collision_layer = 1
 collision_mask = 0
 
 [node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/Ceiling"]
-shape = SubResource("BoxShape3D_wing_floor")
+shape = SubResource("BoxShape3D_cargo_floor")
 
 [node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/Ceiling"]
-mesh = SubResource("BoxMesh_wing_floor")
+mesh = SubResource("BoxMesh_cargo_floor")
 surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
 
 [node name="WallWest" type="StaticBody3D" parent="Compartments/CargoBay"]
@@ -1857,7 +1863,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, 10.5)
 device_id = "salvage_crate"
 
 [node name="CrawlRampCargo" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 0.908, -0.419, 0, 0.419, 0.908, -10.0, -0.6, 14.3)
+transform = Transform3D(1, 0, 0, 0, 0.908, -0.419, 0, 0.419, 0.908, -10, -0.78, 14.22)
 collision_layer = 1
 collision_mask = 0
 
@@ -2094,7 +2100,7 @@ mesh = SubResource("BoxMesh_subdeck_ceiling_main")
 surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
 
 [node name="RampCeiling" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
-transform = Transform3D(1, 0, 0, 0, 0.894427, -0.447214, 0, 0.447214, 0.894427, 0, 2.55, 24.0)
+transform = Transform3D(1, 0, 0, 0, 0.894428, -0.447213, 0, 0.447213, 0.894428, 0, 2.37, 23.65)
 collision_layer = 1
 collision_mask = 0
 
@@ -2106,7 +2112,7 @@ mesh = SubResource("BoxMesh_subdeck_ramp_ceiling")
 surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
 
 [node name="WallEastRampUpper" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0, 2.5, 24.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0, 2.5, 23.65)
 collision_layer = 1
 collision_mask = 0
 
@@ -2118,7 +2124,7 @@ mesh = SubResource("BoxMesh_subdeck_ramp_wall_upper")
 surface_material_override/0 = SubResource("StandardMaterial3D_wall")
 
 [node name="WallWestRampUpper" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0, 2.5, 24.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0, 2.5, 23.65)
 collision_layer = 1
 collision_mask = 0
 
@@ -2207,7 +2213,7 @@ door_name = "Reactor Subdeck Access Bulkhead"
 device_id = "door_subdeck"
 
 [node name="SubdeckRamp" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
-transform = Transform3D(1, 0, 0, 0, 0.894427, -0.447214, 0, 0.447214, 0.894427, 0, -1.25, 24.0)
+transform = Transform3D(1, 0, 0, 0, 0.894428, -0.447213, 0, 0.447213, 0.894428, 0, -1.43, 23.65)
 collision_layer = 1
 collision_mask = 0
 
@@ -2320,7 +2326,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, -1.2, 18)
 device_id = "hull_breach_seal"
 
 [node name="CrawlRampSubdeck" type="StaticBody3D" parent="Compartments/MaintenanceCrawlway"]
-transform = Transform3D(1, 0, 0, 0, 0.907, -0.420, 0, 0.420, 0.907, -5.0, -1.85, 22.9)
+transform = Transform3D(1, 0, 0, 0, 0.908, -0.419, 0, 0.419, 0.908, -5, -1.98, 22.72)
 collision_layer = 1
 collision_mask = 0
 
