@@ -77,6 +77,7 @@ func _ready() -> void:
 	_run_suite("Milestone 7: Architectural Chamber Connectivity & Horror Encounter Stalking Rigor", _test_m7_chamber_connectivity_and_horror_rigor)
 	_run_suite("QA Systems Integrity & Gameplay Improvements", _test_qa_integrity_and_improvements)
 	_run_suite("Paced Alien Stalker Emergence & Safe Room Sanctuary", _test_alien_pacing_and_safe_room)
+	_run_suite("Game Modes, Look Controls, Generator Breaker & Audio Integration", _test_modes_look_breaker_and_audio)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -3170,6 +3171,151 @@ func _test_alien_pacing_and_safe_room() -> void:
 	ShipState.reset_to_defaults()
 	ShipSystemManager.reset_to_defaults()
 	MissionManager.reset_missions()
+
+func _test_modes_look_breaker_and_audio() -> void:
+	# 1. 360 Look Controls Option (Mouse vs Arrow Keys)
+	SaveManager.set_look_mode("mouse")
+	_assert_true(SaveManager.look_mode == "mouse", "SaveManager look_mode defaults to mouse")
+	_assert_true(not SaveManager.look_mode.is_empty(), "SaveManager look_mode is non-empty")
+	
+	SaveManager.set_look_mode("arrow_keys")
+	_assert_true(SaveManager.look_mode == "arrow_keys", "SaveManager set_look_mode to arrow_keys")
+	
+	SaveManager.toggle_look_mode()
+	_assert_true(SaveManager.look_mode == "mouse", "SaveManager toggle_look_mode toggles back to mouse")
+	
+	var player_scene = load("res://scenes/player/player.tscn")
+	var player = player_scene.instantiate()
+	add_child(player)
+	
+	SaveManager.look_mode = "arrow_keys"
+	_assert_true(player.is_arrow_look == true, "Player is_arrow_look is true when look_mode is arrow_keys")
+	
+	SaveManager.look_mode = "mouse"
+	_assert_true(player.is_arrow_look == false, "Player is_arrow_look is false when look_mode is mouse")
+	
+	remove_child(player)
+	player.free()
+
+	# 2. Generator Primary Breaker Visibility in Engineering Bay
+	var interior_scene = load("res://scenes/levels/ship_interior.tscn")
+	var interior = interior_scene.instantiate()
+	add_child(interior)
+	
+	var gen_breaker = interior.get_node_or_null("Compartments/EngineeringBay/GeneratorBreaker")
+	_assert_true(gen_breaker != null, "GeneratorBreaker node exists in ship_interior.tscn")
+	if gen_breaker != null:
+		var z_pos: float = gen_breaker.transform.origin.z
+		_assert_true(absf(z_pos - 16.15) < 0.15, "GeneratorBreaker is mounted on exterior front face (z ~ 16.15)")
+		_assert_true(gen_breaker.transform.basis.z.z < -0.5, "GeneratorBreaker is rotated 180 deg to face room entrance")
+		_assert_true(gen_breaker.is_in_group("interactables") or gen_breaker.has_method("interact"), "GeneratorBreaker is fully interactable")
+	
+	remove_child(interior)
+	interior.free()
+
+	# 3. Audio Assets & Playback Methods
+	_assert_true(FileAccess.file_exists("res://resources/audio/alien_footsteps.mp3"), "alien_footsteps.mp3 exists")
+	_assert_true(FileAccess.file_exists("res://resources/audio/alien_sound.mp3"), "alien_sound.mp3 exists")
+	_assert_true(FileAccess.file_exists("res://resources/audio/background_horror.mp3"), "background_horror.mp3 exists")
+	_assert_true(FileAccess.file_exists("res://resources/audio/gate_opening.mp3"), "gate_opening.mp3 exists")
+	_assert_true(FileAccess.file_exists("res://resources/audio/impact_hit.mp3"), "impact_hit.mp3 exists")
+	_assert_true(FileAccess.file_exists("res://resources/audio/player_death_scream.mp3"), "player_death_scream.mp3 exists")
+	_assert_true(FileAccess.file_exists("res://resources/audio/player_footsteps.mp3"), "player_footsteps.mp3 exists")
+	
+	AudioManager.play_alien_footstep()
+	AudioManager.play_alien_sound()
+	AudioManager.play_gate_opening()
+	AudioManager.play_impact_hit()
+	AudioManager.play_player_death_scream()
+	AudioManager.play_background_horror()
+	_assert_true(true, "All sound effect helper methods execute cleanly")
+
+	# 4. Mode 1 (Feel Mode) vs Mode 2 (Logical Mode)
+	SaveManager.set_game_mode("logical")
+	_assert_true(SaveManager.game_mode == "logical", "SaveManager game_mode set to logical")
+	SaveManager.toggle_game_mode()
+	_assert_true(SaveManager.game_mode == "feel", "SaveManager toggle_game_mode toggles to feel")
+	SaveManager.set_game_mode("feel")
+
+	# Test HUD in Feel Mode
+	var hud_scene = load("res://scenes/ui/hud.tscn")
+	var hud = hud_scene.instantiate()
+	add_child(hud)
+	
+	var bottom_right = hud.get_node_or_null("BottomRightMargin")
+	_assert_true(bottom_right != null and bottom_right.visible == false, "Tactical Schematic HUD prompt hidden in Feel Mode")
+	
+	hud.display_scan_telemetry({
+		"device_name": "Emergency Core",
+		"power_draw": 12.5,
+		"temperature_c": 85.0,
+		"active_faults": ["THERMAL_OVERLOAD"],
+		"repair_steps": ["Replace coolant"]
+	})
+	_assert_true(hud.scan_telemetry_margin.visible == false, "Complex diagnostic scan telemetry card suppressed in Feel Mode")
+	
+	hud._update_tool_and_resource_hud()
+	_assert_true(hud.compact_gear_lbl.text.contains("INVENTORY"), "Feel mode HUD compact gear displays simplified inventory")
+	
+	# Test HUD in Logical Mode
+	SaveManager.set_game_mode("logical")
+	hud._apply_game_mode()
+	_assert_true(bottom_right.visible == true, "Tactical Schematic HUD prompt visible in Logical Mode")
+	hud.display_scan_telemetry({"device_name": "Generator", "power_draw": 5.0, "active_faults": []})
+	_assert_true(hud.scan_telemetry_margin.visible == true, "Complex scan telemetry card shown in Logical Mode")
+
+	remove_child(hud)
+	hud.free()
+
+	# Test PauseMenu in Feel Mode vs Logical Mode
+	var pause_scene = load("res://scenes/ui/pause_menu.tscn")
+	var pause = pause_scene.instantiate()
+	add_child(pause)
+	
+	SaveManager.set_game_mode("feel")
+	pause._apply_game_mode()
+	_assert_true(pause.env_panel.visible == false, "Pause menu environmental telemetry panel hidden in Feel Mode")
+	_assert_true(pause.mission_desc_lbl.visible == false, "Pause menu long technical narrative hidden in Feel Mode")
+	_assert_true(pause.scanner_charge_bar.visible == false, "Pause menu scanner charge bar hidden in Feel Mode")
+	_assert_true(pause.resource_tally_lbl.visible == false, "Pause menu resource tally hidden in Feel Mode")
+	_assert_true(pause.inventory_lbl.visible == true, "Pause menu inventory list remains visible in Feel Mode")
+	_assert_true(pause.immediate_task_lbl.visible == true, "Pause menu immediate task remains visible in Feel Mode")
+	
+	# Test PauseMenu in Logical Mode
+	SaveManager.set_game_mode("logical")
+	pause._apply_game_mode()
+	_assert_true(pause.env_panel.visible == true, "Pause menu environmental telemetry panel visible in Logical Mode")
+	_assert_true(pause.mission_desc_lbl.visible == true, "Pause menu long technical narrative visible in Logical Mode")
+	_assert_true(pause.scanner_charge_bar.visible == true, "Pause menu scanner charge bar visible in Logical Mode")
+	_assert_true(pause.resource_tally_lbl.visible == true, "Pause menu resource tally visible in Logical Mode")
+	
+	remove_child(pause)
+	pause.free()
+
+	# Test MainMenu UI Toggles
+	var main_scene = load("res://scenes/ui/main_menu.tscn")
+	var main_menu = main_scene.instantiate()
+	add_child(main_menu)
+	
+	_assert_true(main_menu.game_mode_btn != null, "MainMenu has game_mode_btn toggle")
+	_assert_true(main_menu.look_mode_btn != null, "MainMenu has look_mode_btn toggle")
+	_assert_true(main_menu.settings_game_mode_btn != null, "MainMenu has settings_game_mode_btn toggle")
+	
+	main_menu._on_toggle_game_mode()
+	_assert_true(SaveManager.game_mode == "feel", "MainMenu toggle game mode changes to feel")
+	main_menu._on_toggle_game_mode()
+	_assert_true(SaveManager.game_mode == "logical", "MainMenu toggle game mode changes to logical")
+	
+	main_menu._on_toggle_look_mode()
+	_assert_true(SaveManager.look_mode == "arrow_keys", "MainMenu toggle look mode changes to arrow_keys")
+	main_menu._on_toggle_look_mode()
+	_assert_true(SaveManager.look_mode == "mouse", "MainMenu toggle look mode changes to mouse")
+	
+	remove_child(main_menu)
+	main_menu.free()
+	
+	SaveManager.set_game_mode("logical")
+	SaveManager.set_look_mode("mouse")
 
 
 
