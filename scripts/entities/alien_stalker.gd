@@ -45,6 +45,7 @@ var zoom_target_pos: Vector3 = Vector3.ZERO
 
 var _pulse_timer: float = 0.0
 var _bob_timer: float = 0.0
+var _alien_footstep_timer: float = 0.0
 
 @onready var torso: MeshInstance3D = get_node_or_null("Torso")
 @onready var head: MeshInstance3D = get_node_or_null("Head")
@@ -258,6 +259,14 @@ func _physics_process(delta: float) -> void:
 				if flat_dist <= attack_range and _attack_cooldown <= 0.0:
 					set_state(State.AGGRESSIVE)
 					_execute_claw_attack()
+				
+				# Footstep sounds when moving
+				_alien_footstep_timer += delta
+				if _alien_footstep_timer >= 0.65:
+					_alien_footstep_timer = 0.0
+					if AudioManager != null and AudioManager.has_method("play_alien_footstep"):
+						AudioManager.play_alien_footstep()
+				
 				move_and_slide()
 		
 		State.AGGRESSIVE:
@@ -276,6 +285,14 @@ func _physics_process(delta: float) -> void:
 					look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
 				if flat_dist <= attack_range and _attack_cooldown <= 0.0:
 					_execute_claw_attack()
+				
+				# Faster footstep sounds in aggressive pursuit
+				_alien_footstep_timer += delta
+				if _alien_footstep_timer >= 0.38:
+					_alien_footstep_timer = 0.0
+					if AudioManager != null and AudioManager.has_method("play_alien_footstep"):
+						AudioManager.play_alien_footstep()
+				
 				move_and_slide()
 		
 		State.TRAPPED:
