@@ -96,6 +96,8 @@ func trigger_creature_horror_encounter() -> void:
 		player.trigger_vibration_alert(4.0, 0.7)
 	
 	if AudioManager != null:
+		if AudioManager.has_method("play_background_horror"):
+			AudioManager.play_background_horror()
 		AudioManager.play_horror_zoom()
 		AudioManager.play_creature_sound()
 	
