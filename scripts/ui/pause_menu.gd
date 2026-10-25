@@ -11,6 +11,15 @@ signal resumed
 @onready var volume_slider: HSlider = %VolumeSlider
 @onready var save_notice_label: Label = %SaveNoticeLabel
 
+# Mode & Look Toggles
+@onready var look_mode_btn: Button = get_node_or_null("%LookModeButton")
+@onready var game_mode_btn: Button = get_node_or_null("%GameModeButton")
+@onready var mode_desc_lbl: Label = get_node_or_null("%ModeDescLabel")
+@onready var env_panel: Control = get_node_or_null("%EnvPanel")
+@onready var header_title_lbl: Label = get_node_or_null("Center/Panel/Margin/VBox/HeaderHBox/Title")
+@onready var mission_header_lbl: Label = get_node_or_null("Center/Panel/Margin/VBox/ColumnsHBox/MissionPanel/MissionMargin/MissionVBox/MissionHeader")
+@onready var gear_header_lbl: Label = get_node_or_null("Center/Panel/Margin/VBox/ColumnsHBox/GearPanel/GearMargin/GearVBox/GearHeader")
+
 # Telemetry Nodes
 @onready var location_lbl: Label = get_node_or_null("%LocationLabel")
 @onready var o2_status_lbl: Label = get_node_or_null("%OxygenStatusLabel")
@@ -53,6 +62,76 @@ func _ready() -> void:
 	# Initialize slider values
 	sensitivity_slider.value = SaveManager.mouse_sensitivity * 1000.0
 	volume_slider.value = SaveManager.master_volume * 100.0
+	
+	if look_mode_btn != null:
+		look_mode_btn.pressed.connect(_on_look_mode_pressed)
+	if game_mode_btn != null:
+		game_mode_btn.pressed.connect(_on_game_mode_pressed)
+	
+	if SaveManager.has_signal("look_mode_changed"):
+		SaveManager.look_mode_changed.connect(func(_m): _update_look_mode_ui())
+	if SaveManager.has_signal("game_mode_changed"):
+		SaveManager.game_mode_changed.connect(func(_m): _apply_game_mode())
+	
+	_update_look_mode_ui()
+	_apply_game_mode()
+
+func _on_look_mode_pressed() -> void:
+	AudioManager.play_sfx("click")
+	SaveManager.toggle_look_mode()
+	_update_look_mode_ui()
+
+func _on_game_mode_pressed() -> void:
+	AudioManager.play_sfx("click")
+	SaveManager.toggle_game_mode()
+	_apply_game_mode()
+
+func _update_look_mode_ui() -> void:
+	if look_mode_btn != null:
+		var is_arrows := (SaveManager.look_mode == "arrow_keys" or SaveManager.look_mode == "arrows")
+		look_mode_btn.text = "LOOK: ARROW KEYS (360°)" if is_arrows else "LOOK: MOUSE (360°)"
+		look_mode_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.6) if is_arrows else Color(0.2, 0.85, 1.0))
+
+func _apply_game_mode() -> void:
+	var is_feel: bool = (SaveManager.game_mode == "feel")
+	
+	if game_mode_btn != null:
+		game_mode_btn.text = "MODE: FEEL (CASUAL)" if is_feel else "MODE: LOGICAL (ENGINEERING)"
+		game_mode_btn.add_theme_color_override("font_color", Color(1.0, 0.75, 0.2) if is_feel else Color(0.2, 0.85, 1.0))
+	
+	if mode_desc_lbl != null:
+		mode_desc_lbl.text = "Feel Mode: Pure horror atmosphere, tasks & inventory without complex data." if is_feel else "Logical Mode: Full engineering diagnostics & science telemetry."
+	
+	if header_title_lbl != null:
+		header_title_lbl.text = "ORBITAL [PAUSED]" if is_feel else "STATION OPERATIONS & ENVIRONMENTAL TELEMETRY [PAUSED]"
+	
+	if mission_header_lbl != null:
+		mission_header_lbl.text = "MISSION OBJECTIVE" if is_feel else "SCIENTIST MISSION DIRECTIVE"
+	
+	if gear_header_lbl != null:
+		gear_header_lbl.text = "INVENTORY" if is_feel else "SCIENTIST GEAR & STORAGE"
+	
+	# In Feel Mode: Hide atmospheric / environmental telemetry panel completely
+	if env_panel != null:
+		env_panel.visible = not is_feel
+	
+	# In Feel Mode: In MissionPanel, hide long technical briefing
+	if mission_desc_lbl != null:
+		mission_desc_lbl.visible = not is_feel
+	
+	# In Feel Mode: In GearPanel, hide all complex engineering gear stats, show only inventory
+	if equipped_tool_lbl != null:
+		equipped_tool_lbl.visible = not is_feel
+	if scanner_charge_lbl != null:
+		scanner_charge_lbl.visible = not is_feel
+	if scanner_charge_bar != null:
+		scanner_charge_bar.visible = not is_feel
+	if resource_tally_lbl != null:
+		resource_tally_lbl.visible = not is_feel
+	if quick_slots_lbl != null:
+		quick_slots_lbl.visible = not is_feel
+	if inventory_lbl != null:
+		inventory_lbl.visible = true
 
 func _input(event: InputEvent) -> void:
 	if visible and (event.is_action_pressed("pause") or (event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_TAB or event.keycode == KEY_I))):
@@ -114,6 +193,7 @@ func refresh_all_info() -> void:
 		}
 		update_gear(equipped, battery, res)
 	update_inventory(MissionManager.inventory)
+	_apply_game_mode()
 
 func update_telemetry(p_o2: float, p_co2: float, p_press: float, p_temp: float, p_hazard: String = "Nominal", p_location: String = "Engineering") -> void:
 	update_oxygen(p_o2, false)
