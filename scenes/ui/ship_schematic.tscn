@@ -44,7 +44,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 20
-text = "ASTRAEA-7 TACTICAL SCHEMATIC // 11 COMPARTMENTS & POWER GRID"
+text = "ASTRAEA-7 TACTICAL SCHEMATIC // 13 COMPARTMENTS & POWER GRID"
 
 [node name="GridStatusLabel" type="Label" parent="Margin/MainVBox/HeaderHBox"]
 unique_name_in_owner = true
@@ -193,6 +193,48 @@ theme_override_font_sizes/font_size = 11
 text = ">>> [YOU ARE HERE] <<<"
 
 [node name="BtnSelectAvionics" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/AvionicsBayPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="ResearchObservatoryPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/ResearchObservatoryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/ResearchObservatoryPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/ResearchObservatoryPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/ResearchObservatoryPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "[13] RESEARCH OBSERVATORY"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/ResearchObservatoryPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "OFFLINE // DOME UNLIT"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/ResearchObservatoryPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectObservatory" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/BridgeRowHBox/ResearchObservatoryPanel/Margin/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 text = " Inspect "
@@ -614,6 +656,48 @@ theme_override_font_sizes/font_size = 11
 text = ">>> [YOU ARE HERE] <<<"
 
 [node name="BtnSelectSubdeck" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/ReactorSubdeckPanel/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " Inspect "
+
+[node name="SpecimenVaultPanel" type="PanelContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/SpecimenVaultPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/SpecimenVaultPanel/Margin"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/SpecimenVaultPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/SpecimenVaultPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.2, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "[12] SPECIMEN VAULT"
+
+[node name="StatusLabel" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/SpecimenVaultPanel/Margin/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "HAZARD: BIO-BREACH"
+
+[node name="PlayerPin" type="Label" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/SpecimenVaultPanel/Margin/HBox/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ">>> [YOU ARE HERE] <<<"
+
+[node name="BtnSelectVault" type="Button" parent="Margin/MainVBox/ContentHBox/SchematicScroll/BlueprintVBox/LowerDeckHBox/SpecimenVaultPanel/Margin/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 text = " Inspect "
