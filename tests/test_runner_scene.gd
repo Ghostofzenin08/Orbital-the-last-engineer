@@ -2868,6 +2868,8 @@ func _test_m7_chamber_connectivity_and_horror_rigor() -> void:
 	_assert_true(level.has_node("Compartments/ReactorSubdeck/WallAftRight"), "ReactorSubdeck has WallAftRight archway post")
 	_assert_true(level.has_node("Compartments/ReactorSubdeck/WallAftHeader"), "ReactorSubdeck has WallAftHeader doorway lintel")
 	_assert_true(level.has_node("Compartments/ReactorSubdeck/VaultAccessRamp"), "ReactorSubdeck has VaultAccessRamp connector")
+	_assert_true(level.has_node("Compartments/ReactorSubdeck/RampCeiling"), "ReactorSubdeck has RampCeiling for ramp headroom")
+	_assert_true(level.has_node("Compartments/ReactorSubdeck/Lights/LightRamp"), "ReactorSubdeck has LightRamp illumination")
 	
 	# Verify Bridge -> Research Observatory doorway archway & corridor connector
 	_assert_true(level.has_node("Compartments/Bridge/WallLeftNorth"), "Bridge has WallLeftNorth archway post")
