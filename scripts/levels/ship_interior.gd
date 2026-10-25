@@ -62,13 +62,13 @@ func _ready() -> void:
 	if alien_stalker != null and ShipState != null and ShipState.crisis_manager != null:
 		ShipState.crisis_manager.register_stalker(alien_stalker)
 	
-	# Milestone 6 & 7: Check and trigger creature hunt crisis with exploration gating
-	MissionManager.objective_completed.connect(func(idx: int, _title: String):
-		if idx == 3:
+	# Milestone 6 & 7: Check and trigger creature hunt crisis only when all repairs are complete
+	MissionManager.objective_completed.connect(func(_idx: int, _title: String):
+		if MissionManager.are_all_repairs_complete():
 			_check_trigger_final_hunt()
 	)
 	MissionManager.room_discovered.connect(func(_room_id: String, _room_name: String):
-		if MissionManager.current_objective_index >= 3:
+		if MissionManager.are_all_repairs_complete():
 			_check_trigger_final_hunt()
 	)
 	
@@ -79,6 +79,9 @@ func _check_trigger_final_hunt() -> void:
 		return
 	if ShipState.crisis_manager.current_crisis == CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT or ShipState.crisis_manager.is_creature_eliminated:
 		return
+	# Alien only appears when ALL spaceship repairs are complete
+	if not MissionManager.are_all_repairs_complete():
+		return
 	if MissionManager.can_engage_final_hunt():
 		trigger_creature_horror_encounter()
 
@@ -87,11 +90,25 @@ func trigger_creature_horror_encounter() -> void:
 		return
 	ShipState.start_crisis(CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT)
 	_flicker_lights_for_encounter()
-	if alien_stalker != null and player != null:
-		get_tree().create_timer(1.0).timeout.connect(func():
-			if is_instance_valid(alien_stalker) and is_instance_valid(player) and alien_stalker.has_method("zoom_near_player"):
-				alien_stalker.zoom_near_player(player, 1.2)
-		)
+	
+	# Alert player with rumbling seismic hull vibrations and horror audio
+	if player != null and player.has_method("trigger_vibration_alert"):
+		player.trigger_vibration_alert(4.0, 0.7)
+	
+	if AudioManager != null:
+		AudioManager.play_horror_zoom()
+		AudioManager.play_creature_sound()
+	
+	# Stalker slowly awakens and emerges in the deep lower deck rather than instant jumpscare
+	if alien_stalker != null:
+		alien_stalker.spawn_in_chamber("specimen_vault", Vector3(0, -2, 38))
+		if is_inside_tree() and get_tree() != null:
+			get_tree().create_timer(3.5).timeout.connect(func():
+				if is_instance_valid(alien_stalker) and alien_stalker.current_state == AlienStalker.State.SPAWNING:
+					alien_stalker.set_state(AlienStalker.State.STALKING)
+					if AudioManager != null:
+						AudioManager.play_boss_screech()
+			)
 
 func _flicker_lights_for_encounter() -> void:
 	# Dramatic horror light flicker across station
