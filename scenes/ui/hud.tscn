@@ -39,6 +39,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Dot" type="ColorRect" parent="ReticleCenter"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(4, 4)
 layout_mode = 2
 color = Color(1, 1, 1, 0.8)
