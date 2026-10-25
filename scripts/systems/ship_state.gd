@@ -41,6 +41,9 @@ var thruster_efficiency_boost: float = 1.0
 const CrisisManagerScript = preload("res://scripts/systems/crisis_manager.gd")
 var crisis_manager: CrisisManager = null
 
+# QA & Survival Death Reason Telemetry
+var death_reason: String = ""
+
 
 # Compartment definitions
 const COMPARTMENTS: Dictionary = {
@@ -144,6 +147,7 @@ func initialize_ship() -> void:
 	commander_override_code = ""
 	quarantine_lockout_cleared = false
 	thruster_efficiency_boost = 1.0
+	death_reason = ""
 
 	if crisis_manager == null:
 		crisis_manager = CrisisManagerScript.new()
@@ -886,6 +890,7 @@ func reset_revelation_bonuses() -> void:
 	commander_override_code = ""
 	quarantine_lockout_cleared = false
 	thruster_efficiency_boost = 1.0
+	death_reason = ""
 	if power_system != null and power_system.has_method("set_harmonic_damping"):
 		power_system.set_harmonic_damping(false)
 	var react_dev = devices.get("reactor_primary", null)
