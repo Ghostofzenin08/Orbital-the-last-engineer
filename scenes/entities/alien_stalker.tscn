@@ -1,6 +1,7 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/entities/alien_stalker.gd" id="1_stalker"]
+[ext_resource type="PackedScene" path="res://my_assets/alien/AlienMonster.fbx" id="2_alien_fbx"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_root"]
 radius = 0.65
@@ -65,12 +66,17 @@ script = ExtResource("1_stalker")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
 shape = SubResource("CapsuleShape3D_root")
 
+[node name="AlienModel" parent="." instance=ExtResource("2_alien_fbx")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
 [node name="Torso" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 1.15, 0)
+visible = false
 mesh = SubResource("CapsuleMesh_torso")
 
 [node name="Head" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 1.95, 0.32)
+visible = false
 mesh = SubResource("BoxMesh_head")
 
 [node name="EyeLeft" type="MeshInstance3D" parent="Head"]
@@ -95,18 +101,22 @@ omni_range = 4.5
 
 [node name="ClawLeft" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0, 1, -0.62, 1.25, 0.35)
+visible = false
 mesh = SubResource("PrismMesh_claw")
 
 [node name="ClawRight" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 0, 0, 1, 0.62, 1.25, 0.35)
+visible = false
 mesh = SubResource("PrismMesh_claw")
 
 [node name="Spines" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 1.35, -0.42)
+visible = false
 mesh = SubResource("BoxMesh_spines")
 
 [node name="Tail" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0.75, -0.65)
+visible = false
 mesh = SubResource("CylinderMesh_tail")
 
 [node name="AuraLight" type="OmniLight3D" parent="."]
