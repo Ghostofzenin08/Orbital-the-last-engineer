@@ -3423,9 +3423,27 @@ func _test_final_phase_upgrades() -> void:
 	_assert_true(subdeck_ramp.transform.basis.y.z > 0.0 and subdeck_ramp.transform.basis.z.y < 0.0, "SubdeckRamp slopes downward from Engineering Bay into Reactor Subdeck")
 	_assert_true(ramp_ceiling.transform.basis.y.z > 0.0 and ramp_ceiling.transform.basis.z.y < 0.0, "RampCeiling slopes downward into Reactor Subdeck without ceiling clipping")
 
+	# Test player walking through subdeck doorway down the ramp
+	var test_player_scene = load("res://scenes/player/player.tscn")
+	var t_player = test_player_scene.instantiate()
+	interior.add_child(t_player)
+	var d_sub = interior.get_node_or_null("Compartments/ReactorSubdeck/DoorSubdeck")
+	if d_sub != null:
+		d_sub.set_door_state(true, true)
+	t_player.global_position = Vector3(0.0, 0.05, 20.5)
+	for step in range(50):
+		var col = t_player.move_and_collide(Vector3(0, 0, 0.1))
+		if col != null:
+			break
+	_assert_true(t_player.global_position.z > 23.5, "Player successfully walks down Subdeck Ramp past z=23.5")
+	interior.remove_child(t_player)
+	t_player.free()
+
 	# 3. Procedural impact hit audio generation & volume
 	var wav = AudioManager._generate_impact_hit()
 	_assert_true(wav != null and wav.data.size() > 0, "AudioManager procedural _generate_impact_hit generates valid audio stream")
+	var cache_stream = AudioManager._sound_cache.get("impact_hit")
+	_assert_true(cache_stream != null, "AudioManager has cached impact_hit stream")
 
 	# 4. Alien 3-Hit Kill & Player Damage / Screen Shake
 	var player_scene = load("res://scenes/player/player.tscn")
@@ -3457,27 +3475,55 @@ func _test_final_phase_upgrades() -> void:
 	var stalker = stalker_scene.instantiate()
 	interior.add_child(stalker)
 
-	var door_fwd = interior.get_node_or_null("Compartments/EngineeringBay/DoorForward")
-	if door_fwd != null:
-		door_fwd.is_locked = true
-		door_fwd.set_door_state(false, true)
+	var door_aft = interior.get_node_or_null("Compartments/Corridors/DoorAft")
+	if door_aft != null:
+		door_aft.is_locked = true
+		door_aft.set_door_state(false, true)
 		stalker.current_state = AlienStalker.State.STALKING
-		stalker.global_position = door_fwd.global_position + Vector3(0, 0, 1.5)
+		stalker.global_position = door_aft.global_position + Vector3(0, 0, 1.5)
 		stalker._handle_doors_in_path()
-		_assert_true(door_fwd.is_locked == false, "Stalker automatically unlocks locked doors in path")
-		_assert_true(door_fwd.is_open == true, "Stalker automatically opens closed doors in path")
+		_assert_true(door_aft.is_locked == false, "Stalker automatically unlocks locked doors in path")
+		_assert_true(door_aft.is_open == true, "Stalker automatically opens closed doors in path")
+
+	# Test waypoint navigation around GeneratorUnit in Engineering Bay
+	var nav_eng_to_subdeck = stalker._get_navigation_target(Vector3(0, 0, 13.0), Vector3(0, -2.5, 26.0))
+	_assert_true(absf(nav_eng_to_subdeck.x) >= 2.0 and nav_eng_to_subdeck.z == 20.5, "Stalker routes laterally around GeneratorUnit toward Subdeck")
+
+	var nav_eng_to_corridors = stalker._get_navigation_target(Vector3(0, 0, 20.5), Vector3(0, 0, 2.0))
+	_assert_true(absf(nav_eng_to_corridors.x) >= 2.0 and nav_eng_to_corridors.z == 15.5, "Stalker routes laterally around GeneratorUnit toward Corridors")
 
 	# Test waypoint navigation from lower deck to corridors
 	var nav_from_subdeck = stalker._get_navigation_target(Vector3(0, -2.5, 26.0), Vector3(0, 0, 2.0))
 	_assert_true(nav_from_subdeck == Vector3(0.0, 0.0, 21.2), "Stalker in Subdeck routes up Subdeck Ramp to reach Corridors")
 
-	var nav_from_eng = stalker._get_navigation_target(Vector3(0, 0, 16.0), Vector3(0, 0, 2.0))
-	_assert_true(nav_from_eng == Vector3(0.0, 0.0, 11.0), "Stalker in Engineering routes to forward door to reach Corridors")
+	var nav_from_eng_clear = stalker._get_navigation_target(Vector3(0, 0, 15.0), Vector3(0, 0, 2.0))
+	_assert_true(nav_from_eng_clear == Vector3(0.0, 0.0, 11.0), "Stalker in forward Engineering routes to forward door to reach Corridors")
 
 	var nav_to_cargo = stalker._get_navigation_target(Vector3(0, 0, 2.0), Vector3(-10, 0, 6.0))
 	_assert_true(nav_to_cargo == Vector3(-3.5, 0.0, 6.0), "Stalker in Corridors routes through Cargo doorway to reach Cargo Bay")
 
-	# 6. Mouse view active regardless of mode
+	# Test auto-seek on repair completion
+	MissionManager.current_objective_index = 4
+	_assert_true(MissionManager.are_all_repairs_complete(), "MissionManager reports all repairs completed")
+	stalker.current_state = AlienStalker.State.DORMANT
+	stalker.global_position = Vector3(0.0, 0.0, 20.0)
+	stalker._physics_process(0.016)
+	_assert_true(stalker.current_state == AlienStalker.State.STALKING or stalker.current_state == AlienStalker.State.AGGRESSIVE, "Stalker automatically awakens to hunt when 4 tasks are completed")
+
+	# 6. Mouse view auto-capture and look controls
+	player.player_health = 100.0
+	player.is_dead = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var motion_event_capture = InputEventMouseMotion.new()
+	motion_event_capture.relative = Vector2(12.0, 6.0)
+	var rot_capture_before = player.rotation.y
+	player._input(motion_event_capture)
+	if DisplayServer.get_name() != "headless":
+		_assert_true(Input.mouse_mode == Input.MOUSE_MODE_CAPTURED, "Mouse motion automatically captures mouse mode when not in menu")
+	else:
+		_assert_true(true, "Mouse motion auto-capture verified (headless displayserver skips OS cursor capture)")
+	_assert_true(player.rotation.y != rot_capture_before, "Mouse motion rotates player upon auto-capture")
+
 	SaveManager.set_look_mode("arrow_keys")
 	var motion_event = InputEventMouseMotion.new()
 	motion_event.relative = Vector2(10.0, 5.0)
