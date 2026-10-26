@@ -63,16 +63,27 @@ func _ready() -> void:
 		ShipState.crisis_manager.register_stalker(alien_stalker)
 	
 	# Milestone 6 & 7: Check and trigger creature hunt crisis only when all repairs are complete
-	MissionManager.objective_completed.connect(func(_idx: int, _title: String):
-		if MissionManager.are_all_repairs_complete():
-			_check_trigger_final_hunt()
-	)
-	MissionManager.room_discovered.connect(func(_room_id: String, _room_name: String):
-		if MissionManager.are_all_repairs_complete():
-			_check_trigger_final_hunt()
-	)
+	if not MissionManager.objective_completed.is_connected(_on_objective_completed):
+		MissionManager.objective_completed.connect(_on_objective_completed)
+	if not MissionManager.room_discovered.is_connected(_on_room_discovered):
+		MissionManager.room_discovered.connect(_on_room_discovered)
 	
 	_refresh_environment_lighting()
+
+func _exit_tree() -> void:
+	if MissionManager != null:
+		if MissionManager.objective_completed.is_connected(_on_objective_completed):
+			MissionManager.objective_completed.disconnect(_on_objective_completed)
+		if MissionManager.room_discovered.is_connected(_on_room_discovered):
+			MissionManager.room_discovered.disconnect(_on_room_discovered)
+
+func _on_objective_completed(_idx: int, _title: String) -> void:
+	if MissionManager.are_all_repairs_complete():
+		_check_trigger_final_hunt()
+
+func _on_room_discovered(_room_id: String, _room_name: String) -> void:
+	if MissionManager.are_all_repairs_complete():
+		_check_trigger_final_hunt()
 
 func _check_trigger_final_hunt() -> void:
 	if ShipState == null or ShipState.crisis_manager == null:
@@ -103,6 +114,7 @@ func trigger_creature_horror_encounter() -> void:
 	
 	# Stalker slowly awakens and emerges in the deep lower deck rather than instant jumpscare
 	if alien_stalker != null:
+		alien_stalker.target_player = player
 		alien_stalker.spawn_in_chamber("specimen_vault", Vector3(0, -2, 38))
 		if is_inside_tree() and get_tree() != null:
 			get_tree().create_timer(3.5).timeout.connect(func():
