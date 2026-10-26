@@ -1,4 +1,4 @@
-[gd_scene load_steps=77 format=3]
+[gd_scene load_steps=87 format=3]
 
 [ext_resource type="Script" path="res://scripts/levels/ship_interior.gd" id="1_level"]
 [ext_resource type="Script" path="res://scripts/systems/environmental_manager.gd" id="2_env"]
@@ -309,6 +309,36 @@ size = Vector3(2.9, 2.2, 0.4)
 
 [sub_resource type="BoxMesh" id="BoxMesh_crawl_conn_wall"]
 size = Vector3(2.9, 2.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_annex_floor"]
+size = Vector3(9.0, 0.4, 8.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_annex_floor"]
+size = Vector3(9.0, 0.4, 8.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_annex_wall_long"]
+size = Vector3(0.4, 3.6, 8.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_annex_wall_long"]
+size = Vector3(0.4, 3.6, 8.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_annex_wall_wide"]
+size = Vector3(9.0, 3.6, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_annex_wall_wide"]
+size = Vector3(9.0, 3.6, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_annex_wall_post"]
+size = Vector3(3.4, 3.6, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_annex_wall_post"]
+size = Vector3(3.4, 3.6, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_annex_wall_header"]
+size = Vector3(2.2, 0.8, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_annex_wall_header"]
+size = Vector3(2.2, 0.8, 0.4)
 
 [node name="ShipInterior" type="Node3D"]
 script = ExtResource("1_level")
@@ -1941,43 +1971,31 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, 10.5)
 device_id = "salvage_crate"
 
 [node name="CrawlRampCargo" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 0.908, -0.419, 0, 0.419, 0.908, -10, -0.78, 14.22)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, -0.2, 14.0)
 collision_layer = 1
 collision_mask = 0
 
 [node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/CrawlRampCargo"]
-shape = SubResource("BoxShape3D_crawl_ramp")
-
-[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlRampCargo"]
-mesh = SubResource("BoxMesh_crawl_ramp")
-surface_material_override/0 = SubResource("StandardMaterial3D_floor")
-
-[node name="CrawlConnectorCargo" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.75, -1.4, 16.0)
-collision_layer = 1
-collision_mask = 0
-
-[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/CrawlConnectorCargo"]
 shape = SubResource("BoxShape3D_crawl_connector")
 
-[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlConnectorCargo"]
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlRampCargo"]
 mesh = SubResource("BoxMesh_crawl_connector")
 surface_material_override/0 = SubResource("StandardMaterial3D_floor")
 
 [node name="CrawlRampWallWest" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.1, -0.3, 14.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.1, 1.7, 14.0)
 collision_layer = 1
 collision_mask = 0
 
 [node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/CrawlRampWallWest"]
-shape = SubResource("BoxShape3D_crawl_ramp_wall_west")
+shape = SubResource("BoxShape3D_crawl_ramp_wall_east")
 
 [node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlRampWallWest"]
-mesh = SubResource("BoxMesh_crawl_ramp_wall_west")
+mesh = SubResource("BoxMesh_crawl_ramp_wall_east")
 surface_material_override/0 = SubResource("StandardMaterial3D_wall")
 
 [node name="CrawlRampWallEast" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.9, -0.3, 14.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.9, 1.7, 14.0)
 collision_layer = 1
 collision_mask = 0
 
@@ -1989,40 +2007,138 @@ mesh = SubResource("BoxMesh_crawl_ramp_wall_east")
 surface_material_override/0 = SubResource("StandardMaterial3D_wall")
 
 [node name="CrawlRampCeiling" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.0, 1.2, 14.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.0, 3.6, 14.0)
 collision_layer = 1
 collision_mask = 0
 
 [node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/CrawlRampCeiling"]
-shape = SubResource("BoxShape3D_crawl_ramp_ceiling")
-
-[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlRampCeiling"]
-mesh = SubResource("BoxMesh_crawl_ramp_ceiling")
-surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
-
-[node name="CrawlConnectorWallSouth" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.75, -0.3, 17.0)
-collision_layer = 1
-collision_mask = 0
-
-[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/CrawlConnectorWallSouth"]
-shape = SubResource("BoxShape3D_crawl_conn_wall")
-
-[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlConnectorWallSouth"]
-mesh = SubResource("BoxMesh_crawl_conn_wall")
-surface_material_override/0 = SubResource("StandardMaterial3D_wall")
-
-[node name="CrawlConnectorCeiling" type="StaticBody3D" parent="Compartments/CargoBay"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.75, 0.8, 16.0)
-collision_layer = 1
-collision_mask = 0
-
-[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/CrawlConnectorCeiling"]
 shape = SubResource("BoxShape3D_crawl_connector")
 
-[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlConnectorCeiling"]
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/CrawlRampCeiling"]
 mesh = SubResource("BoxMesh_crawl_connector")
 surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="AnnexFloor" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.0, -0.2, 19.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/AnnexFloor"]
+shape = SubResource("BoxShape3D_annex_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/AnnexFloor"]
+mesh = SubResource("BoxMesh_annex_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="AnnexCeiling" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.0, 3.6, 19.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/AnnexCeiling"]
+shape = SubResource("BoxShape3D_annex_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/AnnexCeiling"]
+mesh = SubResource("BoxMesh_annex_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
+
+[node name="AnnexWallWest" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 1.7, 19.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/AnnexWallWest"]
+shape = SubResource("BoxShape3D_annex_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/AnnexWallWest"]
+mesh = SubResource("BoxMesh_annex_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="AnnexWallEast" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 1.7, 19.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/AnnexWallEast"]
+shape = SubResource("BoxShape3D_annex_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/AnnexWallEast"]
+mesh = SubResource("BoxMesh_annex_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="AnnexWallSouth" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.0, 1.7, 23.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/AnnexWallSouth"]
+shape = SubResource("BoxShape3D_annex_wall_wide")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/AnnexWallSouth"]
+mesh = SubResource("BoxMesh_annex_wall_wide")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="AnnexWallNorthLeft" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.8, 1.7, 15.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/AnnexWallNorthLeft"]
+shape = SubResource("BoxShape3D_annex_wall_post")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/AnnexWallNorthLeft"]
+mesh = SubResource("BoxMesh_annex_wall_post")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="AnnexWallNorthRight" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, 1.7, 15.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/AnnexWallNorthRight"]
+shape = SubResource("BoxShape3D_annex_wall_post")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/AnnexWallNorthRight"]
+mesh = SubResource("BoxMesh_annex_wall_post")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="AnnexWallNorthHeader" type="StaticBody3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.0, 3.1, 15.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/CargoBay/AnnexWallNorthHeader"]
+shape = SubResource("BoxShape3D_annex_wall_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/CargoBay/AnnexWallNorthHeader"]
+mesh = SubResource("BoxMesh_annex_wall_header")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="LightAnnex" type="OmniLight3D" parent="Compartments/CargoBay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.0, 3.0, 19.0)
+light_color = Color(1, 0.65, 0.25, 1)
+light_energy = 1.3
+omni_range = 9.0
+
+[node name="AuxCargoJunction" parent="Compartments/CargoBay" instance=ExtResource("6_panel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.2, 1.3, 19.0)
+required_item = "spare_fuse"
+component_name = "Auxiliary Power Junction Fuse"
+device_id = "aux_cargo_junction"
+panel_title = "Auxiliary Cargo Power Relay"
+
+[node name="CargoCoolantValve" parent="Compartments/CargoBay" instance=ExtResource("12_valve")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -5.8, 1.3, 18.0)
+valve_type = "coolant"
+device_id = "cargo_coolant_bypass"
+
+[node name="AnnexSalvageCrate" parent="Compartments/CargoBay" instance=ExtResource("17_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.0, 0.5, 21.0)
+device_id = "salvage_crate_annex"
+
+[node name="AnnexStorageLocker" parent="Compartments/CargoBay" instance=ExtResource("13_locker")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.0, 1.0, 21.5)
+device_id = "annex_storage_locker"
 
 [node name="CargoSensor" parent="Compartments/CargoBay" instance=ExtResource("9_sensor")]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.5, 1.6, 9)
