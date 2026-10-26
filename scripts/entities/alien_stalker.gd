@@ -47,6 +47,7 @@ var _pulse_timer: float = 0.0
 var _bob_timer: float = 0.0
 var _alien_footstep_timer: float = 0.0
 var _proximity_impact_timer: float = 0.0
+var _stalker_growl_timer: float = 0.0
 
 @onready var alien_model: Node3D = get_node_or_null("AlienModel")
 var _anim_player: AnimationPlayer = null
@@ -240,10 +241,107 @@ func _execute_claw_attack() -> void:
 			AudioManager.play_creature_roar()
 		if AudioManager.has_method("play_impact_hit"):
 			AudioManager.play_impact_hit()
-		if AudioManager.has_method("play_player_death_scream"):
-			AudioManager.play_player_death_scream()
 	if target_player != null and is_instance_valid(target_player) and target_player.has_method("take_damage"):
 		target_player.take_damage(attack_damage, "creature")
+
+func _handle_doors_in_path() -> void:
+	if current_state == State.DORMANT or current_state == State.ELIMINATED or current_state == State.TRAPPED:
+		return
+	if not is_inside_tree() or get_tree() == null:
+		return
+	var root := get_tree().current_scene
+	if root == null:
+		return
+	var doors := root.find_children("*", "BulkheadDoor", true, false)
+	for d in doors:
+		if d is BulkheadDoor and is_instance_valid(d):
+			var dist := global_position.distance_to(d.global_position)
+			if dist <= 3.8:
+				if d.is_locked:
+					d.is_locked = false
+					d.requires_multitool_to_unlock = false
+				if not d.is_open:
+					d.set_door_state(true)
+					if AudioManager != null and AudioManager.has_method("play_gate_opening"):
+						AudioManager.play_gate_opening()
+				if d.door_panel != null:
+					add_collision_exception_with(d.door_panel)
+
+func _get_navigation_target(alien_pos: Vector3, player_pos: Vector3) -> Vector3:
+	var ax: float = alien_pos.x
+	var az: float = alien_pos.z
+	var px: float = player_pos.x
+	var pz: float = player_pos.z
+	
+	# Lower Deck (Subdeck or Specimen Vault)
+	if az > 21.2:
+		if pz > 21.2:
+			return player_pos
+		return Vector3(0.0, 0.0, 21.2)
+	
+	# Engineering Bay
+	if az > 11.0:
+		if pz > 21.2:
+			return Vector3(0.0, 0.0, 21.2)
+		if pz > 11.0:
+			return player_pos
+		return Vector3(0.0, 0.0, 11.0)
+	
+	# Central Transit Spine (Corridors)
+	if az <= 11.0 and az >= -7.0 and absf(ax) <= 3.5:
+		if pz > 11.0:
+			return Vector3(0.0, 0.0, 11.0)
+		if px < -3.5 and pz >= 0.0:
+			return Vector3(-3.5, 0.0, 6.0)
+		if px > 3.5 and pz >= 0.0:
+			return Vector3(3.5, 0.0, 6.0)
+		if px < -3.5 and pz < 0.0:
+			return Vector3(-3.5, 0.0, -2.0)
+		if px > 3.5 and pz < 0.0:
+			return Vector3(3.5, 0.0, -2.0)
+		if pz < -7.0:
+			return Vector3(0.0, 0.0, -7.0)
+		return player_pos
+	
+	# Cargo Bay (West wing aft)
+	if ax < -3.5 and az >= 0.0:
+		if px < -3.5 and pz >= 0.0:
+			return player_pos
+		return Vector3(-3.5, 0.0, 6.0)
+	
+	# Airlock (East wing aft)
+	if ax > 3.5 and az >= 0.0:
+		if px > 3.5 and pz >= 0.0:
+			return player_pos
+		return Vector3(3.5, 0.0, 6.0)
+	
+	# Crew Quarters (West wing forward)
+	if ax < -3.5 and az < 0.0:
+		if px < -3.5 and pz < 0.0:
+			return player_pos
+		return Vector3(-3.5, 0.0, -2.0)
+	
+	# Medbay (East wing forward)
+	if ax > 3.5 and az < 0.0:
+		if px > 3.5 and pz < 0.0:
+			return player_pos
+		return Vector3(3.5, 0.0, -2.0)
+	
+	# Bridge
+	if az < -7.0 and az >= -17.0:
+		if pz < -17.0:
+			return Vector3(0.0, 0.0, -17.0)
+		if pz >= -7.0:
+			return Vector3(0.0, 0.0, -7.0)
+		return player_pos
+	
+	# Avionics Bay
+	if az < -17.0:
+		if pz < -17.0:
+			return player_pos
+		return Vector3(0.0, 0.0, -17.0)
+	
+	return player_pos
 
 func _physics_process(delta: float) -> void:
 	_pulse_timer += delta * 5.0
@@ -265,6 +363,9 @@ func _physics_process(delta: float) -> void:
 	# Ensure target player is cached when active
 	if (target_player == null or not is_instance_valid(target_player)) and is_inside_tree() and get_tree() != null:
 		target_player = get_tree().root.find_child("Player", true, false)
+	
+	# Proximity door handling - doors do not trap alien
+	_handle_doors_in_path()
 	
 	# Proximity impact sound when near player
 	if visible and current_state != State.DORMANT and current_state != State.ELIMINATED and target_player != null and is_instance_valid(target_player):
@@ -297,13 +398,17 @@ func _physics_process(delta: float) -> void:
 				velocity.z = move_toward(velocity.z, 0.0, 5.0 * delta)
 				move_and_slide()
 			elif target_player != null and is_instance_valid(target_player):
-				var dir := (target_player.global_position - global_position).normalized()
+				var nav_target := _get_navigation_target(global_position, target_player.global_position)
+				var dir := (nav_target - global_position).normalized()
 				dir.y = 0.0
 				velocity.x = dir.x * walk_speed
 				velocity.z = dir.z * walk_speed
 				var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(target_player.global_position.x, target_player.global_position.z))
-				if flat_dist > 0.1:
+				if flat_dist <= 8.0:
 					look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
+				elif dir.length_squared() > 0.01:
+					look_at(Vector3(global_position.x + dir.x, global_position.y, global_position.z + dir.z), Vector3.UP)
+				
 				if flat_dist <= attack_range and _attack_cooldown <= 0.0:
 					set_state(State.AGGRESSIVE)
 					_execute_claw_attack()
@@ -315,6 +420,15 @@ func _physics_process(delta: float) -> void:
 					if AudioManager != null and AudioManager.has_method("play_alien_footstep"):
 						AudioManager.play_alien_footstep()
 				
+				# Menacing stalking audio atmosphere
+				_stalker_growl_timer += delta
+				if flat_dist <= 8.5 and _stalker_growl_timer >= 3.8:
+					_stalker_growl_timer = randf_range(0.0, 0.8)
+					if AudioManager != null:
+						AudioManager.play_creature_sound()
+						if flat_dist <= 5.0:
+							AudioManager.play_heartbeat_rapid()
+				
 				move_and_slide()
 		
 		State.AGGRESSIVE:
@@ -324,13 +438,17 @@ func _physics_process(delta: float) -> void:
 				move_and_slide()
 				set_state(State.STALKING)
 			elif target_player != null and is_instance_valid(target_player):
-				var dir := (target_player.global_position - global_position).normalized()
+				var nav_target := _get_navigation_target(global_position, target_player.global_position)
+				var dir := (nav_target - global_position).normalized()
 				dir.y = 0.0
 				velocity.x = dir.x * (walk_speed * 1.5)
 				velocity.z = dir.z * (walk_speed * 1.5)
 				var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(target_player.global_position.x, target_player.global_position.z))
-				if flat_dist > 0.1:
+				if flat_dist <= 8.0:
 					look_at(Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z), Vector3.UP)
+				elif dir.length_squared() > 0.01:
+					look_at(Vector3(global_position.x + dir.x, global_position.y, global_position.z + dir.z), Vector3.UP)
+				
 				if flat_dist <= attack_range and _attack_cooldown <= 0.0:
 					_execute_claw_attack()
 				
@@ -340,6 +458,12 @@ func _physics_process(delta: float) -> void:
 					_alien_footstep_timer = 0.0
 					if AudioManager != null and AudioManager.has_method("play_alien_footstep"):
 						AudioManager.play_alien_footstep()
+				
+				_stalker_growl_timer += delta
+				if flat_dist <= 8.5 and _stalker_growl_timer >= 2.5:
+					_stalker_growl_timer = randf_range(0.0, 0.5)
+					if AudioManager != null:
+						AudioManager.play_heartbeat_rapid()
 				
 				move_and_slide()
 		
