@@ -46,6 +46,10 @@ var zoom_target_pos: Vector3 = Vector3.ZERO
 var _pulse_timer: float = 0.0
 var _bob_timer: float = 0.0
 var _alien_footstep_timer: float = 0.0
+var _proximity_impact_timer: float = 0.0
+
+@onready var alien_model: Node3D = get_node_or_null("AlienModel")
+var _anim_player: AnimationPlayer = null
 
 @onready var torso: MeshInstance3D = get_node_or_null("Torso")
 @onready var head: MeshInstance3D = get_node_or_null("Head")
@@ -63,6 +67,19 @@ func _ready() -> void:
 	if current_state == State.DORMANT:
 		visible = false
 	_refresh_visuals()
+	
+	if alien_model != null:
+		var mesh_inst: MeshInstance3D = alien_model.find_child("alienMonster_001", true, false)
+		if mesh_inst != null:
+			var alien_mat: Material = load("res://resources/alien_material.tres")
+			if alien_mat != null:
+				mesh_inst.set_surface_override_material(0, alien_mat)
+		_anim_player = alien_model.find_child("AnimationPlayer", true, false)
+		if _anim_player != null and _anim_player.has_animation("Armature|Armature|mixamo_com|Layer0"):
+			var anim := _anim_player.get_animation("Armature|Armature|mixamo_com|Layer0")
+			if anim != null:
+				anim.loop_mode = Animation.LOOP_LINEAR
+			_anim_player.play("Armature|Armature|mixamo_com|Layer0")
 	
 	# Auto-register with ShipState crisis manager if active
 	if ShipState != null and "crisis_manager" in ShipState and ShipState.crisis_manager != null:
@@ -90,16 +107,30 @@ func set_state(new_state: int) -> void:
 			visible = true
 			if collision_shape != null:
 				collision_shape.disabled = false
+			if _anim_player != null:
+				_anim_player.speed_scale = 1.0
+				if not _anim_player.is_playing():
+					_anim_player.play("Armature|Armature|mixamo_com|Layer0")
 		State.HORROR_ZOOM:
 			visible = true
 			horror_zoom_executed = true
+			if _anim_player != null:
+				_anim_player.speed_scale = 2.0
+				if not _anim_player.is_playing():
+					_anim_player.play("Armature|Armature|mixamo_com|Layer0")
 		State.AGGRESSIVE:
 			visible = true
+			if _anim_player != null:
+				_anim_player.speed_scale = 1.5
+				if not _anim_player.is_playing():
+					_anim_player.play("Armature|Armature|mixamo_com|Layer0")
 		State.TRAPPED:
 			is_trapped = true
 			visible = true
 		State.ELIMINATED:
 			is_eliminated = true
+			if _anim_player != null:
+				_anim_player.stop()
 			if collision_shape != null:
 				collision_shape.disabled = true
 			if eye_left_light != null:
@@ -177,6 +208,8 @@ func zoom_near_player(player: Node3D, duration: float = 1.0) -> void:
 		AudioManager.play_horror_zoom()
 		AudioManager.play_boss_screech()
 		AudioManager.play_heartbeat_rapid()
+		if AudioManager.has_method("play_impact_hit"):
+			AudioManager.play_impact_hit()
 	
 	if player != null and player.has_method("trigger_horror_zoom"):
 		player.trigger_horror_zoom(duration, 25.0, 0.95)
@@ -202,8 +235,13 @@ func _execute_claw_attack() -> void:
 		claw_left.rotation.x = deg_to_rad(-55.0)
 	if claw_right != null:
 		claw_right.rotation.x = deg_to_rad(-55.0)
-	if AudioManager != null and AudioManager.has_method("play_creature_roar"):
-		AudioManager.play_creature_roar()
+	if AudioManager != null:
+		if AudioManager.has_method("play_creature_roar"):
+			AudioManager.play_creature_roar()
+		if AudioManager.has_method("play_impact_hit"):
+			AudioManager.play_impact_hit()
+		if AudioManager.has_method("play_player_death_scream"):
+			AudioManager.play_player_death_scream()
 	if target_player != null and is_instance_valid(target_player) and target_player.has_method("take_damage"):
 		target_player.take_damage(attack_damage, "creature")
 
@@ -212,6 +250,8 @@ func _physics_process(delta: float) -> void:
 	_bob_timer += delta * 3.0
 	if _attack_cooldown > 0.0:
 		_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
+	if _proximity_impact_timer > 0.0:
+		_proximity_impact_timer = maxf(0.0, _proximity_impact_timer - delta)
 	
 	# Breathing & eye pulsing visuals
 	_update_animation_effects(delta)
@@ -225,6 +265,14 @@ func _physics_process(delta: float) -> void:
 	# Ensure target player is cached when active
 	if (target_player == null or not is_instance_valid(target_player)) and is_inside_tree() and get_tree() != null:
 		target_player = get_tree().root.find_child("Player", true, false)
+	
+	# Proximity impact sound when near player
+	if visible and current_state != State.DORMANT and current_state != State.ELIMINATED and target_player != null and is_instance_valid(target_player):
+		var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(target_player.global_position.x, target_player.global_position.z))
+		if flat_dist <= 3.8 and not is_player_in_safe_room() and _proximity_impact_timer <= 0.0:
+			_proximity_impact_timer = 2.5
+			if AudioManager != null and AudioManager.has_method("play_impact_hit"):
+				AudioManager.play_impact_hit()
 	
 	match current_state:
 		State.HORROR_ZOOM:
