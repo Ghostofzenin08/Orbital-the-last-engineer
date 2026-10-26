@@ -78,6 +78,7 @@ func _ready() -> void:
 	_run_suite("QA Systems Integrity & Gameplay Improvements", _test_qa_integrity_and_improvements)
 	_run_suite("Paced Alien Stalker Emergence & Safe Room Sanctuary", _test_alien_pacing_and_safe_room)
 	_run_suite("Game Modes, Look Controls, Generator Breaker & Audio Integration", _test_modes_look_breaker_and_audio)
+	_run_suite("Alien 3D Body, Proximity Impact Audio, Death Screams & Enclosed Chamber Geometry", _test_alien_3d_body_audio_and_geometry)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -3316,6 +3317,81 @@ func _test_modes_look_breaker_and_audio() -> void:
 	
 	SaveManager.set_game_mode("logical")
 	SaveManager.set_look_mode("mouse")
+
+func _test_alien_3d_body_audio_and_geometry() -> void:
+	# 1. Verify ReactorSubdeck & SpecimenVault sealing
+	var interior_scene = load("res://scenes/levels/ship_interior.tscn")
+	var interior = interior_scene.instantiate()
+	add_child(interior)
+
+	var subdeck_left = interior.get_node_or_null("Compartments/ReactorSubdeck/WallFrontSubdeckLeft")
+	var subdeck_right = interior.get_node_or_null("Compartments/ReactorSubdeck/WallFrontSubdeckRight")
+	_assert_true(subdeck_left != null, "ReactorSubdeck has WallFrontSubdeckLeft sealing under Engineering Bay")
+	_assert_true(subdeck_right != null, "ReactorSubdeck has WallFrontSubdeckRight sealing under Engineering Bay")
+	
+	var vault_west = interior.get_node_or_null("Compartments/ReactorSubdeck/VaultCorridorWallWest")
+	var vault_east = interior.get_node_or_null("Compartments/ReactorSubdeck/VaultCorridorWallEast")
+	var vault_ceil = interior.get_node_or_null("Compartments/ReactorSubdeck/VaultCorridorCeiling")
+	_assert_true(vault_west != null and vault_east != null and vault_ceil != null, "ReactorSubdeck has corridor walls & ceiling bridging to SpecimenVault")
+
+	var vault_back_wall = interior.get_node_or_null("Compartments/SpecimenVault/WallBack")
+	_assert_true(vault_back_wall != null, "SpecimenVault has WallBack")
+	if vault_back_wall != null:
+		var col = vault_back_wall.get_node_or_null("Collision")
+		_assert_true(col != null and col.shape != null and col.shape.size.x >= 12.0, "SpecimenVault WallBack width >= 12m sealing full room width")
+
+	# 2. Verify Cargo Bay crawlway doorway & enclosing tunnel
+	var cargo_sw = interior.get_node_or_null("Compartments/CargoBay/WallSouthWest")
+	var cargo_se = interior.get_node_or_null("Compartments/CargoBay/WallSouthEast")
+	var cargo_sh = interior.get_node_or_null("Compartments/CargoBay/WallSouthHeader")
+	var door_cc = interior.get_node_or_null("Compartments/CargoBay/DoorCrawlwayCargo")
+	_assert_true(cargo_sw != null and cargo_se != null and cargo_sh != null, "CargoBay south wall is split into west, east, and header leaving doorway clear")
+	_assert_true(door_cc != null, "CargoBay contains DoorCrawlwayCargo")
+
+	var ramp_wall_w = interior.get_node_or_null("Compartments/CargoBay/CrawlRampWallWest")
+	var ramp_wall_e = interior.get_node_or_null("Compartments/CargoBay/CrawlRampWallEast")
+	var ramp_ceil = interior.get_node_or_null("Compartments/CargoBay/CrawlRampCeiling")
+	_assert_true(ramp_wall_w != null and ramp_wall_e != null and ramp_ceil != null, "Crawlway ramp has enclosing side walls and ceiling")
+
+	remove_child(interior)
+	interior.free()
+
+	# 3. Verify AlienStalker 3D body & texture
+	var stalker_scene = load("res://scenes/entities/alien_stalker.tscn")
+	var stalker = stalker_scene.instantiate()
+	add_child(stalker)
+
+	_assert_true(stalker.has_node("AlienModel"), "AlienStalker instantiates AlienModel 3D FBX")
+	var alien_mesh = stalker.find_child("alienMonster_001", true, false)
+	_assert_true(alien_mesh != null, "AlienStalker contains alienMonster_001 MeshInstance3D")
+	_assert_true(ResourceLoader.exists("res://resources/alien_material.tres"), "alien_material.tres exists")
+	_assert_true(ResourceLoader.exists("res://my_assets/alien/AlienMonster.png"), "AlienMonster.png texture exists")
+
+	# 4. Proximity Impact Hit Audio Trigger
+	var player_scene = load("res://scenes/player/player.tscn")
+	var player = player_scene.instantiate()
+	add_child(player)
+
+	stalker.target_player = player
+	stalker.current_state = AlienStalker.State.STALKING
+	stalker.visible = true
+	stalker.global_position = player.global_position + Vector3(2.0, 0, 0)
+	stalker._physics_process(0.016)
+	_assert_true(stalker._proximity_impact_timer > 0.0, "AlienStalker triggers proximity impact timer when near player (<= 3.8m)")
+
+	# 5. Death scream audio on player damage
+	player.player_health = 100.0
+	player.is_dead = false
+	player.take_damage(25.0, "creature")
+	_assert_true(player.player_health == 75.0, "Player takes damage from creature attack")
+	_assert_true(AudioManager.has_method("play_player_death_scream"), "AudioManager has play_player_death_scream")
+	_assert_true(AudioManager.has_method("play_impact_hit"), "AudioManager has play_impact_hit")
+
+	remove_child(player)
+	player.free()
+	remove_child(stalker)
+	stalker.free()
+
 
 
 
