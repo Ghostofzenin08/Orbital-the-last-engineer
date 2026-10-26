@@ -249,22 +249,27 @@ func _handle_doors_in_path() -> void:
 		return
 	if not is_inside_tree() or get_tree() == null:
 		return
-	var root := get_tree().current_scene
+	var root: Node = get_tree().current_scene if get_tree().current_scene != null else get_tree().root
 	if root == null:
 		return
 	var doors := root.find_children("*", "BulkheadDoor", true, false)
+	if doors.is_empty():
+		for child in root.find_children("*", "StaticBody3D", true, false):
+			if child is BulkheadDoor or child.has_method("set_door_state"):
+				doors.append(child)
 	for d in doors:
-		if d is BulkheadDoor and is_instance_valid(d):
+		if is_instance_valid(d) and (d is BulkheadDoor or d.has_method("set_door_state")):
 			var dist := global_position.distance_to(d.global_position)
-			if dist <= 3.8:
-				if d.is_locked:
+			if dist <= 4.5:
+				if "is_locked" in d and d.is_locked:
 					d.is_locked = false
+				if "requires_multitool_to_unlock" in d:
 					d.requires_multitool_to_unlock = false
-				if not d.is_open:
+				if "is_open" in d and not d.is_open:
 					d.set_door_state(true)
 					if AudioManager != null and AudioManager.has_method("play_gate_opening"):
 						AudioManager.play_gate_opening()
-				if d.door_panel != null:
+				if "door_panel" in d and d.door_panel != null:
 					add_collision_exception_with(d.door_panel)
 
 func _get_navigation_target(alien_pos: Vector3, player_pos: Vector3) -> Vector3:
@@ -279,8 +284,19 @@ func _get_navigation_target(alien_pos: Vector3, player_pos: Vector3) -> Vector3:
 			return player_pos
 		return Vector3(0.0, 0.0, 21.2)
 	
-	# Engineering Bay
+	# Engineering Bay (Obstacle avoidance around GeneratorUnit at x=0, z=18.0)
 	if az > 11.0:
+		var target_z := pz if (pz > 11.0 and pz <= 21.2) else (21.2 if pz > 21.2 else 11.0)
+		var target_x := px if (pz > 11.0 and pz <= 21.2) else 0.0
+		
+		var crossing_generator := (az < 16.5 and target_z > 17.0) or (az > 19.5 and target_z < 19.0)
+		if crossing_generator or (az >= 16.0 and az <= 20.0 and absf(ax) < 2.2):
+			var bypass_x := -2.5 if (ax < 0.0 or (ax == 0.0 and (target_x < 0.0 or px < 0.0))) else 2.5
+			if target_z > az:
+				return Vector3(bypass_x, 0.0, 20.5)
+			else:
+				return Vector3(bypass_x, 0.0, 15.5)
+		
 		if pz > 21.2:
 			return Vector3(0.0, 0.0, 21.2)
 		if pz > 11.0:
@@ -359,6 +375,11 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= 9.8 * delta
 	else:
 		velocity.y = 0.0
+	
+	# Auto-seek player when all 4 repair tasks are complete
+	if MissionManager != null and MissionManager.has_method("are_all_repairs_complete") and MissionManager.are_all_repairs_complete():
+		if current_state == State.DORMANT:
+			set_state(State.STALKING)
 	
 	# Ensure target player is cached when active
 	if (target_player == null or not is_instance_valid(target_player)) and is_inside_tree() and get_tree() != null:
