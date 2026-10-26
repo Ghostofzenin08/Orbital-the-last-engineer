@@ -288,6 +288,8 @@ func take_damage(amount: float, source: String = "creature") -> void:
 	if AudioManager != null:
 		if AudioManager.has_method("play_impact_hit"):
 			AudioManager.play_impact_hit()
+		if AudioManager.has_method("play_player_death_scream"):
+			AudioManager.play_player_death_scream()
 		AudioManager.play_sfx("cough_gasp", 0.9)
 	
 	if player_health <= 0.0:
