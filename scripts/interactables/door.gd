@@ -33,10 +33,14 @@ func _ready() -> void:
 	super._ready()
 	_create_materials()
 	if door_panel != null:
+		door_panel.sync_to_physics = false
 		_closed_pos = door_panel.position
 		_open_pos = _closed_pos + Vector3(0, 2.6, 0)
 		if is_open:
 			door_panel.position = _open_pos
+			var panel_col: CollisionShape3D = door_panel.get_node_or_null("PanelCollision")
+			if panel_col != null:
+				panel_col.disabled = true
 	if interaction_col != null:
 		_col_closed_pos = interaction_col.position
 		_col_open_pos = _col_closed_pos + Vector3(0, 2.6, 0)
@@ -121,21 +125,33 @@ func set_door_state(open: bool, immediate: bool = false) -> void:
 	var target_pos := _open_pos if is_open else _closed_pos
 	var col_target := _col_open_pos if is_open else _col_closed_pos
 	
+	var panel_col: CollisionShape3D = door_panel.get_node_or_null("PanelCollision") if door_panel != null else null
+	
 	if immediate:
 		if _tween != null and _tween.is_valid():
 			_tween.kill()
 		if door_panel != null:
+			door_panel.sync_to_physics = false
 			door_panel.position = target_pos
 		if interaction_col != null:
 			interaction_col.position = col_target
+		if panel_col != null:
+			panel_col.set_deferred("disabled", is_open)
+			panel_col.disabled = is_open
 	else:
 		if door_panel != null:
+			door_panel.sync_to_physics = false
 			if _tween != null and _tween.is_valid():
 				_tween.kill()
 			_tween = create_tween()
 			_tween.tween_property(door_panel, "position", target_pos, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 			if interaction_col != null:
 				_tween.parallel().tween_property(interaction_col, "position", col_target, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+			if panel_col != null:
+				if is_open:
+					_tween.tween_callback(func(): panel_col.set_deferred("disabled", true))
+				else:
+					panel_col.set_deferred("disabled", false)
 	
 	_update_power_visuals()
 
