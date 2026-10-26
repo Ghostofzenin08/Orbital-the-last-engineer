@@ -62,7 +62,7 @@ func _ready() -> void:
 	if interaction_ctrl != null and hud != null and hud.has_method("set_prompt"):
 		interaction_ctrl.prompt_changed.connect(hud.set_prompt)
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	# Click to recapture mouse if focus was lost while not in a menu
 	if event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		var pause_menu: Node = hud.get_node_or_null("PauseMenu") if hud != null else null
@@ -74,14 +74,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		if not is_arrow_look:
-			var sens: float = SaveManager.mouse_sensitivity
-			# Yaw on body
-			rotate_y(-event.relative.x * sens)
-			# Pitch on camera pivot
-			_pitch = clampf(_pitch - (event.relative.y * sens), deg_to_rad(-85.0), deg_to_rad(85.0))
-			camera_pivot.rotation.x = _pitch
+	if event is InputEventMouseMotion and (Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or DisplayServer.get_name() == "headless"):
+		var sens: float = SaveManager.mouse_sensitivity
+		# Yaw on body
+		rotate_y(-event.relative.x * sens)
+		# Pitch on camera pivot
+		_pitch = clampf(_pitch - (event.relative.y * sens), deg_to_rad(-85.0), deg_to_rad(85.0))
+		camera_pivot.rotation.x = _pitch
 	
 	if event.is_action_pressed("pause"):
 		_toggle_pause()
@@ -230,11 +229,16 @@ func _physics_process(delta: float) -> void:
 
 	if camera != null:
 		if camera_trauma > 0.0:
-			camera_trauma = maxf(0.0, camera_trauma - delta * 1.25)
+			camera_trauma = maxf(0.0, camera_trauma - delta * 0.9)
 			var shake := camera_trauma * camera_trauma
-			camera.h_offset = (randf() * 2.0 - 1.0) * 0.14 * shake
-			camera.v_offset = (randf() * 2.0 - 1.0) * 0.14 * shake
-			camera.rotation.z = (randf() * 2.0 - 1.0) * 0.06 * shake
+			var is_critical := (player_health <= 35.0 or is_dead)
+			var amp_pos: float = 0.36 if is_critical else 0.14
+			var amp_rot: float = 0.14 if is_critical else 0.06
+			camera.h_offset = (randf() * 2.0 - 1.0) * amp_pos * shake
+			camera.v_offset = (randf() * 2.0 - 1.0) * amp_pos * shake
+			camera.rotation.z = (randf() * 2.0 - 1.0) * amp_rot * shake
+			if is_critical and camera_pivot != null:
+				camera_pivot.rotation.x = _pitch + (randf() * 2.0 - 1.0) * 0.08 * shake
 		else:
 			camera.h_offset = 0.0
 			camera.v_offset = 0.0
@@ -281,21 +285,22 @@ func take_damage(amount: float, source: String = "creature") -> void:
 	health_changed.emit(player_health, max_health)
 	
 	# Violent camera trauma kick and horror vignette
-	camera_trauma = clampf(camera_trauma + 0.85, 0.0, 1.0)
+	var trauma_gain: float = 1.0 if player_health <= 35.0 else 0.85
+	camera_trauma = clampf(camera_trauma + trauma_gain, 0.0, 1.0)
 	if hud != null and hud.has_method("trigger_horror_vignette"):
-		hud.trigger_horror_vignette(0.6)
+		hud.trigger_horror_vignette(0.8 if player_health <= 35.0 else 0.6)
 	
 	if AudioManager != null:
 		if AudioManager.has_method("play_impact_hit"):
 			AudioManager.play_impact_hit()
-		if AudioManager.has_method("play_player_death_scream"):
-			AudioManager.play_player_death_scream()
-		AudioManager.play_sfx("cough_gasp", 0.9)
+		if player_health <= 0.0:
+			if AudioManager.has_method("play_player_death_scream"):
+				AudioManager.play_player_death_scream()
+		else:
+			AudioManager.play_sfx("cough_gasp", 0.9)
 	
 	if player_health <= 0.0:
 		is_dead = true
-		if AudioManager != null and AudioManager.has_method("play_player_death_scream"):
-			AudioManager.play_player_death_scream()
 		player_died.emit(source)
 		_handle_player_death(source)
 
