@@ -48,6 +48,7 @@ func play_sfx(sound_name: String, pitch_scale: float = 1.0) -> void:
 		if not player.playing:
 			player.stream = stream
 			player.pitch_scale = pitch_scale
+			player.volume_db = 4.0 if sound_name == "impact_hit" else 0.0
 			player.play()
 			return
 	# If all busy, steal the first player
@@ -55,6 +56,7 @@ func play_sfx(sound_name: String, pitch_scale: float = 1.0) -> void:
 	fallback.stop()
 	fallback.stream = stream
 	fallback.pitch_scale = pitch_scale
+	fallback.volume_db = 4.0 if sound_name == "impact_hit" else 0.0
 	fallback.play()
 
 func play_ambient(sound_name: String) -> void:
@@ -142,6 +144,7 @@ func _pregenerate_sounds() -> void:
 	_sound_cache["horror_zoom"] = _generate_horror_zoom()
 	_sound_cache["heartbeat_rapid"] = _generate_heartbeat_rapid()
 	_sound_cache["footstep"] = _generate_footstep()
+	_sound_cache["impact_hit"] = _generate_impact_hit()
 
 	# Load authentic recorded audio files from resources/audio
 	_load_or_fallback("alien_footsteps", "res://resources/audio/alien_footsteps.mp3", null)
@@ -151,7 +154,7 @@ func _pregenerate_sounds() -> void:
 	_load_or_fallback("background_horror", "res://resources/audio/background_horror.mp3", _sound_cache["generator_hum"])
 	_load_or_fallback("gate_opening", "res://resources/audio/gate_opening.mp3", _sound_cache["door"])
 	_load_or_fallback("door", "res://resources/audio/gate_opening.mp3", _sound_cache["door"])
-	_load_or_fallback("impact_hit", "res://resources/audio/impact_hit.mp3", _sound_cache["click"])
+	_load_or_fallback("impact_hit", "res://resources/audio/impact_hit.mp3", _sound_cache["impact_hit"])
 	_load_or_fallback("player_death_scream", "res://resources/audio/player_death_scream.mp3", _sound_cache["creature_sound"])
 	_load_or_fallback("player_footsteps", "res://resources/audio/player_footsteps.mp3", _sound_cache["footstep"])
 	_load_or_fallback("footstep", "res://resources/audio/player_footsteps.mp3", _sound_cache["footstep"])
@@ -202,6 +205,36 @@ func play_heartbeat_rapid() -> void:
 func play_footstep(is_sprint: bool = false) -> void:
 	var pitch := randf_range(1.15, 1.35) if is_sprint else randf_range(0.92, 1.08)
 	play_sfx("footstep", pitch)
+
+func _generate_impact_hit() -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 0.45
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		# Deep punch transient (sub-bass drop from 180Hz down to 45Hz)
+		var freq := lerpf(180.0, 45.0, clampf(t * 8.0, 0.0, 1.0))
+		var sub_env := exp(-t * 12.0)
+		var sub := sin(2.0 * PI * freq * t) * sub_env * 0.95
+		# Crunchy bone / flesh impact noise burst
+		var noise_env := exp(-t * 28.0)
+		var noise := (randf() * 2.0 - 1.0) * noise_env * 0.75
+		# Mid-thud body resonance (90Hz)
+		var body_env := exp(-t * 7.0)
+		var body := sin(2.0 * PI * 90.0 * t) * body_env * 0.5
+		var val := clampf(sub + noise + body, -1.0, 1.0)
+		var sample := int(val * 32767.0)
+		data.encode_s16(i * 2, sample)
+	
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
 
 func _generate_click() -> AudioStreamWAV:
 	var sample_rate := 22050
