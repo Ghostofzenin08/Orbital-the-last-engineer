@@ -62,19 +62,25 @@ func _ready() -> void:
 	if interaction_ctrl != null and hud != null and hud.has_method("set_prompt"):
 		interaction_ctrl.prompt_changed.connect(hud.set_prompt)
 
+func is_in_menu() -> bool:
+	if hud == null:
+		return false
+	var pause_menu: Node = hud.get_node_or_null("PauseMenu")
+	var terminal_dialog: Node = hud.get_node_or_null("TerminalDialog")
+	var ship_schematic: Node = hud.get_node_or_null("ShipSchematic")
+	return (pause_menu != null and pause_menu.visible) or (terminal_dialog != null and terminal_dialog.visible) or (ship_schematic != null and ship_schematic.visible)
+
 func _input(event: InputEvent) -> void:
-	# Click to recapture mouse if focus was lost while not in a menu
-	if event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-		var pause_menu: Node = hud.get_node_or_null("PauseMenu") if hud != null else null
-		var terminal_dialog: Node = hud.get_node_or_null("TerminalDialog") if hud != null else null
-		var ship_schematic: Node = hud.get_node_or_null("ShipSchematic") if hud != null else null
-		var in_menu: bool = (pause_menu != null and pause_menu.visible) or (terminal_dialog != null and terminal_dialog.visible) or (ship_schematic != null and ship_schematic.visible)
-		if not in_menu:
+	var in_menu: bool = is_in_menu()
+	if not in_menu and not is_dead and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		if event is InputEventMouseButton and event.pressed:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 			get_viewport().set_input_as_handled()
 			return
+		elif event is InputEventMouseMotion:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
-	if event is InputEventMouseMotion and (Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or DisplayServer.get_name() == "headless"):
+	if event is InputEventMouseMotion and not in_menu and not is_dead:
 		var sens: float = SaveManager.mouse_sensitivity
 		# Yaw on body
 		rotate_y(-event.relative.x * sens)
@@ -85,7 +91,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
 		_toggle_pause()
 	
-	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and event is InputEventKey and event.pressed and not event.echo:
+	if not in_menu and not is_dead and event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_1:
 			InventoryManager.equip_slot(1)
 		elif event.keycode == KEY_2:
@@ -105,7 +111,7 @@ func _input(event: InputEvent) -> void:
 				var next_s: int = (InventoryManager.active_slot % 4) + 1
 				InventoryManager.equip_slot(next_s)
 
-	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if not in_menu and not is_dead and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if interaction_ctrl != null and interaction_ctrl.current_interactable != null:
 			var target = interaction_ctrl.current_interactable
 			var equipped = InventoryManager.get_equipped_item_id()
@@ -134,7 +140,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y = 0.0
 	
-	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+	if is_in_menu() or is_dead:
 		velocity.x = move_toward(velocity.x, 0.0, deceleration * delta)
 		velocity.z = move_toward(velocity.z, 0.0, deceleration * delta)
 		move_and_slide()
