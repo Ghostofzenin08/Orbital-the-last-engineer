@@ -76,10 +76,54 @@ emission = Color(0.4, 0.15, 0.08, 1)
 emission_energy_multiplier = 0.6
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_window"]
-albedo_color = Color(0.1, 0.2, 0.3, 0.3)
+albedo_color = Color(0.08, 0.15, 0.22, 0.5)
 transparency = 1
+metallic = 0.95
+roughness = 0.12
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frame"]
+albedo_color = Color(0.12, 0.15, 0.18, 1)
 metallic = 0.9
-roughness = 0.1
+roughness = 0.28
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bridge_wall_side"]
+size = Vector3(2.7, 3.6, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bridge_wall_side"]
+size = Vector3(2.7, 3.6, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bridge_wall_lower"]
+size = Vector3(5.0, 1.2, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bridge_wall_lower"]
+size = Vector3(5.0, 1.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bridge_wall_upper"]
+size = Vector3(5.0, 0.9, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bridge_wall_upper"]
+size = Vector3(5.0, 0.9, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cockpit_window"]
+size = Vector3(5.0, 1.5, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cockpit_window"]
+size = Vector3(5.0, 1.5, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_window_frame_pillar"]
+size = Vector3(0.2, 1.5, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_window_mullion"]
+size = Vector3(0.14, 1.5, 0.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_window_frame_bar"]
+size = Vector3(5.0, 0.08, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_threshold"]
+size = Vector3(2.4, 0.04, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_threshold"]
+size = Vector3(2.4, 0.04, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_room_floor"]
 size = Vector3(10.4, 0.4, 10.4)
@@ -1369,17 +1413,95 @@ shape = SubResource("BoxShape3D_wall_door_header")
 mesh = SubResource("BoxMesh_wall_door_header")
 surface_material_override/0 = SubResource("StandardMaterial3D_wall")
 
+[node name="BridgeWallFrontLeft" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.85, 1.8, -21.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/BridgeWallFrontLeft"]
+shape = SubResource("BoxShape3D_bridge_wall_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/BridgeWallFrontLeft"]
+mesh = SubResource("BoxMesh_bridge_wall_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="BridgeWallFrontRight" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.85, 1.8, -21.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/BridgeWallFrontRight"]
+shape = SubResource("BoxShape3D_bridge_wall_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/BridgeWallFrontRight"]
+mesh = SubResource("BoxMesh_bridge_wall_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="BridgeWallFrontLower" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -21.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/BridgeWallFrontLower"]
+shape = SubResource("BoxShape3D_bridge_wall_lower")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/BridgeWallFrontLower"]
+mesh = SubResource("BoxMesh_bridge_wall_lower")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="BridgeWallFrontUpper" type="StaticBody3D" parent="Compartments/Bridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.15, -21.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/BridgeWallFrontUpper"]
+shape = SubResource("BoxShape3D_bridge_wall_upper")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/BridgeWallFrontUpper"]
+mesh = SubResource("BoxMesh_bridge_wall_upper")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
 [node name="CockpitWindow" type="StaticBody3D" parent="Compartments/Bridge"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -21.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.95, -21.2)
 collision_layer = 1
 collision_mask = 0
 
 [node name="Collision" type="CollisionShape3D" parent="Compartments/Bridge/CockpitWindow"]
-shape = SubResource("BoxShape3D_wall_back")
+shape = SubResource("BoxShape3D_cockpit_window")
 
 [node name="Mesh" type="MeshInstance3D" parent="Compartments/Bridge/CockpitWindow"]
-mesh = SubResource("BoxMesh_wall_back")
+mesh = SubResource("BoxMesh_cockpit_window")
 surface_material_override/0 = SubResource("StandardMaterial3D_window")
+
+[node name="WindowFrameLeft" type="MeshInstance3D" parent="Compartments/Bridge/CockpitWindow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.45, 0, 0.05)
+mesh = SubResource("BoxMesh_window_frame_pillar")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="WindowFrameRight" type="MeshInstance3D" parent="Compartments/Bridge/CockpitWindow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.45, 0, 0.05)
+mesh = SubResource("BoxMesh_window_frame_pillar")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="WindowMullionLeft" type="MeshInstance3D" parent="Compartments/Bridge/CockpitWindow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0, 0.05)
+mesh = SubResource("BoxMesh_window_mullion")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="WindowMullionRight" type="MeshInstance3D" parent="Compartments/Bridge/CockpitWindow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0, 0.05)
+mesh = SubResource("BoxMesh_window_mullion")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="WindowSill" type="MeshInstance3D" parent="Compartments/Bridge/CockpitWindow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.73, 0.05)
+mesh = SubResource("BoxMesh_window_frame_bar")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="WindowHeader" type="MeshInstance3D" parent="Compartments/Bridge/CockpitWindow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.73, 0.05)
+mesh = SubResource("BoxMesh_window_frame_bar")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
 
 [node name="HoloTable" type="StaticBody3D" parent="Compartments/Bridge"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -15.0)
@@ -2354,7 +2476,7 @@ mesh = SubResource("BoxMesh_subdeck_ceiling_main")
 surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
 
 [node name="RampCeiling" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
-transform = Transform3D(1, 0, 0, 0, 0.894428, -0.447213, 0, 0.447213, 0.894428, 0, 2.37, 23.65)
+transform = Transform3D(1, 0, 0, 0, 0.894428, -0.447213, 0, 0.447213, 0.894428, 0, 2.37, 23.565)
 collision_layer = 1
 collision_mask = 0
 
@@ -2526,8 +2648,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 21.2)
 door_name = "Reactor Subdeck Access Bulkhead"
 device_id = "door_subdeck"
 
+[node name="SubdeckThreshold" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.001, 21.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/ReactorSubdeck/SubdeckThreshold"]
+shape = SubResource("BoxShape3D_threshold")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/ReactorSubdeck/SubdeckThreshold"]
+mesh = SubResource("BoxMesh_threshold")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
 [node name="SubdeckRamp" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
-transform = Transform3D(1, 0, 0, 0, 0.894428, -0.447213, 0, 0.447213, 0.894428, 0, -1.43, 23.65)
+transform = Transform3D(1, 0, 0, 0, 0.894428, -0.447213, 0, 0.447213, 0.894428, 0, -1.431, 23.565)
 collision_layer = 1
 collision_mask = 0
 
