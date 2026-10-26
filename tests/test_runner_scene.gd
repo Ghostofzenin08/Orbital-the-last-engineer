@@ -79,6 +79,7 @@ func _ready() -> void:
 	_run_suite("Paced Alien Stalker Emergence & Safe Room Sanctuary", _test_alien_pacing_and_safe_room)
 	_run_suite("Game Modes, Look Controls, Generator Breaker & Audio Integration", _test_modes_look_breaker_and_audio)
 	_run_suite("Alien 3D Body, Proximity Impact Audio, Death Screams & Enclosed Chamber Geometry", _test_alien_3d_body_audio_and_geometry)
+	_run_suite("Cargo Annex Repairs, Subdeck Ramp Incline, 3-Hit Kill & Stalker Navigation", _test_final_phase_upgrades)
 	
 	print("\n=======================================================")
 	print("TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -3391,6 +3392,103 @@ func _test_alien_3d_body_audio_and_geometry() -> void:
 	player.free()
 	remove_child(stalker)
 	stalker.free()
+
+func _test_final_phase_upgrades() -> void:
+	# 1. Cargo Annex extra room & repairs verification
+	var interior_scene = load("res://scenes/levels/ship_interior.tscn")
+	var interior = interior_scene.instantiate()
+	add_child(interior)
+
+	var annex_floor = interior.get_node_or_null("Compartments/CargoBay/AnnexFloor")
+	var annex_ceiling = interior.get_node_or_null("Compartments/CargoBay/AnnexCeiling")
+	var annex_west = interior.get_node_or_null("Compartments/CargoBay/AnnexWallWest")
+	var annex_east = interior.get_node_or_null("Compartments/CargoBay/AnnexWallEast")
+	var annex_south = interior.get_node_or_null("Compartments/CargoBay/AnnexWallSouth")
+	_assert_true(annex_floor != null and annex_ceiling != null, "Cargo Annex has floor and ceiling enclosing extra room")
+	_assert_true(annex_west != null and annex_east != null and annex_south != null, "Cargo Annex has west, east, and south enclosing walls")
+
+	var aux_junction = interior.get_node_or_null("Compartments/CargoBay/AuxCargoJunction")
+	var coolant_valve = interior.get_node_or_null("Compartments/CargoBay/CargoCoolantValve")
+	var annex_crate = interior.get_node_or_null("Compartments/CargoBay/AnnexSalvageCrate")
+	var annex_locker = interior.get_node_or_null("Compartments/CargoBay/AnnexStorageLocker")
+	_assert_true(aux_junction != null and aux_junction.device_id == "aux_cargo_junction", "Cargo Annex contains functional AuxCargoJunction repair panel")
+	_assert_true(coolant_valve != null and coolant_valve.device_id == "cargo_coolant_bypass", "Cargo Annex contains CargoCoolantValve bypass")
+	_assert_true(annex_crate != null and annex_locker != null, "Cargo Annex contains salvage crate and storage locker repairs")
+
+	# 2. Lower Subdeck Ramp downward slope orientation verification
+	var subdeck_ramp = interior.get_node_or_null("Compartments/ReactorSubdeck/SubdeckRamp")
+	var ramp_ceiling = interior.get_node_or_null("Compartments/ReactorSubdeck/RampCeiling")
+	_assert_true(subdeck_ramp != null, "ReactorSubdeck contains SubdeckRamp")
+	_assert_true(ramp_ceiling != null, "ReactorSubdeck contains RampCeiling")
+	_assert_true(subdeck_ramp.transform.basis.y.z > 0.0 and subdeck_ramp.transform.basis.z.y < 0.0, "SubdeckRamp slopes downward from Engineering Bay into Reactor Subdeck")
+	_assert_true(ramp_ceiling.transform.basis.y.z > 0.0 and ramp_ceiling.transform.basis.z.y < 0.0, "RampCeiling slopes downward into Reactor Subdeck without ceiling clipping")
+
+	# 3. Procedural impact hit audio generation & volume
+	var wav = AudioManager._generate_impact_hit()
+	_assert_true(wav != null and wav.data.size() > 0, "AudioManager procedural _generate_impact_hit generates valid audio stream")
+
+	# 4. Alien 3-Hit Kill & Player Damage / Screen Shake
+	var player_scene = load("res://scenes/player/player.tscn")
+	var player = player_scene.instantiate()
+	add_child(player)
+
+	player.player_health = 100.0
+	player.is_dead = false
+	# Hit 1
+	player.take_damage(35.0, "creature")
+	_assert_true(player.player_health == 65.0, "Hit 1: Player takes 35 damage and survives at 65 health")
+	_assert_true(player.is_dead == false, "Hit 1: Player is not dead")
+	_assert_true(player.camera_trauma > 0.8, "Hit 1: Camera trauma elevated on impact")
+
+	# Hit 2
+	player.take_damage(35.0, "creature")
+	_assert_true(player.player_health == 30.0, "Hit 2: Player takes 35 damage and survives at 30 health")
+	_assert_true(player.is_dead == false, "Hit 2: Player is not dead")
+	_assert_true(player.camera_trauma >= 0.99, "Hit 2: Near-death critical trauma reaches maximum screen shaking")
+
+	# Hit 3 (Fatal)
+	player.take_damage(35.0, "creature")
+	_assert_true(player.player_health == 0.0, "Hit 3: Player health reduced to 0")
+	_assert_true(player.is_dead == true, "Hit 3: Player is dead after 3 hits")
+	_assert_true(ShipState.death_reason == "CREATURE_ATTACK", "ShipState records CREATURE_ATTACK on 3rd lethal hit")
+
+	# 5. Stalker door unlocking and waypoint seeking
+	var stalker_scene = load("res://scenes/entities/alien_stalker.tscn")
+	var stalker = stalker_scene.instantiate()
+	interior.add_child(stalker)
+
+	var door_fwd = interior.get_node_or_null("Compartments/EngineeringBay/DoorForward")
+	if door_fwd != null:
+		door_fwd.is_locked = true
+		door_fwd.set_door_state(false, true)
+		stalker.current_state = AlienStalker.State.STALKING
+		stalker.global_position = door_fwd.global_position + Vector3(0, 0, 1.5)
+		stalker._handle_doors_in_path()
+		_assert_true(door_fwd.is_locked == false, "Stalker automatically unlocks locked doors in path")
+		_assert_true(door_fwd.is_open == true, "Stalker automatically opens closed doors in path")
+
+	# Test waypoint navigation from lower deck to corridors
+	var nav_from_subdeck = stalker._get_navigation_target(Vector3(0, -2.5, 26.0), Vector3(0, 0, 2.0))
+	_assert_true(nav_from_subdeck == Vector3(0.0, 0.0, 21.2), "Stalker in Subdeck routes up Subdeck Ramp to reach Corridors")
+
+	var nav_from_eng = stalker._get_navigation_target(Vector3(0, 0, 16.0), Vector3(0, 0, 2.0))
+	_assert_true(nav_from_eng == Vector3(0.0, 0.0, 11.0), "Stalker in Engineering routes to forward door to reach Corridors")
+
+	var nav_to_cargo = stalker._get_navigation_target(Vector3(0, 0, 2.0), Vector3(-10, 0, 6.0))
+	_assert_true(nav_to_cargo == Vector3(-3.5, 0.0, 6.0), "Stalker in Corridors routes through Cargo doorway to reach Cargo Bay")
+
+	# 6. Mouse view active regardless of mode
+	SaveManager.set_look_mode("arrow_keys")
+	var motion_event = InputEventMouseMotion.new()
+	motion_event.relative = Vector2(10.0, 5.0)
+	var rot_before = player.rotation.y
+	player._input(motion_event)
+	_assert_true(player.rotation.y != rot_before, "Mouse motion rotates player even when arrow_keys mode is active")
+
+	remove_child(player)
+	player.free()
+	remove_child(interior)
+	interior.free()
 
 
 
