@@ -3415,13 +3415,25 @@ func _test_final_phase_upgrades() -> void:
 	_assert_true(coolant_valve != null and coolant_valve.device_id == "cargo_coolant_bypass", "Cargo Annex contains CargoCoolantValve bypass")
 	_assert_true(annex_crate != null and annex_locker != null, "Cargo Annex contains salvage crate and storage locker repairs")
 
-	# 2. Lower Subdeck Ramp downward slope orientation verification
+	# 2. Lower Subdeck Ramp downward slope orientation verification & Bridge Bulkhead Geometry
 	var subdeck_ramp = interior.get_node_or_null("Compartments/ReactorSubdeck/SubdeckRamp")
 	var ramp_ceiling = interior.get_node_or_null("Compartments/ReactorSubdeck/RampCeiling")
+	var subdeck_threshold = interior.get_node_or_null("Compartments/ReactorSubdeck/SubdeckThreshold")
 	_assert_true(subdeck_ramp != null, "ReactorSubdeck contains SubdeckRamp")
 	_assert_true(ramp_ceiling != null, "ReactorSubdeck contains RampCeiling")
+	_assert_true(subdeck_threshold != null, "ReactorSubdeck contains SubdeckThreshold transition plate")
 	_assert_true(subdeck_ramp.transform.basis.y.z > 0.0 and subdeck_ramp.transform.basis.z.y < 0.0, "SubdeckRamp slopes downward from Engineering Bay into Reactor Subdeck")
 	_assert_true(ramp_ceiling.transform.basis.y.z > 0.0 and ramp_ceiling.transform.basis.z.y < 0.0, "RampCeiling slopes downward into Reactor Subdeck without ceiling clipping")
+
+	# Verify Command Bridge reinforced forward bulkhead walls & framed cockpit viewport
+	var br_wall_left = interior.get_node_or_null("Compartments/Bridge/BridgeWallFrontLeft")
+	var br_wall_right = interior.get_node_or_null("Compartments/Bridge/BridgeWallFrontRight")
+	var br_wall_lower = interior.get_node_or_null("Compartments/Bridge/BridgeWallFrontLower")
+	var br_wall_upper = interior.get_node_or_null("Compartments/Bridge/BridgeWallFrontUpper")
+	var br_window = interior.get_node_or_null("Compartments/Bridge/CockpitWindow")
+	_assert_true(br_wall_left != null and br_wall_right != null, "Command Bridge has reinforced port and starboard forward armor bulkheads")
+	_assert_true(br_wall_lower != null and br_wall_upper != null, "Command Bridge has solid lower armored console barrier and overhead header")
+	_assert_true(br_window != null and br_window.has_node("WindowMullionLeft") and br_window.has_node("WindowMullionRight"), "Command Bridge Cockpit Viewport has structural framing pillars and mullions")
 
 	# Test player walking through subdeck doorway down the ramp
 	var test_player_scene = load("res://scenes/player/player.tscn")
@@ -3436,6 +3448,14 @@ func _test_final_phase_upgrades() -> void:
 		if col != null:
 			break
 	_assert_true(t_player.global_position.z > 23.5, "Player successfully walks down Subdeck Ramp past z=23.5")
+	
+	# Test player walking back up the ramp through the subdeck doorway
+	t_player.global_position = Vector3(0.0, -1.0, 23.5)
+	for step in range(50):
+		var col = t_player.move_and_collide(Vector3(0, 0.05, -0.1))
+		if col != null:
+			break
+	_assert_true(t_player.global_position.z < 21.5, "Player successfully walks back up Subdeck Ramp past z=21.5 into Engineering")
 	interior.remove_child(t_player)
 	t_player.free()
 
