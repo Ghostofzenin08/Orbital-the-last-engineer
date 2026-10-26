@@ -37,11 +37,13 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="Dot" type="ColorRect" parent="ReticleCenter"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(4, 4)
 layout_mode = 2
+mouse_filter = 2
 color = Color(1, 1, 1, 0.8)
 
 [node name="PromptMargin" type="MarginContainer" parent="."]
@@ -56,10 +58,12 @@ offset_right = 250.0
 offset_bottom = 175.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="PromptLabel" type="Label" parent="PromptMargin"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -73,9 +77,11 @@ offset_right = 460.0
 offset_bottom = 110.0
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
+mouse_filter = 2
 
 [node name="ObjectivePanel" type="PanelContainer" parent="TopLeftMargin"]
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Margin" type="MarginContainer" parent="TopLeftMargin/ObjectivePanel"]
 layout_mode = 2
@@ -83,10 +89,12 @@ theme_override_constants/margin_left = 14
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 14
 theme_override_constants/margin_bottom = 8
+mouse_filter = 2
 
 [node name="VBox" type="VBoxContainer" parent="TopLeftMargin/ObjectivePanel/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 4
+mouse_filter = 2
 
 [node name="ObjectiveTitle" type="Label" parent="TopLeftMargin/ObjectivePanel/Margin/VBox"]
 unique_name_in_owner = true
@@ -94,6 +102,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 13
 text = "MISSION 1: RESTORE EMERGENCY GENERATOR"
+mouse_filter = 2
 
 [node name="ImmediateTaskLabel" type="Label" parent="TopLeftMargin/ObjectivePanel/Margin/VBox"]
 unique_name_in_owner = true
@@ -101,6 +110,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
 theme_override_font_sizes/font_size = 12
 text = "IMMEDIATE TASK: Flip Generator Breaker Lever"
+mouse_filter = 2
 
 [node name="ObjectiveDesc" type="Label" parent="TopLeftMargin/ObjectivePanel/Margin/VBox"]
 unique_name_in_owner = true
@@ -108,6 +118,7 @@ visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "Briefing..."
+mouse_filter = 2
 
 [node name="TutorialMargin" type="MarginContainer" parent="."]
 unique_name_in_owner = true
@@ -117,6 +128,7 @@ offset_top = 125.0
 offset_right = 440.0
 offset_bottom = 205.0
 theme_override_constants/margin_left = 16
+mouse_filter = 2
 
 [node name="TutorialPanel" type="PanelContainer" parent="TutorialMargin"]
 layout_mode = 2
