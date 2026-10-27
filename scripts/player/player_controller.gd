@@ -61,6 +61,9 @@ func _ready() -> void:
 	
 	if interaction_ctrl != null and hud != null and hud.has_method("set_prompt"):
 		interaction_ctrl.prompt_changed.connect(hud.set_prompt)
+	if hud != null and hud.has_method("update_health"):
+		health_changed.connect(hud.update_health)
+		hud.update_health(player_health, max_health)
 
 func is_in_menu() -> bool:
 	if hud == null:
