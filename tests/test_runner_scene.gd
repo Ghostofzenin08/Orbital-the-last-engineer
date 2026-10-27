@@ -383,6 +383,13 @@ func _test_end_to_end_level_flow() -> void:
 	elif ShipState.crisis_manager != null:
 		ShipState.crisis_manager.is_creature_eliminated = true
 
+	# Normalize oxygen with medical oxygen booster in Medbay before departure
+	var med_booster = level.get_node_or_null("Compartments/Medbay/MedicalOxygenBooster")
+	if med_booster != null:
+		med_booster._on_interacted(player)
+	elif EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
+		EnvironmentalManager.instance.normalize_poison_oxygen_in_medbay()
+
 	# Objective 5: Engage departure switch
 	var departure_switch: BreakerSwitch = level.get_node("Compartments/Bridge/DepartureSwitch")
 	_assert_true(departure_switch != null, "Departure switch found at Helm Console")
