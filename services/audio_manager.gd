@@ -44,11 +44,19 @@ func play_sfx(sound_name: String, pitch_scale: float = 1.0) -> void:
 	if not _sound_cache.has(sound_name):
 		return
 	var stream: AudioStream = _sound_cache[sound_name]
+	var sfx_vol: float = 0.0
+	if sound_name == "impact_hit" or sound_name == "player_death_scream":
+		sfx_vol = 6.0
+	elif sound_name == "creature_roar" or sound_name == "boss_screech":
+		sfx_vol = 4.0
+	elif sound_name == "creature_sound" or sound_name == "alien_sound":
+		sfx_vol = 3.0
+	
 	for player in _sfx_players:
 		if not player.playing:
 			player.stream = stream
 			player.pitch_scale = pitch_scale
-			player.volume_db = 4.0 if sound_name == "impact_hit" else 0.0
+			player.volume_db = sfx_vol
 			player.play()
 			return
 	# If all busy, steal the first player
@@ -56,7 +64,7 @@ func play_sfx(sound_name: String, pitch_scale: float = 1.0) -> void:
 	fallback.stop()
 	fallback.stream = stream
 	fallback.pitch_scale = pitch_scale
-	fallback.volume_db = 4.0 if sound_name == "impact_hit" else 0.0
+	fallback.volume_db = sfx_vol
 	fallback.play()
 
 func play_ambient(sound_name: String) -> void:
