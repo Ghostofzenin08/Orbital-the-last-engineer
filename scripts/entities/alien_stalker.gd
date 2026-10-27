@@ -388,13 +388,20 @@ func _physics_process(delta: float) -> void:
 	# Proximity door handling - doors do not trap alien
 	_handle_doors_in_path()
 	
-	# Proximity impact sound when near player
+	# Proximity impact sound and horror stalking atmosphere when near player
 	if visible and current_state != State.DORMANT and current_state != State.ELIMINATED and target_player != null and is_instance_valid(target_player):
 		var flat_dist := Vector2(global_position.x, global_position.z).distance_to(Vector2(target_player.global_position.x, target_player.global_position.z))
-		if flat_dist <= 3.8 and not is_player_in_safe_room() and _proximity_impact_timer <= 0.0:
-			_proximity_impact_timer = 2.5
+		if flat_dist <= 9.0 and not is_player_in_safe_room() and _proximity_impact_timer <= 0.0:
+			_proximity_impact_timer = 2.4
 			if AudioManager != null and AudioManager.has_method("play_impact_hit"):
 				AudioManager.play_impact_hit()
+			if AudioManager != null and AudioManager.has_method("play_creature_sound"):
+				AudioManager.play_creature_sound()
+			if flat_dist <= 5.5:
+				if AudioManager != null and AudioManager.has_method("play_heartbeat_rapid"):
+					AudioManager.play_heartbeat_rapid()
+				if "camera_trauma" in target_player:
+					target_player.camera_trauma = maxf(float(target_player.camera_trauma), 0.35)
 	
 	match current_state:
 		State.HORROR_ZOOM:
