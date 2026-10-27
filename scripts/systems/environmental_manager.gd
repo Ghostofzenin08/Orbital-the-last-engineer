@@ -23,6 +23,7 @@ var _critical_alert_active: bool = false
 # Player tracking
 var player_compartment_id: String = "engineering_bay"
 var player_afflictions: Array[String] = []
+var _cached_player: Node3D = null
 
 # Compartment data dictionary
 var compartments: Dictionary = {}
@@ -783,8 +784,10 @@ func _update_player_compartment() -> void:
 	if not is_inside_tree():
 		return
 	
-	var root := get_tree().root
-	var player = root.find_child("Player", true, false)
+	if _cached_player == null or not is_instance_valid(_cached_player):
+		var root := get_tree().root
+		_cached_player = root.find_child("Player", true, false) as Node3D
+	var player := _cached_player
 	if player != null and is_instance_valid(player):
 		var old_id := player_compartment_id
 		player_compartment_id = get_compartment_for_position(player.global_position)

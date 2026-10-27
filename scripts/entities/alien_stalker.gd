@@ -61,6 +61,8 @@ var _stride_blend: float = 0.0
 var _bone_indices: Dictionary = {}
 var _bone_rest_quats: Dictionary = {}
 var _hips_rest_origin: Vector3 = Vector3(0.0, 1.183, 0.01)
+var _cached_doors: Array[Node] = []
+var _door_check_timer: float = 0.0
 
 @onready var torso: MeshInstance3D = get_node_or_null("Torso")
 @onready var head: MeshInstance3D = get_node_or_null("Head")
@@ -82,6 +84,7 @@ func _ready() -> void:
 	if alien_model != null:
 		var mesh_inst: MeshInstance3D = alien_model.find_child("alienMonster_001", true, false)
 		if mesh_inst != null:
+			mesh_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			var alien_mat: Material = load("res://resources/alien_material.tres")
 			if alien_mat != null:
 				mesh_inst.set_surface_override_material(0, alien_mat)
@@ -325,15 +328,19 @@ func _handle_doors_in_path() -> void:
 		return
 	if not is_inside_tree() or get_tree() == null:
 		return
-	var root: Node = get_tree().current_scene if get_tree().current_scene != null else get_tree().root
-	if root == null:
-		return
-	var doors := root.find_children("*", "BulkheadDoor", true, false)
-	if doors.is_empty():
-		for child in root.find_children("*", "StaticBody3D", true, false):
-			if child is BulkheadDoor or child.has_method("set_door_state"):
-				doors.append(child)
-	for d in doors:
+	if _cached_doors.is_empty():
+		var root: Node = get_tree().current_scene if get_tree().current_scene != null else get_tree().root
+		if root == null:
+			return
+		var found := root.find_children("*", "BulkheadDoor", true, false)
+		if found.is_empty():
+			for child in root.find_children("*", "StaticBody3D", true, false):
+				if child is BulkheadDoor or child.has_method("set_door_state"):
+					found.append(child)
+		for d in found:
+			if is_instance_valid(d):
+				_cached_doors.append(d)
+	for d in _cached_doors:
 		if is_instance_valid(d) and (d is BulkheadDoor or d.has_method("set_door_state")):
 			if d.name == "AirlockInner" or d.name == "AirlockOuter" or ("device_id" in d and str(d.device_id).begins_with("airlock")):
 				continue
@@ -465,8 +472,11 @@ func _physics_process(delta: float) -> void:
 	if (target_player == null or not is_instance_valid(target_player)) and is_inside_tree() and get_tree() != null:
 		target_player = get_tree().root.find_child("Player", true, false)
 	
-	# Proximity door handling - doors do not trap alien
-	_handle_doors_in_path()
+	# Proximity door handling - throttled to avoid per-frame checks
+	_door_check_timer += delta
+	if _door_check_timer >= 0.15:
+		_door_check_timer = 0.0
+		_handle_doors_in_path()
 	
 	# Proximity impact sound and horror stalking atmosphere when near player
 	if visible and current_state != State.DORMANT and current_state != State.ELIMINATED and target_player != null and is_instance_valid(target_player):
@@ -723,6 +733,16 @@ func _update_bipedal_walk_cycle(delta: float) -> void:
 	_stride_blend = move_toward(_stride_blend, target_blend, delta * 6.0)
 	if is_moving:
 		_walk_cycle_phase = fmod(_walk_cycle_phase + delta * maxf(3.2, horiz_speed * 2.85), TAU)
+	
+	# Let native C++ AnimationPlayer drive the multi-track bipedal walk cycle in real time without double-dirtying Skeleton3D!
+	if _anim_player != null and _anim_player.has_animation("Armature|Armature|mixamo_com|Layer0"):
+		if is_moving:
+			_anim_player.speed_scale = clampf(horiz_speed / maxf(0.5, walk_speed), 0.65, 2.2)
+			if not _anim_player.is_playing():
+				_anim_player.play("Armature|Armature|mixamo_com|Layer0")
+		else:
+			_anim_player.speed_scale = 0.25
+		return
 	
 	var l_swing := sin(_walk_cycle_phase) * _stride_blend
 	var r_swing := sin(_walk_cycle_phase + PI) * _stride_blend

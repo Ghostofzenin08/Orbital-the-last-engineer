@@ -34,7 +34,12 @@ var _scifi_normal_tex: NoiseTexture2D = null
 var _scifi_roughness_tex: NoiseTexture2D = null
 var _objective_beacon: Node3D = null
 var _beacon_pulse_time: float = 0.0
+var _wayfinder_update_timer: float = 0.0
+var _cached_target_node: Node3D = null
+var _cached_target_name: String = ""
 var _red_poison_smoke_container: Node3D = null
+var _world_env: WorldEnvironment = null
+var _last_poison_fog_state: int = -1
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -247,20 +252,13 @@ func _setup_red_poison_smoke() -> void:
 	for z in smoke_zones:
 		var cloud := MeshInstance3D.new()
 		cloud.name = "SmokeCloud_%s" % str(z["id"])
+		cloud.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var box := BoxMesh.new()
 		box.size = z["size"]
 		cloud.mesh = box
 		cloud.position = z["pos"]
 		cloud.set_surface_override_material(0, smoke_mat)
 		_red_poison_smoke_container.add_child(cloud)
-		
-		var rlight := OmniLight3D.new()
-		rlight.name = "SmokeLight_%s" % str(z["id"])
-		rlight.light_color = Color(1.0, 0.12, 0.10, 1.0)
-		rlight.light_energy = 1.35
-		rlight.omni_range = 8.0
-		rlight.position = z["pos"] + Vector3(0.0, 0.6, 0.0)
-		_red_poison_smoke_container.add_child(rlight)
 	
 	add_child(_red_poison_smoke_container)
 
@@ -273,17 +271,22 @@ func _update_red_poison_smoke_visuals(_delta: float) -> void:
 			var pcid := str(env_manager.player_compartment_id)
 			player_in_poison_zone = (pcid != "airlock_chamber" and pcid != "medbay")
 	if _red_poison_smoke_container != null and is_instance_valid(_red_poison_smoke_container):
-		_red_poison_smoke_container.visible = poison_active
-	var world_env := get_node_or_null("HorrorWorldEnvironment") as WorldEnvironment
-	if world_env != null and world_env.environment != null:
-		if poison_active and player_in_poison_zone:
-			world_env.environment.fog_light_color = Color(0.88, 0.08, 0.08, 1.0)
-			world_env.environment.fog_light_energy = 0.68
-			world_env.environment.fog_density = 0.038
-		else:
-			world_env.environment.fog_light_color = Color(0.05, 0.09, 0.14, 1.0)
-			world_env.environment.fog_light_energy = 0.22
-			world_env.environment.fog_density = 0.006
+		if _red_poison_smoke_container.visible != poison_active:
+			_red_poison_smoke_container.visible = poison_active
+	var desired_fog_state: int = 1 if (poison_active and player_in_poison_zone) else 0
+	if desired_fog_state != _last_poison_fog_state:
+		_last_poison_fog_state = desired_fog_state
+		if _world_env == null or not is_instance_valid(_world_env):
+			_world_env = get_node_or_null("HorrorWorldEnvironment") as WorldEnvironment
+		if _world_env != null and _world_env.environment != null:
+			if desired_fog_state == 1:
+				_world_env.environment.fog_light_color = Color(0.88, 0.08, 0.08, 1.0)
+				_world_env.environment.fog_light_energy = 0.68
+				_world_env.environment.fog_density = 0.038
+			else:
+				_world_env.environment.fog_light_color = Color(0.05, 0.09, 0.14, 1.0)
+				_world_env.environment.fog_light_energy = 0.22
+				_world_env.environment.fog_density = 0.006
 
 func _setup_objective_beacon() -> void:
 	if _objective_beacon != null and is_instance_valid(_objective_beacon):
@@ -383,9 +386,14 @@ func get_current_objective_target_info() -> Dictionary:
 
 func _update_objective_beacon_and_wayfinder(delta: float) -> void:
 	_beacon_pulse_time += delta * 4.5
-	var info := get_current_objective_target_info()
-	var target_node: Node3D = info.get("node", null) as Node3D
-	var target_name: String = str(info.get("name", ""))
+	_wayfinder_update_timer += delta
+	if delta == 0.0 or _wayfinder_update_timer >= 0.10 or _cached_target_node == null or not is_instance_valid(_cached_target_node):
+		_wayfinder_update_timer = 0.0
+		var info := get_current_objective_target_info()
+		_cached_target_node = info.get("node", null) as Node3D
+		_cached_target_name = str(info.get("name", ""))
+	var target_node: Node3D = _cached_target_node
+	var target_name: String = _cached_target_name
 	
 	if _objective_beacon != null and is_instance_valid(_objective_beacon):
 		if target_node != null and is_instance_valid(target_node):
@@ -395,7 +403,7 @@ func _update_objective_beacon_and_wayfinder(delta: float) -> void:
 		else:
 			_objective_beacon.visible = false
 	
-	if player != null and is_instance_valid(player) and "hud" in player and player.hud != null and player.hud.has_method("update_wayfinder"):
+	if _wayfinder_update_timer == 0.0 and player != null and is_instance_valid(player) and "hud" in player and player.hud != null and player.hud.has_method("update_wayfinder"):
 		if target_node != null and is_instance_valid(target_node):
 			var dist := player.global_position.distance_to(target_node.global_position)
 			var to_target := target_node.global_position - player.global_position
@@ -424,7 +432,7 @@ func _update_objective_beacon_and_wayfinder(delta: float) -> void:
 			player.hud.update_wayfinder("", 0.0, "")
 
 func _apply_scifi_horror_textures_and_environment() -> void:
-	# 1. Configure sleek, moody, high-contrast Bio-Research Facility WorldEnvironment (no white blowout)
+	# 1. Configure sleek, moody, high-contrast Bio-Research Facility WorldEnvironment (no white blowout & fast GPU rendering)
 	if get_node_or_null("HorrorWorldEnvironment") == null:
 		var world_env := WorldEnvironment.new()
 		world_env.name = "HorrorWorldEnvironment"
@@ -436,64 +444,25 @@ func _apply_scifi_horror_textures_and_environment() -> void:
 		env.ambient_light_energy = 0.22
 		env.tonemap_mode = Environment.TONE_MAPPER_ACES
 		env.tonemap_exposure = 0.90
-		env.glow_enabled = true
-		env.glow_intensity = 0.22
-		env.glow_bloom = 0.03
+		env.glow_enabled = false
 		env.fog_enabled = true
 		env.fog_light_color = Color(0.05, 0.09, 0.14, 1.0)
 		env.fog_light_energy = 0.22
 		env.fog_density = 0.006
 		world_env.environment = env
 		add_child(world_env)
+		_world_env = world_env
 	
-	# 2. Generate ultra-clean, micro-polished architectural surface textures for cleanroom panels & lab floors
-	var normal_noise := FastNoiseLite.new()
-	normal_noise.seed = 442
-	normal_noise.noise_type = FastNoiseLite.TYPE_CELLULAR
-	normal_noise.frequency = 0.04
-	normal_noise.cellular_distance_function = FastNoiseLite.DISTANCE_MANHATTAN
-	
-	_scifi_normal_tex = NoiseTexture2D.new()
-	_scifi_normal_tex.width = 128
-	_scifi_normal_tex.height = 128
-	_scifi_normal_tex.seamless = true
-	_scifi_normal_tex.as_normal_map = true
-	_scifi_normal_tex.bump_strength = 1.0
-	_scifi_normal_tex.noise = normal_noise
-	
-	var rough_noise := FastNoiseLite.new()
-	rough_noise.seed = 2184
-	rough_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	rough_noise.frequency = 0.025
-	
-	_scifi_roughness_tex = NoiseTexture2D.new()
-	_scifi_roughness_tex.width = 128
-	_scifi_roughness_tex.height = 128
-	_scifi_roughness_tex.seamless = true
-	_scifi_roughness_tex.noise = rough_noise
-	
+	# Enable distance fade on all compartment lights so distant rooms don't cost GPU light passes
 	var compartments_root := get_node_or_null("Compartments")
 	if compartments_root == null:
 		return
-	var updated_materials: Dictionary = {}
-	for mesh_inst in compartments_root.find_children("*", "MeshInstance3D", true, false):
-		if mesh_inst is MeshInstance3D:
-			var mat: Material = mesh_inst.get_surface_override_material(0)
-			if mat == null and mesh_inst.mesh != null and mesh_inst.mesh.get_surface_count() > 0:
-				mat = mesh_inst.mesh.surface_get_material(0)
-			if mat is StandardMaterial3D and not updated_materials.has(mat):
-				updated_materials[mat] = true
-				var smat: StandardMaterial3D = mat as StandardMaterial3D
-				if smat.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED and not smat.emission_enabled:
-					smat.normal_enabled = true
-					smat.normal_texture = _scifi_normal_tex
-					smat.normal_scale = 0.05
-					smat.clearcoat_enabled = true
-					smat.clearcoat = 0.45
-					smat.clearcoat_roughness = 0.14
-					smat.uv1_triplanar = true
-					smat.uv1_world_triplanar = true
-					smat.uv1_scale = Vector3(0.25, 0.25, 0.25)
+	for light_node in compartments_root.find_children("*", "Light3D", true, false):
+		if light_node is Light3D:
+			light_node.distance_fade_enabled = true
+			light_node.distance_fade_begin = 16.0
+			light_node.distance_fade_length = 5.0
+			light_node.shadow_enabled = false
 
 func _populate_story_observatory_and_vault_props() -> void:
 	var trim_mat := StandardMaterial3D.new()

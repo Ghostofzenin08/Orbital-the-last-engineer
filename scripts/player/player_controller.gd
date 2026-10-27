@@ -45,6 +45,9 @@ var _base_fov: float = 75.0
 var _target_fov: float = 75.0
 var _jumpscare_focus_target: Node3D = null
 var _jumpscare_osc_time: float = 0.0
+var _cached_pause_menu: Node = null
+var _cached_terminal_dialog: Node = null
+var _cached_ship_schematic: Node = null
 
 var is_arrow_look: bool:
 	get:
@@ -61,6 +64,10 @@ func _ready() -> void:
 		_base_fov = camera.fov
 		_target_fov = _base_fov
 	
+	if hud != null:
+		_cached_pause_menu = hud.get_node_or_null("PauseMenu")
+		_cached_terminal_dialog = hud.get_node_or_null("TerminalDialog")
+		_cached_ship_schematic = hud.get_node_or_null("ShipSchematic")
 	if interaction_ctrl != null and hud != null and hud.has_method("set_prompt"):
 		interaction_ctrl.prompt_changed.connect(hud.set_prompt)
 	if hud != null and hud.has_method("update_health"):
@@ -70,10 +77,13 @@ func _ready() -> void:
 func is_in_menu() -> bool:
 	if hud == null:
 		return false
-	var pause_menu: Node = hud.get_node_or_null("PauseMenu")
-	var terminal_dialog: Node = hud.get_node_or_null("TerminalDialog")
-	var ship_schematic: Node = hud.get_node_or_null("ShipSchematic")
-	return (pause_menu != null and pause_menu.visible) or (terminal_dialog != null and terminal_dialog.visible) or (ship_schematic != null and ship_schematic.visible)
+	if _cached_pause_menu == null:
+		_cached_pause_menu = hud.get_node_or_null("PauseMenu")
+	if _cached_terminal_dialog == null:
+		_cached_terminal_dialog = hud.get_node_or_null("TerminalDialog")
+	if _cached_ship_schematic == null:
+		_cached_ship_schematic = hud.get_node_or_null("ShipSchematic")
+	return (_cached_pause_menu != null and _cached_pause_menu.visible) or (_cached_terminal_dialog != null and _cached_terminal_dialog.visible) or (_cached_ship_schematic != null and _cached_ship_schematic.visible)
 
 func _input(event: InputEvent) -> void:
 	var in_menu: bool = is_in_menu()

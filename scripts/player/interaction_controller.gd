@@ -10,6 +10,7 @@ signal prompt_changed(prompt_text: String)
 @export var player_body: CharacterBody3D
 
 var current_interactable: Interactable = null
+var _last_prompt_text: String = ""
 
 func _ready() -> void:
 	if ray_cast == null:
@@ -20,8 +21,9 @@ func _process(_delta: float) -> void:
 		return
 	
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-		if current_interactable != null:
+		if current_interactable != null or _last_prompt_text != "":
 			current_interactable = null
+			_last_prompt_text = ""
 			prompt_changed.emit("")
 		return
 	
@@ -30,14 +32,19 @@ func _process(_delta: float) -> void:
 		if collider is Interactable:
 			if current_interactable != collider:
 				current_interactable = collider
-			prompt_changed.emit(current_interactable.get_prompt())
+			var p_txt: String = current_interactable.get_prompt()
+			if p_txt != _last_prompt_text:
+				_last_prompt_text = p_txt
+				prompt_changed.emit(p_txt)
 		else:
-			if current_interactable != null:
+			if current_interactable != null or _last_prompt_text != "":
 				current_interactable = null
+				_last_prompt_text = ""
 				prompt_changed.emit("")
 	else:
-		if current_interactable != null:
+		if current_interactable != null or _last_prompt_text != "":
 			current_interactable = null
+			_last_prompt_text = ""
 			prompt_changed.emit("")
 
 func _unhandled_input(event: InputEvent) -> void:

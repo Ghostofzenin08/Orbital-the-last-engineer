@@ -15,6 +15,7 @@ extends Interactable
 var _mat_nominal: StandardMaterial3D
 var _mat_alarm: StandardMaterial3D
 var _is_fault_active: bool = false
+var _last_visual_state: int = -1
 
 func _ready() -> void:
 	super._ready()
@@ -172,6 +173,10 @@ func _process(_delta: float) -> void:
 
 func _update_visuals() -> void:
 	var active := check_fault_active()
+	var st: int = 1 if active else 0
+	if st == _last_visual_state:
+		return
+	_last_visual_state = st
 	if indicator_mesh != null:
 		indicator_mesh.material_override = _mat_alarm if active else _mat_nominal
 	if indicator_light != null:
