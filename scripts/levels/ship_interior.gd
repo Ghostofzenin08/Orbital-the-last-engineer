@@ -34,6 +34,7 @@ var _scifi_normal_tex: NoiseTexture2D = null
 var _scifi_roughness_tex: NoiseTexture2D = null
 var _objective_beacon: Node3D = null
 var _beacon_pulse_time: float = 0.0
+var _red_poison_smoke_container: Node3D = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -86,6 +87,7 @@ func _ready() -> void:
 	
 	_refresh_environment_lighting()
 	_setup_objective_beacon()
+	_setup_red_poison_smoke()
 	_update_objective_beacon_and_wayfinder(0.0)
 
 func _exit_tree() -> void:
@@ -154,9 +156,13 @@ func trigger_creature_horror_encounter() -> void:
 		AudioManager.play_horror_zoom()
 		AudioManager.play_creature_sound()
 	
-	# Stalker slowly awakens and emerges in the deep lower deck rather than instant jumpscare
+	# Stalker awakens and emerges from its original Specimen Vault spawn point (Vector3(0, -2, 38)):
+	# If player is late to reach the Airlock Chamber, the alien catches and kills them in range;
+	# If player reaches the Airlock Chamber, the alien rounds/circles outside the chamber!
 	if alien_stalker != null:
 		alien_stalker.target_player = player
+		if "lethal_chase_active" in alien_stalker:
+			alien_stalker.lethal_chase_active = true
 		alien_stalker.spawn_in_chamber("specimen_vault", Vector3(0, -2, 38))
 		if is_inside_tree() and get_tree() != null:
 			get_tree().create_timer(3.5).timeout.connect(func():
@@ -209,6 +215,75 @@ func _process(delta: float) -> void:
 			trigger_psychological_suspense_pulse("periodic_stalking")
 	
 	_update_objective_beacon_and_wayfinder(delta)
+	_update_red_poison_smoke_visuals(delta)
+
+func _setup_red_poison_smoke() -> void:
+	if _red_poison_smoke_container != null and is_instance_valid(_red_poison_smoke_container):
+		return
+	_red_poison_smoke_container = Node3D.new()
+	_red_poison_smoke_container.name = "RedPoisonSmokeContainer"
+	_red_poison_smoke_container.visible = false
+	
+	var smoke_mat := StandardMaterial3D.new()
+	smoke_mat.albedo_color = Color(0.88, 0.08, 0.08, 0.28)
+	smoke_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	smoke_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	smoke_mat.emission_enabled = true
+	smoke_mat.emission = Color(0.95, 0.06, 0.06, 1.0)
+	smoke_mat.emission_energy_multiplier = 1.65
+	
+	# Red gas smoke clouds spread across ALL chambers EXCEPT airlock_chamber and medbay!
+	var smoke_zones: Array[Dictionary] = [
+		{"id": "corridors", "pos": Vector3(0.0, 1.4, 6.0), "size": Vector3(4.2, 2.4, 10.0)},
+		{"id": "life_support", "pos": Vector3(0.0, 1.4, -1.5), "size": Vector3(6.8, 2.4, 7.5)},
+		{"id": "engineering_bay", "pos": Vector3(0.0, 1.4, 16.0), "size": Vector3(8.5, 2.4, 8.5)},
+		{"id": "bridge", "pos": Vector3(0.0, 1.4, -14.0), "size": Vector3(7.5, 2.4, 7.5)},
+		{"id": "cargo_bay", "pos": Vector3(-8.5, 1.4, 8.0), "size": Vector3(7.0, 2.4, 7.0)},
+		{"id": "crew_quarters", "pos": Vector3(-8.5, 1.4, -8.0), "size": Vector3(6.5, 2.4, 6.5)},
+		{"id": "reactor_subdeck", "pos": Vector3(0.0, -1.2, 26.5), "size": Vector3(6.5, 2.2, 7.0)},
+		{"id": "specimen_vault", "pos": Vector3(0.0, -0.8, 38.0), "size": Vector3(8.0, 2.4, 7.5)},
+		{"id": "research_observatory", "pos": Vector3(-15.0, 1.4, -20.0), "size": Vector3(7.5, 2.4, 7.5)}
+	]
+	for z in smoke_zones:
+		var cloud := MeshInstance3D.new()
+		cloud.name = "SmokeCloud_%s" % str(z["id"])
+		var box := BoxMesh.new()
+		box.size = z["size"]
+		cloud.mesh = box
+		cloud.position = z["pos"]
+		cloud.set_surface_override_material(0, smoke_mat)
+		_red_poison_smoke_container.add_child(cloud)
+		
+		var rlight := OmniLight3D.new()
+		rlight.name = "SmokeLight_%s" % str(z["id"])
+		rlight.light_color = Color(1.0, 0.12, 0.10, 1.0)
+		rlight.light_energy = 1.35
+		rlight.omni_range = 8.0
+		rlight.position = z["pos"] + Vector3(0.0, 0.6, 0.0)
+		_red_poison_smoke_container.add_child(rlight)
+	
+	add_child(_red_poison_smoke_container)
+
+func _update_red_poison_smoke_visuals(_delta: float) -> void:
+	var poison_active: bool = false
+	var player_in_poison_zone: bool = false
+	if env_manager != null and "poison_environment_active" in env_manager:
+		poison_active = bool(env_manager.poison_environment_active)
+		if poison_active and "player_compartment_id" in env_manager:
+			var pcid := str(env_manager.player_compartment_id)
+			player_in_poison_zone = (pcid != "airlock_chamber" and pcid != "medbay")
+	if _red_poison_smoke_container != null and is_instance_valid(_red_poison_smoke_container):
+		_red_poison_smoke_container.visible = poison_active
+	var world_env := get_node_or_null("HorrorWorldEnvironment") as WorldEnvironment
+	if world_env != null and world_env.environment != null:
+		if poison_active and player_in_poison_zone:
+			world_env.environment.fog_light_color = Color(0.88, 0.08, 0.08, 1.0)
+			world_env.environment.fog_light_energy = 0.68
+			world_env.environment.fog_density = 0.038
+		else:
+			world_env.environment.fog_light_color = Color(0.05, 0.09, 0.14, 1.0)
+			world_env.environment.fog_light_energy = 0.22
+			world_env.environment.fog_density = 0.006
 
 func _setup_objective_beacon() -> void:
 	if _objective_beacon != null and is_instance_valid(_objective_beacon):
@@ -288,6 +363,14 @@ func get_current_objective_target_info() -> Dictionary:
 			}
 		4:
 			if ShipState != null and ShipState.crisis_manager != null and ShipState.crisis_manager.is_creature_eliminated:
+				if env_manager != null and "poison_environment_active" in env_manager and env_manager.poison_environment_active and not env_manager.medbay_poison_recovery_completed:
+					var med_target := get_node_or_null("Compartments/Medbay/MedicalOxygenBooster")
+					if med_target == null:
+						med_target = get_node_or_null("Compartments/Medbay/DoorMedbay")
+					return {
+						"node": med_target,
+						"name": "Medical Oxygen Booster Valve (Medical Chamber)"
+					}
 				return {
 					"node": get_node_or_null("Compartments/Bridge/DepartureSwitch"),
 					"name": "Orbital Departure Switch (Command Bridge Helm)"

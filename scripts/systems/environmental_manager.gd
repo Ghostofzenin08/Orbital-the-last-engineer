@@ -37,6 +37,12 @@ var airlock_cycling: bool = false
 var airlock_target_pressure: float = 101.3
 var airlock_cycle_speed: float = 33.7 # ~3s from 101.3 to 0
 
+# Red Poison Gas Environment State (Post-Valve Open until Medbay O2 Valve Turned)
+var poison_environment_active: bool = false
+var medbay_poison_recovery_completed: bool = false
+var _left_airlock_after_poison: bool = false
+var poison_o2_drain_rate: float = 1.0 # 5% per 5 seconds (1.0% per second)
+
 static var instance: EnvironmentalManager = null
 
 func _init() -> void:
@@ -56,6 +62,11 @@ func _ready() -> void:
 
 func initialize_atmosphere() -> void:
 	compartments.clear()
+	oxygen_level = 100.0
+	poison_environment_active = false
+	medbay_poison_recovery_completed = false
+	_left_airlock_after_poison = false
+	_critical_alert_active = false
 	
 	var default_comps: Dictionary = {
 		"engineering_bay": {
@@ -314,7 +325,23 @@ func _process(delta: float) -> void:
 	
 	# 3. Synchronize legacy oxygen_level with player's compartment (or minimum across ship)
 	var old_level := oxygen_level
-	if compartments.has(player_compartment_id):
+	if poison_environment_active:
+		if player_compartment_id != "airlock_chamber":
+			_left_airlock_after_poison = true
+		if player_compartment_id == "airlock_chamber" and not _left_airlock_after_poison:
+			oxygen_level = 100.0
+			if compartments.has("airlock_chamber"):
+				compartments["airlock_chamber"]["o2_level"] = 100.0
+		else:
+			# Player left Airlock Chamber into poison environment:
+			# Oxygen keeps decreasing 5% per 5 seconds (1.0% per second) until player turns MedicalOxygenBooster valve in Medbay!
+			oxygen_level = maxf(0.0, old_level - (poison_o2_drain_rate * delta))
+			for cid in compartments.keys():
+				if cid == "airlock_chamber":
+					compartments[cid]["o2_level"] = 100.0
+				else:
+					compartments[cid]["o2_level"] = oxygen_level
+	elif compartments.has(player_compartment_id):
 		oxygen_level = compartments[player_compartment_id]["o2_level"]
 	else:
 		# Fallback to mean O2
@@ -325,7 +352,7 @@ func _process(delta: float) -> void:
 	
 	# Fallback simulation if isolated node outside tree with no player
 	var rev_scrub_mult: float = get_scrubber_optimization_multiplier()
-	if not is_inside_tree() and delta > 0.0:
+	if not is_inside_tree() and delta > 0.0 and not poison_environment_active:
 		if ls_online:
 			oxygen_level = minf(max_oxygen, old_level + (replenishment_rate * rev_scrub_mult * delta))
 		else:
@@ -349,7 +376,7 @@ func _process(delta: float) -> void:
 		return
 	
 	if not is_equal_approx(old_level, oxygen_level):
-		oxygen_level_changed.emit(oxygen_level, not ls_online)
+		oxygen_level_changed.emit(oxygen_level, poison_environment_active or not ls_online)
 	
 	# 4. Evaluate player status effects & hazards
 	_evaluate_player_afflictions(delta)
@@ -766,11 +793,61 @@ func _update_player_compartment() -> void:
 				var mm = get_node("/root/MissionManager")
 				if mm.has_method("mark_room_discovered"):
 					mm.mark_room_discovered(player_compartment_id)
-			if player_compartment_id == "medbay" and ShipState != null and ShipState.crisis_manager != null:
-				if ShipState.crisis_manager.current_crisis == CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT and not ShipState.crisis_manager.is_creature_eliminated:
+			if player_compartment_id == "medbay":
+				if poison_environment_active:
 					var hud_node: Node = player.get_node_or_null("HUD")
 					if hud_node != null and hud_node.has_method("show_notification"):
-						hud_node.show_notification("SANCTUARY: Medical Bay decontamination field active. Alien cannot seek you here.", 4.5)
+						hud_node.show_notification("MEDICAL CHAMBER REACHED: Turn the Medical Oxygen Booster Valve [E] to normalize & stabilize O2!", 4.0)
+				elif ShipState != null and ShipState.crisis_manager != null:
+					if ShipState.crisis_manager.current_crisis == CrisisManager.CrisisType.CREATURE_PREDATORY_HUNT and not ShipState.crisis_manager.is_creature_eliminated:
+						var hud_node: Node = player.get_node_or_null("HUD")
+						if hud_node != null and hud_node.has_method("show_notification"):
+							hud_node.show_notification("SANCTUARY: Medical Bay decontamination field active. Alien cannot seek you here.", 4.5)
+
+func is_compartment_poisoned(cid: String) -> bool:
+	if not poison_environment_active:
+		return false
+	return cid != "airlock_chamber" and cid != "medbay"
+
+func activate_poison_gas_environment() -> void:
+	if compartments.is_empty():
+		initialize_atmosphere()
+	register_expanded_chambers()
+	poison_environment_active = true
+	medbay_poison_recovery_completed = false
+	_left_airlock_after_poison = (player_compartment_id != "airlock_chamber")
+	for cid in compartments.keys():
+		var comp: Dictionary = compartments[cid]
+		if cid == "airlock_chamber" or cid == "medbay":
+			comp["o2_level"] = 100.0
+			comp["active_hazards"] = []
+		else:
+			var hazards: Array = comp.get("active_hazards", [])
+			if not hazards.has("RED_POISON_GAS"):
+				hazards.append("RED_POISON_GAS")
+			comp["active_hazards"] = hazards
+	if player_compartment_id == "airlock_chamber":
+		oxygen_level = 100.0
+	oxygen_level_changed.emit(oxygen_level, true)
+
+func normalize_poison_oxygen_in_medbay() -> void:
+	poison_environment_active = false
+	medbay_poison_recovery_completed = true
+	_left_airlock_after_poison = false
+	oxygen_level = 100.0
+	for cid in compartments.keys():
+		var comp: Dictionary = compartments[cid]
+		comp["o2_level"] = 100.0
+		comp["co2_ppm"] = 420.0
+		comp["active_hazards"] = []
+	if AudioManager != null:
+		AudioManager.stop_alarm()
+		AudioManager.play_sfx("repair")
+	oxygen_level_changed.emit(oxygen_level, false)
+	if is_inside_tree() and has_node("/root/MissionManager"):
+		var mm = get_node("/root/MissionManager")
+		if mm.has_method("_broadcast_current_objective"):
+			mm._broadcast_current_objective()
 
 func _evaluate_player_afflictions(delta: float) -> void:
 	var comp: Dictionary = compartments.get(player_compartment_id, {})
@@ -868,6 +945,8 @@ func reset_atmosphere() -> void:
 	initialize_atmosphere()
 	oxygen_level = 100.0
 	is_active = true
+	poison_environment_active = false
+	medbay_poison_recovery_completed = false
 	_critical_alert_active = false
 	player_afflictions.clear()
 	if AudioManager != null:

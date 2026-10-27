@@ -3670,6 +3670,78 @@ func _test_final_phase_upgrades() -> void:
 		_assert_true(level_player.hud.wayfinder_lbl != null and level_player.hud.wayfinder_lbl.text.contains("TARGET BEACON:"), "HUD displays live WayfinderLabel distance & direction")
 		_assert_true(level_player.hud.story_monologue_lbl != null and level_player.hud.story_monologue_lbl.text.contains("DR. VANCE"), "HUD displays first-person StoryMonologueLabel")
 
+	# 11. Alien Airlock Orbit, Red Poison Smoke Spread, 5%/5s O2 Drain & Medbay O2 Reset Flow
+	var lvl_env = interior.get_node_or_null("EnvironmentalManager")
+	var lvl_stalker = interior.get_node_or_null("Compartments/SpecimenVault/AlienStalker")
+	if lvl_env != null and lvl_stalker != null and level_player != null:
+		# A. Player late to reach Airlock Chamber -> killed in alien range field when lethal_chase_active
+		level_player.player_health = 100.0
+		level_player.is_dead = false
+		level_player.global_position = Vector3(0.0, 0.0, 2.0) # Corridors (outside Airlock)
+		lvl_env.player_compartment_id = "corridors"
+		lvl_stalker.target_player = level_player
+		lvl_stalker.lethal_chase_active = true
+		lvl_stalker.set_state(AlienStalker.State.AGGRESSIVE)
+		lvl_stalker.global_position = Vector3(0.0, 0.0, 3.2) # Within attack range
+		lvl_stalker._attack_cooldown = 0.0
+		lvl_stalker._execute_claw_attack()
+		_assert_true(level_player.is_dead == true, "Player late to reach Airlock is killed when caught in alien range field")
+
+		# B. Player reaches Airlock Chamber -> Alien rounds/circles outside Airlock until poison valve opened
+		level_player.player_health = 100.0
+		level_player.is_dead = false
+		level_player.global_position = Vector3(6.0, 0.0, 8.0) # Inside Airlock Chamber
+		lvl_env.player_compartment_id = "airlock_chamber"
+		lvl_stalker.set_state(AlienStalker.State.STALKING)
+		lvl_stalker._physics_process(0.1)
+		_assert_true(lvl_stalker.is_player_in_airlock_chamber(), "AlienStalker detects player inside Airlock Chamber")
+		_assert_true(lvl_stalker.is_orbiting_outside_airlock, "AlienStalker rounds/circles outside Airlock Chamber while player is inside")
+		lvl_stalker._execute_claw_attack()
+		_assert_true(level_player.player_health == 100.0, "Player inside Airlock Chamber is protected while alien circles outside")
+
+		# C. Player opens Poison Gas Valve -> Red gas smoke spreads in all chambers except Airlock & Medbay, Alien dies
+		MissionManager.current_objective_index = 4
+		var p_valve = interior.get_node_or_null("Compartments/AirlockChamber/DecontaminationPoisonGasValve")
+		if p_valve != null:
+			p_valve._on_interacted(level_player)
+		_assert_true(lvl_stalker.is_eliminated, "Alien dies when Poison Gas Valve is opened")
+		_assert_true(lvl_env.poison_environment_active, "Red poison gas environment activates across station")
+		_assert_true(not lvl_env.is_compartment_poisoned("airlock_chamber"), "Airlock Chamber is excluded from red poison gas")
+		_assert_true(not lvl_env.is_compartment_poisoned("medbay"), "Medical Chamber (Medbay) is excluded from red poison gas")
+		_assert_true(lvl_env.is_compartment_poisoned("corridors") and lvl_env.is_compartment_poisoned("life_support"), "Corridors and other chambers are filled with red poison gas")
+		interior._update_red_poison_smoke_visuals(0.016)
+		var smoke_node = interior.get_node_or_null("RedPoisonSmokeContainer")
+		_assert_true(smoke_node != null and smoke_node.visible, "3D RedPoisonSmokeContainer is visible when poison valve opens")
+
+		# D. Player runs from Airlock Chamber to Medical Chamber -> O2 decreases 5% per 5s in poison gas -> Keeps decreasing until MedicalOxygenBooster Valve is turned!
+		level_player.global_position = Vector3(0.0, 0.0, 4.0) # Step out of Airlock into poisoned Corridor
+		lvl_env.player_compartment_id = "corridors"
+		lvl_env.oxygen_level = 100.0
+		lvl_env._process(5.0) # 5 seconds in poison gas
+		_assert_true(is_equal_approx(lvl_env.oxygen_level, 95.0), "Oxygen decreases by 5% per 5 seconds (100% -> 95%) in poison gas environment")
+
+		# Player reaches Medical Chamber (Medbay) -> O2 keeps decreasing until MedicalOxygenBooster valve is turned
+		level_player.global_position = Vector3(6.0, 0.0, -8.0)
+		lvl_env._update_player_compartment()
+		_assert_true(lvl_env.player_compartment_id == "medbay", "Player reaches Medical Chamber (medbay)")
+		var med_valve_target: Dictionary = interior.get_current_objective_target_info()
+		var med_valve = interior.get_node_or_null("Compartments/Medbay/MedicalOxygenBooster")
+		_assert_true(med_valve_target.get("node", null) == med_valve, "Second-to-last task points to MedicalOxygenBooster Valve in Medbay")
+		lvl_env._process(5.0) # Another 5 seconds before turning the valve
+		_assert_true(is_equal_approx(lvl_env.oxygen_level, 90.0), "Oxygen continues decreasing (95% -> 90%) until MedicalOxygenBooster valve is turned")
+
+		# Player turns MedicalOxygenBooster valve -> O2 normalizes to 100% and stabilizes, advancing to final Bridge DepartureSwitch task
+		if med_valve != null:
+			med_valve._on_interacted(level_player)
+		_assert_true(is_equal_approx(lvl_env.oxygen_level, 100.0), "Oxygen level normalizes & stabilizes at 100% after turning MedicalOxygenBooster valve")
+		_assert_true(not lvl_env.poison_environment_active and lvl_env.medbay_poison_recovery_completed, "Poison gas hazard cleared after turning MedicalOxygenBooster valve")
+		var post_medbay_target: Dictionary = interior.get_current_objective_target_info()
+		_assert_true(post_medbay_target.get("node", null) == interior.get_node_or_null("Compartments/Bridge/DepartureSwitch"), "Final task continues to Bridge DepartureSwitch after MedicalOxygenBooster valve is turned")
+
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+
 	remove_child(player)
 	player.free()
 	remove_child(interior)

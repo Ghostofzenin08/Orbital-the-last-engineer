@@ -66,6 +66,9 @@ func get_prompt() -> String:
 				var ss = get_node("/root/ShipState")
 				if ss.crisis_manager != null and ss.crisis_manager.current_crisis == ss.crisis_manager.CrisisType.CREATURE_PREDATORY_HUNT and not ss.crisis_manager.is_creature_eliminated:
 					return "[LOCKDOWN] Kill Alien in Airlock First!"
+			if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
+				if EnvironmentalManager.instance.poison_environment_active and not EnvironmentalManager.instance.medbay_poison_recovery_completed:
+					return "[LOCKDOWN] Turn Medical Oxygen Booster Valve in Medbay First!"
 			if not ShipSystemManager.is_system_online("communications"):
 				return "[Locked] %s" % label_name
 			return "[E] Engage %s" % label_name
@@ -97,6 +100,13 @@ func _on_interacted(_player: Node) -> void:
 					hud.show_notification("CANNOT ENERGIZE BUS: Turn ON the Generator Breaker on the center cylinder first!", 4.0)
 			sync_state()
 		"propulsion":
+			if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
+				if EnvironmentalManager.instance.poison_environment_active and not EnvironmentalManager.instance.medbay_poison_recovery_completed:
+					is_on = false
+					if hud != null and hud.has_method("show_notification"):
+						hud.show_notification("OXYGEN UNSTABLE! Run to the Medical Chamber (Medbay) and turn the Medical Oxygen Booster Valve first!", 4.5)
+					sync_state()
+					return
 			var res := ShipSystemManager.engage_propulsion()
 			if res.get("ok", false):
 				is_on = true

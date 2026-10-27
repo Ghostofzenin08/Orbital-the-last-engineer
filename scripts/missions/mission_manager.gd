@@ -382,25 +382,12 @@ func mark_room_discovered(room_id: String) -> void:
 				room_name = ss.COMPARTMENTS[room_id].get("name", room_name)
 		room_discovered.emit(room_id, room_name)
 		_broadcast_current_objective()
-	
-	if current_objective_index == 4 and (room_id == "airlock_chamber" or room_id == "cargo_bay"):
-		if has_node("/root/ShipState"):
-			var ss = get_node("/root/ShipState")
-			if ss.crisis_manager != null and not ss.crisis_manager.is_creature_trapped:
-				ss.trap_creature_in_chamber("airlock_chamber")
-				_broadcast_current_objective()
 
 func is_room_discovered(room_id: String) -> bool:
 	return discovered_rooms.has(room_id)
 
 func mark_airlock_cycled() -> void:
 	airlock_cycles_completed += 1
-	if current_objective_index == 4:
-		if has_node("/root/ShipState"):
-			var ss = get_node("/root/ShipState")
-			if ss.crisis_manager != null and not ss.crisis_manager.is_creature_trapped:
-				ss.trap_creature_in_chamber("airlock_chamber")
-				_broadcast_current_objective()
 	airlock_cycled.emit()
 
 func mark_breach_sealed(comp_id: String = "maintenance_crawlway") -> void:
@@ -464,6 +451,8 @@ func get_current_immediate_task() -> String:
 				return "Trap Alien & Open Poison Gas Valve"
 			elif not ss.crisis_manager.is_creature_eliminated:
 				return "Open Poison Gas Valve to Purge Alien"
+			elif EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null and EnvironmentalManager.instance.poison_environment_active and not EnvironmentalManager.instance.medbay_poison_recovery_completed:
+				return "Turn Medical Oxygen Booster Valve in Medbay (-5% O2 / 5s)"
 			else:
 				return "Alien Purged - Engage Sub-Orbital Ion Thruster Bank (Bridge)"
 	return str(obj.get("immediate_task", "Follow Mission Directives"))
@@ -473,6 +462,8 @@ func get_current_target_room() -> String:
 	if current_objective_index == 4 and has_node("/root/ShipState"):
 		var ss = get_node("/root/ShipState")
 		if ss.crisis_manager != null and ss.crisis_manager.is_creature_eliminated:
+			if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null and EnvironmentalManager.instance.poison_environment_active and not EnvironmentalManager.instance.medbay_poison_recovery_completed:
+				return "Medical Chamber — Turn Medical Oxygen Booster Valve"
 			return "Command Bridge (Front / Far North Room)"
 		return "Airlock Chamber (East Door in Central Corridor)"
 	return str(obj.get("target_room", "Station Interior"))
@@ -487,7 +478,9 @@ func get_current_plain_guide() -> String:
 		var ss = get_node("/root/ShipState")
 		if ss.crisis_manager != null:
 			if ss.crisis_manager.is_creature_eliminated:
-				return "ALIEN ELIMINATED! Run North to the Command Bridge helm and press [E] on the Orbital Departure Switch to fire the thrusters and escape!"
+				if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null and EnvironmentalManager.instance.poison_environment_active and not EnvironmentalManager.instance.medbay_poison_recovery_completed:
+					return "ALIEN ELIMINATED! Red poison gas drains O2 (-5% per 5s). Run from Airlock Chamber to the Medical Chamber (Medbay) and press [E] on the Medical Oxygen Booster Valve to normalize & stabilize O2, then head to the Bridge Departure Switch!"
+				return "OXYGEN NORMALIZED & STABLE (100% O2)! Final Task: Run North to the Command Bridge helm and press [E] on the Orbital Departure Switch to fire the thrusters and escape!"
 			return "ALIEN AWAKENED! Run South to the Central Corridor, enter the East Airlock Chamber, and press [E] on the Red Poison Gas Valve to trap & kill the creature! (Tip: Medbay is a Safe Room.)"
 	return str(obj.get("plain_guide", obj.get("desc", "")))
 

@@ -45,6 +45,10 @@ func check_fault_active() -> bool:
 		if ShipState != null and "crisis_manager" in ShipState and ShipState.crisis_manager != null:
 			return not ShipState.crisis_manager.is_creature_eliminated
 		return true
+	if device_id == "medical_oxygen_booster" or valve_type == "oxygen_booster":
+		if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
+			if EnvironmentalManager.instance.poison_environment_active:
+				return true
 	if ShipState == null or not ("active_faults" in ShipState):
 		return false
 	if valve_type == "pressure":
@@ -56,19 +60,22 @@ func check_fault_active() -> bool:
 func get_prompt() -> String:
 	_is_fault_active = check_fault_active()
 	if valve_type == "poison_gas" or valve_type == "toxic_gas":
-		var target := "airlock_chamber"
-		if ShipState != null and "crisis_manager" in ShipState and ShipState.crisis_manager != null:
-			target = ShipState.crisis_manager.target_chamber_id
 		if _is_fault_active:
-			return "[E / Enter] OPEN %s (FLOOD %s WITH POISONOUS DECONTAMINATION GAS)" % [valve_name, target]
+			return "[E] Open %s (Release Red Poison Gas)" % valve_name
 		else:
-			return "[E / Enter] Inspect %s (Decontamination Purge Completed - Creature PURGED)" % valve_name
+			return "[Purged] %s" % valve_name
+	if device_id == "medical_oxygen_booster" or valve_type == "oxygen_booster":
+		if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
+			if EnvironmentalManager.instance.poison_environment_active:
+				return "[E] Turn %s (Normalize & Stabilize Oxygen)" % valve_name
+			elif EnvironmentalManager.instance.medbay_poison_recovery_completed:
+				return "[Normalized] %s (100%% O2 Stable)" % valve_name
 	if _is_fault_active:
 		if valve_type == "pressure":
-			return "[E / Enter] Rotate %s (Seal Cabin Leak)" % valve_name
+			return "[E] Rotate %s (Seal Leak)" % valve_name
 		else:
-			return "[E / Enter] Reset %s (Dump Excess Heat)" % valve_name
-	return "[E / Enter] Inspect %s (Valve Position: Nominal)" % valve_name
+			return "[E] Reset %s (Dump Heat)" % valve_name
+	return "[E] Inspect %s" % valve_name
 
 func _on_interacted(player: Node) -> void:
 	_is_fault_active = check_fault_active()
@@ -88,20 +95,37 @@ func _on_interacted(player: Node) -> void:
 			var comp_id: String = get_parent().name.to_snake_case() if get_parent() != null else "airlock_chamber"
 			if comp_id.is_empty() or comp_id == "root":
 				comp_id = "airlock_chamber"
-			if not ShipState.crisis_manager.is_creature_trapped:
-				ShipState.trap_creature_in_chamber(comp_id)
 			ShipState.crisis_manager.execute_poison_gas_purge(comp_id)
+		if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
+			if EnvironmentalManager.instance.has_method("activate_poison_gas_environment"):
+				EnvironmentalManager.instance.activate_poison_gas_environment()
 		if AudioManager != null:
 			AudioManager.play_sfx("gas_hiss")
 			AudioManager.play_sfx("creature_roar")
-		var msg := "Poisonous Gas Valve OPENED! Chamber sealed & flooded with lethal decontamination gas. Mutant alien exterminated! Head to the Command Bridge Departure Switch to escape!"
+		var msg := "RED POISON GAS RELEASED! Alien killed! Run to Medical Chamber & turn the Oxygen Booster Valve (-5% O2 / 5s)!"
 		var hud = (player.hud if (player != null and "hud" in player and player.hud != null) else (get_tree().root.find_child("HUD", true, false) if is_inside_tree() else null))
 		if hud != null and hud.has_method("show_notification"):
-			hud.show_notification(msg, 6.0)
+			hud.show_notification(msg, 4.5)
 		if has_node("/root/MissionManager"):
 			get_node("/root/MissionManager")._broadcast_current_objective()
 		_update_visuals()
 		return
+	
+	if device_id == "medical_oxygen_booster" or valve_type == "oxygen_booster":
+		var env_mgr_med = EnvironmentalManager.instance if ("instance" in EnvironmentalManager and EnvironmentalManager.instance != null) else (get_tree().root.find_child("EnvironmentalManager", true, false) if is_inside_tree() else null)
+		if env_mgr_med != null and env_mgr_med.has_method("normalize_poison_oxygen_in_medbay") and (env_mgr_med.poison_environment_active or not env_mgr_med.medbay_poison_recovery_completed):
+			env_mgr_med.normalize_poison_oxygen_in_medbay()
+			if AudioManager != null:
+				AudioManager.play_sfx("gas_hiss")
+				AudioManager.play_sfx("repair")
+			var msg_med := "OXYGEN NORMALIZED & STABILIZED (100% O2)! Final Task: Run to the Command Bridge & flip the Departure Switch!"
+			var hud_med = (player.hud if (player != null and "hud" in player and player.hud != null) else (get_tree().root.find_child("HUD", true, false) if is_inside_tree() else null))
+			if hud_med != null and hud_med.has_method("show_notification"):
+				hud_med.show_notification(msg_med, 5.0)
+			if has_node("/root/MissionManager"):
+				get_node("/root/MissionManager")._broadcast_current_objective()
+			_update_visuals()
+			return
 	
 	if _is_fault_active:
 		var env_mgr = EnvironmentalManager.instance if ("instance" in EnvironmentalManager and EnvironmentalManager.instance != null) else (get_tree().root.find_child("EnvironmentalManager", true, false) if is_inside_tree() else null)

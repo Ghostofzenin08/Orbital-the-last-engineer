@@ -35,6 +35,9 @@ var current_state: int = State.DORMANT
 var is_trapped: bool = false
 var is_eliminated: bool = false
 var horror_zoom_executed: bool = false
+var lethal_chase_active: bool = false
+var is_orbiting_outside_airlock: bool = false
+var _airlock_orbit_angle: float = 0.0
 var _attack_cooldown: float = 0.0
 
 var target_player: Node3D = null
@@ -175,9 +178,59 @@ func is_player_in_safe_room() -> bool:
 			return env.get_compartment_for_position(target_player.global_position) == safe_chamber_id
 	return false
 
+func is_player_in_airlock_chamber() -> bool:
+	if target_player == null or not is_instance_valid(target_player):
+		return false
+	if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
+		var env = EnvironmentalManager.instance
+		if "player_compartment_id" in env and env.player_compartment_id == "airlock_chamber":
+			return true
+		if env.has_method("get_compartment_for_position"):
+			return env.get_compartment_for_position(target_player.global_position) == "airlock_chamber"
+	var p := target_player.global_position
+	return p.x > 2.0 and p.z >= 3.5 and p.z < 14.5
+
+func _orbit_outside_airlock_chamber(delta: float) -> void:
+	is_orbiting_outside_airlock = true
+	_airlock_orbit_angle += delta * 2.4
+	# Ensure the alien never enters inside the Airlock Chamber (x > 2.2)
+	if global_position.x > 2.2 and global_position.z >= 3.5 and global_position.z <= 14.5:
+		global_position.x = 1.6
+	# Circle menacingly outside the East Airlock Chamber doorway (x=4.0, z=8.0) in the Central Corridor
+	var orbit_center := Vector3(0.2, global_position.y, 8.0)
+	var orbit_target := orbit_center + Vector3(cos(_airlock_orbit_angle) * 1.1, 0.0, sin(_airlock_orbit_angle) * 2.0)
+	var nav_target := _get_navigation_target(global_position, orbit_target)
+	var to_target := nav_target - global_position
+	to_target.y = 0.0
+	if to_target.length() > 0.05:
+		var dir := to_target.normalized()
+		velocity.x = dir.x * walk_speed
+		velocity.z = dir.z * walk_speed
+	else:
+		velocity.x = cos(_airlock_orbit_angle + PI * 0.5) * walk_speed
+		velocity.z = sin(_airlock_orbit_angle + PI * 0.5) * walk_speed
+	# Face toward the Airlock Chamber door or movement direction while rounding outside
+	if target_player != null and is_instance_valid(target_player):
+		var look_pos := Vector3(target_player.global_position.x, global_position.y, target_player.global_position.z)
+		if Vector2(global_position.x, global_position.z).distance_to(Vector2(look_pos.x, look_pos.z)) > 0.1:
+			look_at(look_pos, Vector3.UP)
+	_alien_footstep_timer += delta
+	if _alien_footstep_timer >= 0.55:
+		_alien_footstep_timer = 0.0
+		if AudioManager != null and AudioManager.has_method("play_alien_footstep"):
+			AudioManager.play_alien_footstep()
+	_stalker_growl_timer += delta
+	if _stalker_growl_timer >= 3.2:
+		_stalker_growl_timer = 0.0
+		if AudioManager != null:
+			AudioManager.play_creature_sound()
+	move_and_slide()
+	if global_position.x > 2.2 and global_position.z >= 3.5 and global_position.z <= 14.5:
+		global_position.x = 2.0
+
 func zoom_near_player(player: Node3D, duration: float = 1.0) -> void:
 	target_player = player
-	if is_player_in_safe_room():
+	if is_player_in_safe_room() or is_player_in_airlock_chamber():
 		return
 	zoom_duration = maxf(0.2, duration)
 	zoom_progress = 0.0
@@ -235,7 +288,7 @@ func eliminate() -> void:
 		AudioManager.play_creature_roar()
 
 func _execute_claw_attack() -> void:
-	if is_player_in_safe_room():
+	if is_player_in_safe_room() or is_player_in_airlock_chamber():
 		return
 	_attack_cooldown = attack_interval
 	_face_thrash_timer = 0.95
@@ -254,7 +307,8 @@ func _execute_claw_attack() -> void:
 		if target_player.has_method("trigger_jumpscare_face_zoom"):
 			target_player.trigger_jumpscare_face_zoom(self, 0.95)
 		if target_player.has_method("take_damage"):
-			target_player.take_damage(attack_damage, "creature")
+			var dmg: float = maxf(attack_damage, 100.0) if lethal_chase_active else attack_damage
+			target_player.take_damage(dmg, "creature")
 
 func _handle_doors_in_path() -> void:
 	if current_state == State.DORMANT or current_state == State.ELIMINATED or current_state == State.TRAPPED:
@@ -271,6 +325,8 @@ func _handle_doors_in_path() -> void:
 				doors.append(child)
 	for d in doors:
 		if is_instance_valid(d) and (d is BulkheadDoor or d.has_method("set_door_state")):
+			if d.name == "AirlockInner" or d.name == "AirlockOuter" or ("device_id" in d and str(d.device_id).begins_with("airlock")):
+				continue
 			var dist := global_position.distance_to(d.global_position)
 			if dist <= 4.5:
 				if "is_locked" in d and d.is_locked:
@@ -436,10 +492,15 @@ func _physics_process(delta: float) -> void:
 		
 		State.STALKING:
 			if is_player_in_safe_room():
+				is_orbiting_outside_airlock = false
 				velocity.x = move_toward(velocity.x, 0.0, 5.0 * delta)
 				velocity.z = move_toward(velocity.z, 0.0, 5.0 * delta)
 				move_and_slide()
+			elif is_player_in_airlock_chamber():
+				# Player reached Airlock Chamber: Alien rounds/circles outside the chamber until poison valve is opened
+				_orbit_outside_airlock_chamber(delta)
 			elif target_player != null and is_instance_valid(target_player):
+				is_orbiting_outside_airlock = false
 				var nav_target := _get_navigation_target(global_position, target_player.global_position)
 				var dir := (nav_target - global_position).normalized()
 				dir.y = 0.0
@@ -478,11 +539,16 @@ func _physics_process(delta: float) -> void:
 		
 		State.AGGRESSIVE:
 			if is_player_in_safe_room():
+				is_orbiting_outside_airlock = false
 				velocity.x = move_toward(velocity.x, 0.0, 6.0 * delta)
 				velocity.z = move_toward(velocity.z, 0.0, 6.0 * delta)
 				move_and_slide()
 				set_state(State.STALKING)
+			elif is_player_in_airlock_chamber():
+				set_state(State.STALKING)
+				_orbit_outside_airlock_chamber(delta)
 			elif target_player != null and is_instance_valid(target_player):
+				is_orbiting_outside_airlock = false
 				var nav_target := _get_navigation_target(global_position, target_player.global_position)
 				var dir := (nav_target - global_position).normalized()
 				dir.y = 0.0

@@ -244,11 +244,16 @@ func trap_creature(chamber_id: String = "") -> bool:
 func execute_poison_gas_purge(chamber_id: String = "") -> bool:
 	var purge_chamber := chamber_id if chamber_id != "" else target_chamber_id
 	poison_gas_valve_opened = true
+	is_creature_trapped = true
 	is_creature_eliminated = true
 	creature_state = CreatureState.ELIMINATED
 	
 	if stalker_entity != null and stalker_entity.has_method("eliminate"):
 		stalker_entity.eliminate()
+	
+	if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
+		if EnvironmentalManager.instance.has_method("activate_poison_gas_environment"):
+			EnvironmentalManager.instance.activate_poison_gas_environment()
 	
 	if AudioManager != null:
 		AudioManager.play_sfx("gas_hiss")
