@@ -144,10 +144,10 @@ size = Vector3(10.4, 3.6, 0.4)
 size = Vector3(10.4, 3.6, 0.4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_door_side"]
-size = Vector3(3.8, 3.6, 0.4)
+size = Vector3(4.0, 3.6, 0.4)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall_door_side"]
-size = Vector3(3.8, 3.6, 0.4)
+size = Vector3(4.0, 3.6, 0.4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_door_header"]
 size = Vector3(2.4, 1.0, 0.4)
@@ -211,10 +211,10 @@ size = Vector3(12.0, 0.4, 5.0)
 size = Vector3(12.0, 0.4, 5.0)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_subdeck_ramp_ceiling"]
-size = Vector3(12.0, 0.4, 5.6)
+size = Vector3(12.0, 0.4, 5.412)
 
 [sub_resource type="BoxMesh" id="BoxMesh_subdeck_ramp_ceiling"]
-size = Vector3(12.0, 0.4, 5.6)
+size = Vector3(12.0, 0.4, 5.412)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_subdeck_ramp_wall_upper"]
 size = Vector3(0.4, 2.6, 5.0)
@@ -283,10 +283,10 @@ size = Vector3(0.4, 3.6, 3.8)
 size = Vector3(0.4, 3.6, 3.8)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ramp"]
-size = Vector3(2.4, 0.4, 5.6)
+size = Vector3(2.4, 0.4, 5.412)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ramp"]
-size = Vector3(2.4, 0.4, 5.6)
+size = Vector3(2.4, 0.4, 5.412)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_crawl_ramp"]
 size = Vector3(2.0, 0.4, 2.86)
@@ -305,6 +305,18 @@ size = Vector3(4.8, 2.7, 0.4)
 
 [sub_resource type="BoxMesh" id="BoxMesh_subdeck_front_wall"]
 size = Vector3(4.8, 2.7, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_observatory_wall_east"]
+size = Vector3(0.4, 3.6, 7.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_observatory_wall_east"]
+size = Vector3(0.4, 3.6, 7.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_observatory_header"]
+size = Vector3(0.4, 1.0, 2.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_observatory_header"]
+size = Vector3(0.4, 1.0, 2.6)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vault_corridor_wall"]
 size = Vector3(0.4, 3.6, 1.9)
@@ -2476,7 +2488,7 @@ mesh = SubResource("BoxMesh_subdeck_ceiling_main")
 surface_material_override/0 = SubResource("StandardMaterial3D_ceiling")
 
 [node name="RampCeiling" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
-transform = Transform3D(1, 0, 0, 0, 0.894428, -0.447213, 0, 0.447213, 0.894428, 0, 2.37, 23.565)
+transform = Transform3D(1, 0, 0, 0, 0.886914, -0.461934, 0, 0.461934, 0.886914, 0, 1.94289, 25.26296)
 collision_layer = 1
 collision_mask = 0
 
@@ -2648,20 +2660,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 21.2)
 door_name = "Reactor Subdeck Access Bulkhead"
 device_id = "door_subdeck"
 
-[node name="SubdeckThreshold" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.001, 21.2)
-collision_layer = 1
-collision_mask = 0
-
-[node name="Collision" type="CollisionShape3D" parent="Compartments/ReactorSubdeck/SubdeckThreshold"]
-shape = SubResource("BoxShape3D_threshold")
-
-[node name="Mesh" type="MeshInstance3D" parent="Compartments/ReactorSubdeck/SubdeckThreshold"]
-mesh = SubResource("BoxMesh_threshold")
-surface_material_override/0 = SubResource("StandardMaterial3D_floor")
-
 [node name="SubdeckRamp" type="StaticBody3D" parent="Compartments/ReactorSubdeck"]
-transform = Transform3D(1, 0, 0, 0, 0.894428, -0.447213, 0, 0.447213, 0.894428, 0, -1.431, 23.565)
+transform = Transform3D(1, 0, 0, 0, 0.886914, -0.461934, 0, 0.461934, 0.886914, 0, -1.42738, 23.50761)
 collision_layer = 1
 collision_mask = 0
 
@@ -3122,6 +3122,30 @@ shape = SubResource("BoxShape3D_wall_long")
 
 [node name="Mesh" type="MeshInstance3D" parent="Compartments/ResearchObservatory/WallLeft"]
 mesh = SubResource("BoxMesh_wall_long")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastNorth" type="StaticBody3D" parent="Compartments/ResearchObservatory"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.8, 1.8, -21.3)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/ResearchObservatory/WallEastNorth"]
+shape = SubResource("BoxShape3D_observatory_wall_east")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/ResearchObservatory/WallEastNorth"]
+mesh = SubResource("BoxMesh_observatory_wall_east")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastHeader" type="StaticBody3D" parent="Compartments/ResearchObservatory"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.8, 3.1, -16.1)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape3D" parent="Compartments/ResearchObservatory/WallEastHeader"]
+shape = SubResource("BoxShape3D_observatory_header")
+
+[node name="Mesh" type="MeshInstance3D" parent="Compartments/ResearchObservatory/WallEastHeader"]
+mesh = SubResource("BoxMesh_observatory_header")
 surface_material_override/0 = SubResource("StandardMaterial3D_wall")
 
 [node name="Lights" type="Node3D" parent="Compartments/ResearchObservatory"]
