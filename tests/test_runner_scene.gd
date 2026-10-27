@@ -2875,6 +2875,7 @@ func _test_m7_chamber_connectivity_and_horror_rigor() -> void:
 	add_child(level)
 	
 	# Verify Subdeck -> Specimen Vault doorway archway & access ramp
+	_assert_true(level.has_node("Compartments/ReactorSubdeck/DoorVault"), "ReactorSubdeck has DoorVault bulkhead door")
 	_assert_true(level.has_node("Compartments/ReactorSubdeck/WallAftLeft"), "ReactorSubdeck has WallAftLeft archway post")
 	_assert_true(level.has_node("Compartments/ReactorSubdeck/WallAftRight"), "ReactorSubdeck has WallAftRight archway post")
 	_assert_true(level.has_node("Compartments/ReactorSubdeck/WallAftHeader"), "ReactorSubdeck has WallAftHeader doorway lintel")
@@ -3468,6 +3469,34 @@ func _test_final_phase_upgrades() -> void:
 	_assert_true(t_player.global_position.z <= 21.0, "Player successfully walks back up Subdeck Ramp past z=21.0 into Engineering")
 	interior.remove_child(t_player)
 	t_player.free()
+
+	# Subdeck Aft Gateway to Specimen Vault geometry & traversal verification
+	var d_vault = interior.get_node_or_null("Compartments/ReactorSubdeck/DoorVault")
+	_assert_true(d_vault != null and d_vault.device_id == "door_specimen_vault", "ReactorSubdeck contains functional DoorVault bulkhead")
+	var aft_header = interior.get_node_or_null("Compartments/ReactorSubdeck/WallAftHeader")
+	_assert_true(aft_header != null and aft_header.transform.origin.y >= 0.65, "WallAftHeader is flush with ceiling at y=1.3 without ceiling gap")
+	var aft_ramp = interior.get_node_or_null("Compartments/ReactorSubdeck/VaultAccessRamp")
+	_assert_true(aft_ramp != null and aft_ramp.transform.basis.y.z < 0.0 and aft_ramp.transform.basis.z.y > 0.0, "VaultAccessRamp slopes upward smoothly into Specimen Vault")
+	if d_vault != null:
+		d_vault.set_door_state(true, true)
+	var t_vault_player = test_player_scene.instantiate()
+	interior.add_child(t_vault_player)
+	t_vault_player.global_position = Vector3(0.0, -2.45, 30.5)
+	for step in range(60):
+		var col = t_vault_player.move_and_collide(Vector3(0.0, 0.04, 0.1))
+		if col != null:
+			break
+	_assert_true(t_vault_player.global_position.z >= 33.5, "Player successfully walks through DoorVault up VaultAccessRamp into Specimen Vault past z=33.5")
+
+	# Test player walking back down VaultAccessRamp through DoorVault into Reactor Subdeck
+	t_vault_player.global_position = Vector3(0.0, -1.95, 33.5)
+	for step in range(60):
+		var col = t_vault_player.move_and_collide(Vector3(0.0, 0.0, -0.1))
+		if col != null:
+			break
+	_assert_true(t_vault_player.global_position.z <= 31.0, "Player successfully walks back down VaultAccessRamp through DoorVault into Reactor Subdeck past z=31.0")
+	interior.remove_child(t_vault_player)
+	t_vault_player.free()
 
 	# 3. Procedural impact hit audio generation & volume
 	var wav = AudioManager._generate_impact_hit()
