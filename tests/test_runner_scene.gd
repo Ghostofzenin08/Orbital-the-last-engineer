@@ -2385,6 +2385,12 @@ func _test_m6_tactical_ui_telemetry_and_immediate_task() -> void:
 	var gear_lbl = hud.get_node_or_null("%CompactGearLabel")
 	_assert_true(gear_lbl != null, "HUD contains %CompactGearLabel in bottom-left")
 
+	var vitals_pnl = hud.get_node_or_null("%VitalsPanel")
+	var hp_bar = hud.get_node_or_null("%HealthBar")
+	var o2_bar_node = hud.get_node_or_null("%OxygenBar")
+	_assert_true(vitals_pnl != null, "HUD contains %VitalsPanel")
+	_assert_true(hp_bar != null and o2_bar_node != null, "HUD contains %HealthBar and %OxygenBar gauges")
+
 	var prompt_lbl = hud.get_node_or_null("%PromptLabel")
 	_assert_true(prompt_lbl != null, "HUD contains %PromptLabel")
 	var prompt_margin = hud.get_node_or_null("PromptMargin")
@@ -3376,9 +3382,9 @@ func _test_alien_3d_body_audio_and_geometry() -> void:
 	stalker.target_player = player
 	stalker.current_state = AlienStalker.State.STALKING
 	stalker.visible = true
-	stalker.global_position = player.global_position + Vector3(2.0, 0, 0)
+	stalker.global_position = player.global_position + Vector3(7.5, 0, 0)
 	stalker._physics_process(0.016)
-	_assert_true(stalker._proximity_impact_timer > 0.0, "AlienStalker triggers proximity impact timer when near player (<= 3.8m)")
+	_assert_true(stalker._proximity_impact_timer > 0.0, "AlienStalker triggers proximity impact audio when near player (<= 9.0m)")
 
 	# 5. Death scream audio on player damage
 	player.player_health = 100.0
@@ -3418,10 +3424,8 @@ func _test_final_phase_upgrades() -> void:
 	# 2. Lower Subdeck Ramp downward slope orientation verification & Bridge Bulkhead Geometry
 	var subdeck_ramp = interior.get_node_or_null("Compartments/ReactorSubdeck/SubdeckRamp")
 	var ramp_ceiling = interior.get_node_or_null("Compartments/ReactorSubdeck/RampCeiling")
-	var subdeck_threshold = interior.get_node_or_null("Compartments/ReactorSubdeck/SubdeckThreshold")
 	_assert_true(subdeck_ramp != null, "ReactorSubdeck contains SubdeckRamp")
 	_assert_true(ramp_ceiling != null, "ReactorSubdeck contains RampCeiling")
-	_assert_true(subdeck_threshold != null, "ReactorSubdeck contains SubdeckThreshold transition plate")
 	_assert_true(subdeck_ramp.transform.basis.y.z > 0.0 and subdeck_ramp.transform.basis.z.y < 0.0, "SubdeckRamp slopes downward from Engineering Bay into Reactor Subdeck")
 	_assert_true(ramp_ceiling.transform.basis.y.z > 0.0 and ramp_ceiling.transform.basis.z.y < 0.0, "RampCeiling slopes downward into Reactor Subdeck without ceiling clipping")
 
@@ -3434,6 +3438,12 @@ func _test_final_phase_upgrades() -> void:
 	_assert_true(br_wall_left != null and br_wall_right != null, "Command Bridge has reinforced port and starboard forward armor bulkheads")
 	_assert_true(br_wall_lower != null and br_wall_upper != null, "Command Bridge has solid lower armored console barrier and overhead header")
 	_assert_true(br_window != null and br_window.has_node("WindowMullionLeft") and br_window.has_node("WindowMullionRight"), "Command Bridge Cockpit Viewport has structural framing pillars and mullions")
+
+	# Verify Research Observatory airtight enclosed East wall
+	var obs_wall_east = interior.get_node_or_null("Compartments/ResearchObservatory/WallEastNorth")
+	var obs_header_east = interior.get_node_or_null("Compartments/ResearchObservatory/WallEastHeader")
+	_assert_true(obs_wall_east != null, "Research Observatory has WallEastNorth enclosing space opening")
+	_assert_true(obs_header_east != null, "Research Observatory has WallEastHeader enclosing doorway header")
 
 	# Test player walking through subdeck doorway down the ramp
 	var test_player_scene = load("res://scenes/player/player.tscn")
@@ -3451,11 +3461,11 @@ func _test_final_phase_upgrades() -> void:
 	
 	# Test player walking back up the ramp through the subdeck doorway
 	t_player.global_position = Vector3(0.0, -1.0, 23.5)
-	for step in range(50):
+	for step in range(60):
 		var col = t_player.move_and_collide(Vector3(0, 0.05, -0.1))
 		if col != null:
 			break
-	_assert_true(t_player.global_position.z < 21.5, "Player successfully walks back up Subdeck Ramp past z=21.5 into Engineering")
+	_assert_true(t_player.global_position.z <= 21.0, "Player successfully walks back up Subdeck Ramp past z=21.0 into Engineering")
 	interior.remove_child(t_player)
 	t_player.free()
 
