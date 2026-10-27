@@ -17,6 +17,11 @@ extends CanvasLayer
 @onready var gear_info_btn: Button = get_node_or_null("%GearInfoButton")
 @onready var compact_gear_lbl: Label = get_node_or_null("%CompactGearLabel")
 @onready var overlay_rect: ColorRect = get_node_or_null("%StatusEffectOverlay")
+@onready var vitals_panel: PanelContainer = get_node_or_null("%VitalsPanel")
+@onready var health_bar: ProgressBar = get_node_or_null("%HealthBar")
+@onready var health_value: Label = get_node_or_null("%HealthValue")
+@onready var oxygen_bar: ProgressBar = get_node_or_null("%OxygenBar")
+@onready var oxygen_value: Label = get_node_or_null("%OxygenValue")
 
 # Tutorial UI
 @onready var tutorial_margin: MarginContainer = get_node_or_null("%TutorialMargin")
@@ -208,7 +213,29 @@ func set_prompt(text: String) -> void:
 			reticle_dot.color = Color(1.0, 1.0, 1.0, 0.8)
 			reticle_dot.custom_minimum_size = Vector2(4, 4)
 
+func update_health(current: float, maximum: float) -> void:
+	if health_bar != null:
+		health_bar.max_value = maximum
+		health_bar.value = current
+	if health_value != null:
+		var pct := int(clampf((current / maximum) * 100.0, 0.0, 100.0)) if maximum > 0.0 else 0
+		health_value.text = "%d%%" % pct
+		if pct <= 35:
+			health_value.add_theme_color_override("font_color", Color(1.0, 0.25, 0.2))
+		elif pct <= 65:
+			health_value.add_theme_color_override("font_color", Color(1.0, 0.75, 0.2))
+		else:
+			health_value.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
+
 func update_oxygen(level: float, is_depleting: bool) -> void:
+	if oxygen_bar != null:
+		oxygen_bar.value = level
+	if oxygen_value != null:
+		oxygen_value.text = "%d%%" % int(level)
+		if is_depleting:
+			oxygen_value.add_theme_color_override("font_color", Color(1.0, 0.35, 0.15))
+		else:
+			oxygen_value.add_theme_color_override("font_color", Color(0.2, 0.85, 1.0))
 	if pause_menu != null and pause_menu.has_method("update_oxygen"):
 		pause_menu.update_oxygen(level, is_depleting)
 
