@@ -6,6 +6,75 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/ship_schematic.tscn" id="4_schematic"]
 [ext_resource type="Shader" path="res://my_assets/Shaders/status_effect.gdshader" id="5_shader"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_panel"]
+bg_color = Color(0.05, 0.08, 0.13, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.45, 0.65, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_info_btn_normal"]
+bg_color = Color(0.08, 0.18, 0.28, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.65, 0.9, 0.75)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_info_btn_hover"]
+bg_color = Color(0.14, 0.3, 0.46, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.85, 1.0, 1.0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_info_btn_pressed"]
+bg_color = Color(0.05, 0.12, 0.18, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.5, 0.7, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_bg"]
+bg_color = Color(0.04, 0.06, 0.09, 0.8)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fill"]
+bg_color = Color(0.2, 0.85, 0.4, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o2_fill"]
+bg_color = Color(0.2, 0.75, 1.0, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_overlay"]
 shader = ExtResource("5_shader")
 shader_parameter/strength = 0.0
@@ -73,14 +142,15 @@ horizontal_alignment = 1
 
 [node name="TopLeftMargin" type="MarginContainer" parent="."]
 anchors_preset = 0
-offset_right = 460.0
-offset_bottom = 110.0
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
+offset_right = 490.0
+offset_bottom = 120.0
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
 mouse_filter = 2
 
 [node name="ObjectivePanel" type="PanelContainer" parent="TopLeftMargin"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_panel")
 mouse_filter = 2
 
 [node name="Margin" type="MarginContainer" parent="TopLeftMargin/ObjectivePanel"]
@@ -132,6 +202,7 @@ mouse_filter = 2
 
 [node name="TutorialPanel" type="PanelContainer" parent="TutorialMargin"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_panel")
 
 [node name="Margin" type="MarginContainer" parent="TutorialMargin/TutorialPanel"]
 layout_mode = 2
@@ -164,29 +235,117 @@ autowrap_mode = 2
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -160.0
-offset_bottom = 56.0
+offset_left = -260.0
+offset_bottom = 125.0
 grow_horizontal = 0
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 24
+mouse_filter = 2
 
-[node name="InfoPanel" type="PanelContainer" parent="TopRightMargin"]
+[node name="RightVBox" type="VBoxContainer" parent="TopRightMargin"]
 layout_mode = 2
+theme_override_constants/separation = 6
+mouse_filter = 2
 
-[node name="InfoMargin" type="MarginContainer" parent="TopRightMargin/InfoPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 4
-
-[node name="InfoButton" type="Button" parent="TopRightMargin/InfoPanel/InfoMargin"]
+[node name="InfoButton" type="Button" parent="TopRightMargin/RightVBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(110, 32)
+custom_minimum_size = Vector2(110, 28)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 12
+size_flags_horizontal = 8
+theme_override_styles/normal = SubResource("StyleBoxFlat_info_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_info_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_info_btn_pressed")
+theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
 text = "[TAB] INFO"
+
+[node name="VitalsPanel" type="PanelContainer" parent="TopRightMargin/RightVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_panel")
+mouse_filter = 2
+
+[node name="VitalsMargin" type="MarginContainer" parent="TopRightMargin/RightVBox/VitalsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+mouse_filter = 2
+
+[node name="VitalsBox" type="VBoxContainer" parent="TopRightMargin/RightVBox/VitalsPanel/VitalsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+mouse_filter = 2
+
+[node name="HealthRow" type="HBoxContainer" parent="TopRightMargin/RightVBox/VitalsPanel/VitalsMargin/VitalsBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="HealthTag" type="Label" parent="TopRightMargin/RightVBox/VitalsPanel/VitalsMargin/VitalsBox/HealthRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 0.85)
+theme_override_font_sizes/font_size = 10
+text = "SUIT HP"
+mouse_filter = 2
+
+[node name="HealthBar" type="ProgressBar" parent="TopRightMargin/RightVBox/VitalsPanel/VitalsMargin/VitalsBox/HealthRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 8)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
+value = 100.0
+show_percentage = false
+mouse_filter = 2
+
+[node name="HealthValue" type="Label" parent="TopRightMargin/RightVBox/VitalsPanel/VitalsMargin/VitalsBox/HealthRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1.0, 0.4, 1)
+theme_override_font_sizes/font_size = 10
+text = "100%"
+horizontal_alignment = 2
+mouse_filter = 2
+
+[node name="OxygenRow" type="HBoxContainer" parent="TopRightMargin/RightVBox/VitalsPanel/VitalsMargin/VitalsBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="OxygenTag" type="Label" parent="TopRightMargin/RightVBox/VitalsPanel/VitalsMargin/VitalsBox/OxygenRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 0.85)
+theme_override_font_sizes/font_size = 10
+text = "O2 RES"
+mouse_filter = 2
+
+[node name="OxygenBar" type="ProgressBar" parent="TopRightMargin/RightVBox/VitalsPanel/VitalsMargin/VitalsBox/OxygenRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 8)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_o2_fill")
+value = 100.0
+show_percentage = false
+mouse_filter = 2
+
+[node name="OxygenValue" type="Label" parent="TopRightMargin/RightVBox/VitalsPanel/VitalsMargin/VitalsBox/OxygenRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "100%"
+horizontal_alignment = 2
+mouse_filter = 2
 
 [node name="BottomLeftMargin" type="MarginContainer" parent="."]
 anchors_preset = 2
@@ -200,32 +359,37 @@ theme_override_constants/margin_bottom = 12
 
 [node name="CompactGearPanel" type="PanelContainer" parent="BottomLeftMargin"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_panel")
 
 [node name="CompactMargin" type="MarginContainer" parent="BottomLeftMargin/CompactGearPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
 
 [node name="HBox" type="HBoxContainer" parent="BottomLeftMargin/CompactGearPanel/CompactMargin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
 [node name="CompactGearLabel" type="Label" parent="BottomLeftMargin/CompactGearPanel/CompactMargin/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.85, 0.95, 0.9)
+theme_override_colors/font_color = Color(0.8, 0.9, 1.0, 0.95)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_font_sizes/font_size = 11
 text = "[1] Scanner  [2] Multitool  |  [TAB] Full Info & Gear"
 
 [node name="GearInfoButton" type="Button" parent="BottomLeftMargin/CompactGearPanel/CompactMargin/HBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(70, 24)
+custom_minimum_size = Vector2(65, 22)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.75, 0.2, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_info_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_info_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_info_btn_pressed")
+theme_override_colors/font_color = Color(1, 0.8, 0.25, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 10
 text = "INFO"
 
 [node name="ScanTelemetryMargin" type="MarginContainer" parent="."]
@@ -245,6 +409,7 @@ grow_vertical = 2
 
 [node name="ScanPanel" type="PanelContainer" parent="ScanTelemetryMargin"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_panel")
 
 [node name="ScanMargin" type="MarginContainer" parent="ScanTelemetryMargin/ScanPanel"]
 layout_mode = 2
