@@ -60,10 +60,13 @@ func check_fault_active() -> bool:
 func get_prompt() -> String:
 	_is_fault_active = check_fault_active()
 	if valve_type == "poison_gas" or valve_type == "toxic_gas":
+		var target := "airlock_chamber"
+		if ShipState != null and "crisis_manager" in ShipState and ShipState.crisis_manager != null:
+			target = ShipState.crisis_manager.target_chamber_id
 		if _is_fault_active:
-			return "[E] Open %s (Release Red Poison Gas)" % valve_name
+			return "[E] Open %s (FLOOD %s WITH POISONOUS DECONTAMINATION GAS / Release Red Poison Gas)" % [valve_name, target]
 		else:
-			return "[Purged] %s" % valve_name
+			return "[Purged] %s (Decontamination Purge Completed - Creature PURGED)" % valve_name
 	if device_id == "medical_oxygen_booster" or valve_type == "oxygen_booster":
 		if EnvironmentalManager != null and "instance" in EnvironmentalManager and EnvironmentalManager.instance != null:
 			if EnvironmentalManager.instance.poison_environment_active:
@@ -72,9 +75,9 @@ func get_prompt() -> String:
 				return "[Normalized] %s (100%% O2 Stable)" % valve_name
 	if _is_fault_active:
 		if valve_type == "pressure":
-			return "[E] Rotate %s (Seal Leak)" % valve_name
+			return "[E] Rotate %s (Seal Cabin Leak)" % valve_name
 		else:
-			return "[E] Reset %s (Dump Heat)" % valve_name
+			return "[E] Reset %s (Dump Excess Heat)" % valve_name
 	return "[E] Inspect %s" % valve_name
 
 func _on_interacted(player: Node) -> void:
@@ -91,6 +94,9 @@ func _on_interacted(player: Node) -> void:
 			vdev.repair(100.0)
 	
 	if valve_type == "poison_gas" or valve_type == "toxic_gas":
+		var st = get_tree().root.find_child("AlienStalker", true, false) if is_inside_tree() else null
+		if st != null and st.has_method("eliminate"):
+			st.eliminate()
 		if ShipState != null and "crisis_manager" in ShipState and ShipState.crisis_manager != null:
 			var comp_id: String = get_parent().name.to_snake_case() if get_parent() != null else "airlock_chamber"
 			if comp_id.is_empty() or comp_id == "root":
