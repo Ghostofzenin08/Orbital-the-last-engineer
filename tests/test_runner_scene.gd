@@ -376,6 +376,13 @@ func _test_end_to_end_level_flow() -> void:
 	_assert_true(align_res.get("ok", false) and ShipSystemManager.is_system_online("communications"), "Comms array aligned")
 	_assert_true(MissionManager.current_objective_index == 4, "Mission advanced to Objective 4 (Propulsion)")
 	
+	# Purge alien with decontamination poison gas valve in Airlock Chamber before departure
+	var poison_valve = level.get_node_or_null("Compartments/AirlockChamber/DecontaminationPoisonGasValve")
+	if poison_valve != null:
+		poison_valve._on_interacted(player)
+	elif ShipState.crisis_manager != null:
+		ShipState.crisis_manager.is_creature_eliminated = true
+
 	# Objective 5: Engage departure switch
 	var departure_switch: BreakerSwitch = level.get_node("Compartments/Bridge/DepartureSwitch")
 	_assert_true(departure_switch != null, "Departure switch found at Helm Console")
