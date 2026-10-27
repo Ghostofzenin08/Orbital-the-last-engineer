@@ -3703,6 +3703,7 @@ func _test_final_phase_upgrades() -> void:
 		lvl_stalker._physics_process(0.1)
 		_assert_true(lvl_stalker.is_player_in_airlock_chamber(), "AlienStalker detects player inside Airlock Chamber")
 		_assert_true(lvl_stalker.is_orbiting_outside_airlock, "AlienStalker rounds/circles outside Airlock Chamber while player is inside")
+		_assert_true(lvl_stalker._skeleton != null and lvl_stalker._walk_cycle_phase > 0.0, "AlienStalker actively animates 2-legged bipedal walk cycle on Skeleton3D while moving")
 		lvl_stalker._execute_claw_attack()
 		_assert_true(level_player.player_health == 100.0, "Player inside Airlock Chamber is protected while alien circles outside")
 

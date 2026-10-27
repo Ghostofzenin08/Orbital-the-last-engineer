@@ -55,6 +55,12 @@ var _face_thrash_timer: float = 0.0
 
 @onready var alien_model: Node3D = get_node_or_null("AlienModel")
 var _anim_player: AnimationPlayer = null
+var _skeleton: Skeleton3D = null
+var _walk_cycle_phase: float = 0.0
+var _stride_blend: float = 0.0
+var _bone_indices: Dictionary = {}
+var _bone_rest_quats: Dictionary = {}
+var _hips_rest_origin: Vector3 = Vector3(0.0, 1.183, 0.01)
 
 @onready var torso: MeshInstance3D = get_node_or_null("Torso")
 @onready var head: MeshInstance3D = get_node_or_null("Head")
@@ -80,6 +86,10 @@ func _ready() -> void:
 			if alien_mat != null:
 				mesh_inst.set_surface_override_material(0, alien_mat)
 		_anim_player = alien_model.find_child("AnimationPlayer", true, false)
+		var skels := alien_model.find_children("*", "Skeleton3D", true, false)
+		if skels.size() > 0:
+			_skeleton = skels[0] as Skeleton3D
+			_cache_skeleton_bones_and_build_walk_cycle()
 		if _anim_player != null and _anim_player.has_animation("Armature|Armature|mixamo_com|Layer0"):
 			var anim := _anim_player.get_animation("Armature|Armature|mixamo_com|Layer0")
 			if anim != null:
@@ -588,6 +598,168 @@ func _physics_process(delta: float) -> void:
 			velocity = Vector3.ZERO
 			if position.y > -0.6:
 				position.y -= delta * 1.5
+	
+	# Update 2-legged bipedal stride pose on the Mixamo Skeleton3D so the alien walks/runs on its 2 legs instead of sliding
+	_update_bipedal_walk_cycle(delta)
+
+func _cache_skeleton_bones_and_build_walk_cycle() -> void:
+	if _skeleton == null:
+		return
+	var bone_names: Array[String] = [
+		"mixamorig_Hips",
+		"mixamorig_Spine",
+		"mixamorig_Spine1",
+		"mixamorig_Spine2",
+		"mixamorig_Neck",
+		"mixamorig_Head",
+		"mixamorig_LeftShoulder",
+		"mixamorig_LeftArm",
+		"mixamorig_LeftForeArm",
+		"mixamorig_LeftHand",
+		"mixamorig_RightShoulder",
+		"mixamorig_RightArm",
+		"mixamorig_RightForeArm",
+		"mixamorig_RightHand",
+		"mixamorig_LeftUpLeg",
+		"mixamorig_LeftLeg",
+		"mixamorig_LeftFoot",
+		"mixamorig_LeftToeBase",
+		"mixamorig_RightUpLeg",
+		"mixamorig_RightLeg",
+		"mixamorig_RightFoot",
+		"mixamorig_RightToeBase"
+	]
+	for bname in bone_names:
+		var idx := _skeleton.find_bone(bname)
+		if idx >= 0:
+			_bone_indices[bname] = idx
+			var rest := _skeleton.get_bone_rest(idx)
+			_bone_rest_quats[bname] = rest.basis.get_rotation_quaternion()
+			if bname == "mixamorig_Hips":
+				_hips_rest_origin = rest.origin
+	
+	# Replace the static 1-keyframe T-pose in AnimationPlayer with a real multi-keyframe bipedal walk cycle
+	if _anim_player != null and _anim_player.has_animation("Armature|Armature|mixamo_com|Layer0"):
+		var anim := _anim_player.get_animation("Armature|Armature|mixamo_com|Layer0")
+		if anim != null:
+			while anim.get_track_count() > 0:
+				anim.remove_track(0)
+			anim.length = 1.0
+			anim.loop_mode = Animation.LOOP_LINEAR
+			var skel_path := "Armature/Skeleton3D"
+			if _anim_player.get_parent() != null:
+				skel_path = str(_anim_player.get_parent().get_path_to(_skeleton))
+			var sample_count := 12
+			var tracked_bones: Array[String] = [
+				"mixamorig_LeftUpLeg", "mixamorig_RightUpLeg",
+				"mixamorig_LeftLeg", "mixamorig_RightLeg",
+				"mixamorig_LeftFoot", "mixamorig_RightFoot",
+				"mixamorig_Hips", "mixamorig_Spine", "mixamorig_Spine1",
+				"mixamorig_LeftArm", "mixamorig_RightArm",
+				"mixamorig_LeftForeArm", "mixamorig_RightForeArm"
+			]
+			var rot_tracks: Dictionary = {}
+			for bname in tracked_bones:
+				if _bone_rest_quats.has(bname):
+					var tidx := anim.add_track(Animation.TYPE_ROTATION_3D)
+					anim.track_set_path(tidx, NodePath(skel_path + ":" + bname))
+					rot_tracks[bname] = tidx
+			var pos_tidx := anim.add_track(Animation.TYPE_POSITION_3D)
+			anim.track_set_path(pos_tidx, NodePath(skel_path + ":mixamorig_Hips"))
+			for s in range(sample_count + 1):
+				var t_norm := float(s) / float(sample_count)
+				var phase := t_norm * TAU
+				var l_swing := sin(phase)
+				var r_swing := sin(phase + PI)
+				var l_knee := maxf(0.0, cos(phase - 0.35))
+				var r_knee := maxf(0.0, cos(phase + PI - 0.35))
+				if rot_tracks.has("mixamorig_LeftUpLeg"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_LeftUpLeg"], t_norm, _bone_rest_quats["mixamorig_LeftUpLeg"] * Quaternion(Vector3.RIGHT, l_swing * deg_to_rad(38.0)))
+				if rot_tracks.has("mixamorig_RightUpLeg"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_RightUpLeg"], t_norm, _bone_rest_quats["mixamorig_RightUpLeg"] * Quaternion(Vector3.RIGHT, r_swing * deg_to_rad(38.0)))
+				if rot_tracks.has("mixamorig_LeftLeg"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_LeftLeg"], t_norm, _bone_rest_quats["mixamorig_LeftLeg"] * Quaternion(Vector3.RIGHT, -deg_to_rad(12.0 + 42.0 * l_knee)))
+				if rot_tracks.has("mixamorig_RightLeg"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_RightLeg"], t_norm, _bone_rest_quats["mixamorig_RightLeg"] * Quaternion(Vector3.RIGHT, -deg_to_rad(12.0 + 42.0 * r_knee)))
+				if rot_tracks.has("mixamorig_LeftFoot"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_LeftFoot"], t_norm, _bone_rest_quats["mixamorig_LeftFoot"] * Quaternion(Vector3.RIGHT, deg_to_rad(10.0 * l_knee - 14.0 * l_swing)))
+				if rot_tracks.has("mixamorig_RightFoot"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_RightFoot"], t_norm, _bone_rest_quats["mixamorig_RightFoot"] * Quaternion(Vector3.RIGHT, deg_to_rad(10.0 * r_knee - 14.0 * r_swing)))
+				if rot_tracks.has("mixamorig_Hips"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_Hips"], t_norm, _bone_rest_quats["mixamorig_Hips"] * Quaternion(Vector3.UP, l_swing * deg_to_rad(8.0)) * Quaternion(Vector3.BACK, l_swing * deg_to_rad(4.0)))
+				if rot_tracks.has("mixamorig_Spine"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_Spine"], t_norm, _bone_rest_quats["mixamorig_Spine"] * Quaternion(Vector3.RIGHT, deg_to_rad(10.0)) * Quaternion(Vector3.UP, -l_swing * deg_to_rad(5.0)))
+				if rot_tracks.has("mixamorig_Spine1"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_Spine1"], t_norm, _bone_rest_quats["mixamorig_Spine1"] * Quaternion(Vector3.RIGHT, deg_to_rad(8.0)))
+				if rot_tracks.has("mixamorig_LeftArm"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_LeftArm"], t_norm, _bone_rest_quats["mixamorig_LeftArm"] * Quaternion(Vector3.RIGHT, deg_to_rad(22.0) - l_swing * deg_to_rad(28.0)))
+				if rot_tracks.has("mixamorig_RightArm"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_RightArm"], t_norm, _bone_rest_quats["mixamorig_RightArm"] * Quaternion(Vector3.RIGHT, deg_to_rad(22.0) - r_swing * deg_to_rad(28.0)))
+				if rot_tracks.has("mixamorig_LeftForeArm"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_LeftForeArm"], t_norm, _bone_rest_quats["mixamorig_LeftForeArm"] * Quaternion(Vector3.RIGHT, deg_to_rad(28.0)))
+				if rot_tracks.has("mixamorig_RightForeArm"):
+					anim.rotation_track_insert_key(rot_tracks["mixamorig_RightForeArm"], t_norm, _bone_rest_quats["mixamorig_RightForeArm"] * Quaternion(Vector3.RIGHT, deg_to_rad(28.0)))
+				var step_bob := (absf(sin(phase)) - 0.5) * 0.08
+				var hip_sway := cos(phase) * 0.035
+				anim.position_track_insert_key(pos_tidx, t_norm, _hips_rest_origin + Vector3(hip_sway, step_bob - 0.04, 0.0))
+
+func _set_bone_rot_offset(bone_name: String, local_offset: Quaternion) -> void:
+	if _skeleton == null or not _bone_indices.has(bone_name) or not _bone_rest_quats.has(bone_name):
+		return
+	var idx: int = _bone_indices[bone_name]
+	var rest_q: Quaternion = _bone_rest_quats[bone_name]
+	_skeleton.set_bone_pose_rotation(idx, rest_q * local_offset)
+
+func _update_bipedal_walk_cycle(delta: float) -> void:
+	if _skeleton == null or current_state == State.DORMANT or current_state == State.ELIMINATED:
+		return
+	var horiz_speed := Vector2(velocity.x, velocity.z).length()
+	if current_state == State.HORROR_ZOOM:
+		horiz_speed = walk_speed * 2.2
+	elif current_state == State.SPAWNING:
+		horiz_speed = walk_speed * 0.65
+	var is_moving := horiz_speed > 0.12
+	var target_blend := clampf(horiz_speed / maxf(0.5, walk_speed), 0.25 if is_moving else 0.0, 1.45)
+	_stride_blend = move_toward(_stride_blend, target_blend, delta * 6.0)
+	if is_moving:
+		_walk_cycle_phase = fmod(_walk_cycle_phase + delta * maxf(3.2, horiz_speed * 2.85), TAU)
+	
+	var l_swing := sin(_walk_cycle_phase) * _stride_blend
+	var r_swing := sin(_walk_cycle_phase + PI) * _stride_blend
+	var l_knee_lift := maxf(0.0, cos(_walk_cycle_phase - 0.35)) * _stride_blend
+	var r_knee_lift := maxf(0.0, cos(_walk_cycle_phase + PI - 0.35)) * _stride_blend
+	
+	# 1. Bipedal Thighs (LeftUpLeg & RightUpLeg swing forward/backward in opposite phase)
+	_set_bone_rot_offset("mixamorig_LeftUpLeg", Quaternion(Vector3.RIGHT, l_swing * deg_to_rad(38.0)))
+	_set_bone_rot_offset("mixamorig_RightUpLeg", Quaternion(Vector3.RIGHT, r_swing * deg_to_rad(38.0)))
+	
+	# 2. Knees (LeftLeg & RightLeg bend backward when lifting forward, straighten on plant)
+	_set_bone_rot_offset("mixamorig_LeftLeg", Quaternion(Vector3.RIGHT, -deg_to_rad(12.0 + 42.0 * l_knee_lift)))
+	_set_bone_rot_offset("mixamorig_RightLeg", Quaternion(Vector3.RIGHT, -deg_to_rad(12.0 + 42.0 * r_knee_lift)))
+	
+	# 3. Feet & Toes (LeftFoot & RightFoot flex with the stride)
+	_set_bone_rot_offset("mixamorig_LeftFoot", Quaternion(Vector3.RIGHT, deg_to_rad(10.0 * l_knee_lift - 14.0 * l_swing)))
+	_set_bone_rot_offset("mixamorig_RightFoot", Quaternion(Vector3.RIGHT, deg_to_rad(10.0 * r_knee_lift - 14.0 * r_swing)))
+	
+	# 4. Hips (vertical step bobbing + lateral weight shift + pelvis yaw twist)
+	if _bone_indices.has("mixamorig_Hips"):
+		var step_bob := (absf(sin(_walk_cycle_phase)) - 0.5) * 0.08 * minf(1.0, _stride_blend)
+		var hip_sway := cos(_walk_cycle_phase) * 0.035 * minf(1.0, _stride_blend)
+		_skeleton.set_bone_pose_position(_bone_indices["mixamorig_Hips"], _hips_rest_origin + Vector3(hip_sway, step_bob - 0.04, 0.0))
+		_set_bone_rot_offset("mixamorig_Hips", Quaternion(Vector3.UP, l_swing * deg_to_rad(8.0)) * Quaternion(Vector3.BACK, l_swing * deg_to_rad(4.0)))
+	
+	# 5. Predatory Spine & Head Hunch
+	_set_bone_rot_offset("mixamorig_Spine", Quaternion(Vector3.RIGHT, deg_to_rad(10.0)) * Quaternion(Vector3.UP, -l_swing * deg_to_rad(5.0)))
+	_set_bone_rot_offset("mixamorig_Spine1", Quaternion(Vector3.RIGHT, deg_to_rad(8.0)))
+	_set_bone_rot_offset("mixamorig_Neck", Quaternion(Vector3.RIGHT, deg_to_rad(-8.0)))
+	_set_bone_rot_offset("mixamorig_Head", Quaternion(Vector3.RIGHT, deg_to_rad(-6.0)) * Quaternion(Vector3.UP, sin(_bob_timer * 1.4) * deg_to_rad(6.0)))
+	
+	# 6. Arms & Forearms (counter-swing with legs, or slash forward during claw attack)
+	var slash_boost := deg_to_rad(42.0) if _attack_cooldown > 0.8 else 0.0
+	_set_bone_rot_offset("mixamorig_LeftArm", Quaternion(Vector3.RIGHT, deg_to_rad(22.0) + slash_boost - l_swing * deg_to_rad(28.0)))
+	_set_bone_rot_offset("mixamorig_RightArm", Quaternion(Vector3.RIGHT, deg_to_rad(22.0) + slash_boost - r_swing * deg_to_rad(28.0)))
+	_set_bone_rot_offset("mixamorig_LeftForeArm", Quaternion(Vector3.RIGHT, deg_to_rad(28.0) + slash_boost * 0.5))
+	_set_bone_rot_offset("mixamorig_RightForeArm", Quaternion(Vector3.RIGHT, deg_to_rad(28.0) + slash_boost * 0.5))
 
 func _update_animation_effects(_delta: float) -> void:
 	if current_state == State.ELIMINATED:
