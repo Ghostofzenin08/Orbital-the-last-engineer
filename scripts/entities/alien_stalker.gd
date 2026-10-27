@@ -48,6 +48,7 @@ var _bob_timer: float = 0.0
 var _alien_footstep_timer: float = 0.0
 var _proximity_impact_timer: float = 0.0
 var _stalker_growl_timer: float = 0.0
+var _face_thrash_timer: float = 0.0
 
 @onready var alien_model: Node3D = get_node_or_null("AlienModel")
 var _anim_player: AnimationPlayer = null
@@ -203,16 +204,21 @@ func zoom_near_player(player: Node3D, duration: float = 1.0) -> void:
 		zoom_target_pos = zoom_start_pos + Vector3(0, 0, -2.0)
 	
 	set_state(State.HORROR_ZOOM)
+	_face_thrash_timer = maxf(0.9, duration)
 	horror_zoom_started.emit()
 	
 	if AudioManager != null:
 		AudioManager.play_horror_zoom()
 		AudioManager.play_boss_screech()
 		AudioManager.play_heartbeat_rapid()
-		if AudioManager.has_method("play_impact_hit"):
+		if AudioManager.has_method("play_jumpscare_scream"):
+			AudioManager.play_jumpscare_scream()
+		elif AudioManager.has_method("play_impact_hit"):
 			AudioManager.play_impact_hit()
 	
-	if player != null and player.has_method("trigger_horror_zoom"):
+	if player != null and player.has_method("trigger_jumpscare_face_zoom"):
+		player.trigger_jumpscare_face_zoom(self, duration)
+	elif player != null and player.has_method("trigger_horror_zoom"):
 		player.trigger_horror_zoom(duration, 25.0, 0.95)
 
 func trap_in_chamber(chamber_id: String, pos: Vector3 = Vector3.ZERO) -> void:
@@ -232,17 +238,23 @@ func _execute_claw_attack() -> void:
 	if is_player_in_safe_room():
 		return
 	_attack_cooldown = attack_interval
+	_face_thrash_timer = 0.95
 	if claw_left != null:
 		claw_left.rotation.x = deg_to_rad(-55.0)
 	if claw_right != null:
 		claw_right.rotation.x = deg_to_rad(-55.0)
 	if AudioManager != null:
+		if AudioManager.has_method("play_jumpscare_scream"):
+			AudioManager.play_jumpscare_scream()
 		if AudioManager.has_method("play_creature_roar"):
 			AudioManager.play_creature_roar()
 		if AudioManager.has_method("play_impact_hit"):
 			AudioManager.play_impact_hit()
-	if target_player != null and is_instance_valid(target_player) and target_player.has_method("take_damage"):
-		target_player.take_damage(attack_damage, "creature")
+	if target_player != null and is_instance_valid(target_player):
+		if target_player.has_method("trigger_jumpscare_face_zoom"):
+			target_player.trigger_jumpscare_face_zoom(self, 0.95)
+		if target_player.has_method("take_damage"):
+			target_player.take_damage(attack_damage, "creature")
 
 func _handle_doors_in_path() -> void:
 	if current_state == State.DORMANT or current_state == State.ELIMINATED or current_state == State.TRAPPED:
@@ -366,6 +378,8 @@ func _physics_process(delta: float) -> void:
 		_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
 	if _proximity_impact_timer > 0.0:
 		_proximity_impact_timer = maxf(0.0, _proximity_impact_timer - delta)
+	if _face_thrash_timer > 0.0:
+		_face_thrash_timer = maxf(0.0, _face_thrash_timer - delta)
 	
 	# Breathing & eye pulsing visuals
 	_update_animation_effects(delta)
@@ -440,6 +454,9 @@ func _physics_process(delta: float) -> void:
 				if flat_dist <= attack_range and _attack_cooldown <= 0.0:
 					set_state(State.AGGRESSIVE)
 					_execute_claw_attack()
+				elif flat_dist <= 3.6 and not horror_zoom_executed and not is_player_in_safe_room():
+					zoom_near_player(target_player, 0.85)
+					return
 				
 				# Footstep sounds when moving
 				_alien_footstep_timer += delta
@@ -516,15 +533,34 @@ func _update_animation_effects(_delta: float) -> void:
 			aura_light.light_energy = 0.0
 		return
 	
-	# Sinister pulsing crimson eye glow
-	var eye_energy := 2.0 + sin(_pulse_timer) * 0.8
+	# Sinister pulsing crimson eye glow (blazing bright during jumpscare)
+	var is_jumpscaring := (current_state == State.HORROR_ZOOM or _face_thrash_timer > 0.0)
+	var eye_energy := (5.5 + sin(_pulse_timer * 8.0) * 2.0) if is_jumpscaring else (2.0 + sin(_pulse_timer) * 0.8)
 	if eye_left_light != null:
 		eye_left_light.light_energy = eye_energy
 	if eye_right_light != null:
 		eye_right_light.light_energy = eye_energy
 	
 	if aura_light != null:
-		aura_light.light_energy = 1.0 + sin(_pulse_timer * 0.5) * 0.4
+		aura_light.light_energy = (3.2 + sin(_pulse_timer * 6.0) * 1.2) if is_jumpscaring else (1.0 + sin(_pulse_timer * 0.5) * 0.4)
+	
+	# Hotel Shrek 1 / Five Nights at Doraemon's style Alien Face Rapid Zoom-In / Zoom-Out Thrash
+	if is_jumpscaring:
+		var thrash_wave := sin(_pulse_timer * 11.0)
+		var face_scale := 1.18 + 0.24 * thrash_wave
+		if head != null:
+			head.scale = Vector3(face_scale, face_scale, face_scale)
+			head.rotation.z = sin(_pulse_timer * 15.0) * 0.28
+		if alien_model != null:
+			alien_model.position.z = thrash_wave * 0.26
+			alien_model.rotation.z = cos(_pulse_timer * 14.0) * 0.12
+	else:
+		if head != null:
+			head.scale = Vector3.ONE
+			head.rotation.z = 0.0
+		if alien_model != null:
+			alien_model.position.z = 0.0
+			alien_model.rotation.z = 0.0
 	
 	# Claws & Spine bobbing or strike attack pose
 	if _attack_cooldown > 0.8:

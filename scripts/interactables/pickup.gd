@@ -22,8 +22,11 @@ func _check_if_collected() -> void:
 		return
 
 func get_prompt() -> String:
-	return "[E / Enter] Take %s" % item_name
+	return "[E] Take %s" % item_name
 
 func _on_interacted(_player: Node) -> void:
 	MissionManager.add_inventory_item(item_id)
+	var hud = get_tree().root.find_child("HUD", true, false) if is_inside_tree() else null
+	if hud != null and hud.has_method("show_notification"):
+		hud.show_notification("Picked up %s" % item_name, 2.2)
 	queue_free()

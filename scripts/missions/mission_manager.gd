@@ -18,30 +18,40 @@ const OBJECTIVES: Array[Dictionary] = [
 		"id": "obj_primary_power",
 		"title": "Restore Emergency Generator",
 		"immediate_task": "Flip Generator Breaker Lever",
+		"target_room": "Engineering Bay (Starting Room — Center Cylinder)",
+		"plain_guide": "WHERE: Front of the large cylinder in this room. ACTION: Walk up to the glowing Generator Breaker lever and press [E] to turn ON the station's main electricity.",
 		"desc": "Lead Scientist docked at the research facility finding massive chambers in dark disarray and zero power. Proceed to Engineering and engage the primary generator breaker to restore baseline chamber systems."
 	},
 	{
 		"id": "obj_power_distribution",
 		"title": "Energize Main Electrical Bus",
 		"immediate_task": "Close Main Distribution Bus Relay",
+		"target_room": "Engineering Bay (Left / West Wall)",
+		"plain_guide": "WHERE: Left wall of Engineering Bay. ACTION: Press [E] on the Main Power Bus Switch to send electricity to the corridor doors and security panels.",
 		"desc": "Close the high-voltage distribution bus relay in Engineering to restore power to chamber doors, key-security panels, and the central corridor."
 	},
 	{
 		"id": "obj_life_support",
 		"title": "Repair Scrubber Coolant Manifold",
 		"immediate_task": "Install Replacement Coupler in Scrubber",
+		"target_room": "Engineering Table -> Life Support (Center Room)",
+		"plain_guide": "STEP 1: Pick up the glowing Spare Coolant Coupler on the table in Engineering [E]. STEP 2: Open the North Corridor Door [E], walk straight into Life Support, and press [E] on the flashing red Repair Panel so you can breathe.",
 		"desc": "The facility air is choked with toxic bio-spores, leaving it impossible to breathe. Retrieve a spare coupler and install it into Life Support to restore breathable oxygen."
 	},
 	{
 		"id": "obj_communications",
 		"title": "Align Comms & Review Research",
 		"immediate_task": "Calibrate Dish & Access Research Logs",
+		"target_room": "Command Bridge (Front / Far North Room)",
+		"plain_guide": "WHERE: Walk North from Life Support into the Command Bridge. ACTION: Press [E] on the Bridge Comms Terminal and click 'Calibrate & Lock Comm Array' (Warning: Restoring comms power will wake the mutated specimen!).",
 		"desc": "Access Bridge communications to review the science team's logs, uncovering the secret biological experiment and the creature that slaughtered the crew."
 	},
 	{
 		"id": "obj_propulsion",
 		"title": "Trap Alien & Poison Gas Purge",
 		"immediate_task": "Trap Alien & Open Poison Gas Valve",
+		"target_room": "Airlock Chamber (East off Central Corridor) -> Bridge",
+		"plain_guide": "ALIEN AWAKENED! Run South to the Central Corridor, enter the East Airlock Chamber, and press [E] on the Red Poison Gas Valve to trap and kill the mutated creature! Then flip the Departure Switch on the Bridge helm to escape.",
 		"desc": "The adapted alien predator stalks the observatory. Lure the creature into the sealed chamber, open the emergency poisonous gas valve to exterminate it, and engage departure thrusters."
 	}
 ]
@@ -457,6 +467,58 @@ func get_current_immediate_task() -> String:
 			else:
 				return "Alien Purged - Engage Sub-Orbital Ion Thruster Bank (Bridge)"
 	return str(obj.get("immediate_task", "Follow Mission Directives"))
+
+func get_current_target_room() -> String:
+	var obj := get_current_objective()
+	if current_objective_index == 4 and has_node("/root/ShipState"):
+		var ss = get_node("/root/ShipState")
+		if ss.crisis_manager != null and ss.crisis_manager.is_creature_eliminated:
+			return "Command Bridge (Front / Far North Room)"
+		return "Airlock Chamber (East Door in Central Corridor)"
+	return str(obj.get("target_room", "Station Interior"))
+
+func get_current_plain_guide() -> String:
+	var obj := get_current_objective()
+	if current_objective_index == 2:
+		if has_item("coolant_coupler"):
+			return "COUPLER ACQUIRED! Walk North through the Corridor door into Life Support (Center Room) and press [E] on the flashing red Repair Panel to restore breathable air."
+		return str(obj.get("plain_guide", obj.get("desc", "")))
+	if current_objective_index == 4 and has_node("/root/ShipState"):
+		var ss = get_node("/root/ShipState")
+		if ss.crisis_manager != null:
+			if ss.crisis_manager.is_creature_eliminated:
+				return "ALIEN ELIMINATED! Run North to the Command Bridge helm and press [E] on the Orbital Departure Switch to fire the thrusters and escape!"
+			return "ALIEN AWAKENED! Run South to the Central Corridor, enter the East Airlock Chamber, and press [E] on the Red Poison Gas Valve to trap & kill the creature! (Tip: Medbay is a Safe Room.)"
+	return str(obj.get("plain_guide", obj.get("desc", "")))
+
+func get_player_motive() -> String:
+	if current_objective_index == 4 and has_node("/root/ShipState"):
+		var ss = get_node("/root/ShipState")
+		if ss.crisis_manager != null and ss.crisis_manager.is_creature_eliminated:
+			return "MOTIVE: The Chamber-4 Creature is dead! Fire the Bridge Thrusters and escape alive!"
+		return "MOTIVE: Survive the mutated creature that killed your crew — Lure & purge it with Poison Gas!"
+	return "MOTIVE: Your Bio-Research Team vanished after a distress call & O2 is failing — Restore the station & survive!"
+
+func get_current_story_monologue() -> String:
+	match current_objective_index:
+		0:
+			return "DR. VANCE (YOU): \"My shuttle locked behind me and my team isn't answering... O2 is dropping and something is growling in the vents! First, pull that glowing Generator Lever right in front of me!\""
+		1:
+			return "DR. VANCE (YOU): \"Generator is humming—wait, what was that roar below deck?! The corridor doors are still dead. Flip the Power Bus Switch on the left wall so I can get out of here!\""
+		2:
+			if has_item("coolant_coupler"):
+				return "DR. VANCE (YOU): \"Got the Spare Coupler! Now run straight through the North door into Life Support and plug it into the flashing red panel before I suffocate!\""
+			return "DR. VANCE (YOU): \"I can barely breathe—the creature tore open the bio-filters! Grab that glowing Spare Coolant Coupler on the table here, then head North to Life Support!\""
+		3:
+			return "DR. VANCE (YOU): \"Finally I can breathe... Look at the claw marks leading North. I must reach the Command Bridge computer to see what Dr. Thorne's secret experiment unleashed!\""
+		4:
+			if has_node("/root/ShipState"):
+				var ss = get_node("/root/ShipState")
+				if ss.crisis_manager != null and ss.crisis_manager.is_creature_eliminated:
+					return "DR. VANCE (YOU): \"The poison gas killed it! The monster is dead! Now run straight back to the Command Bridge helm and flip the Departure Switch to escape!\""
+			return "DR. VANCE (YOU): \"OH GOD—Thorne bred a monster in Secret Chamber 4 and the comm signal just woke it up! Run to the East Airlock Chamber and turn the Red Poison Gas Valve to trap & kill it!\""
+		_:
+			return "DR. VANCE (YOU): \"Astraea Station is secure. Time to leave this nightmare behind.\""
 
 func get_objective_count() -> int:
 	return OBJECTIVES.size()

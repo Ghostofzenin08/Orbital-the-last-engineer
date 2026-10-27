@@ -163,12 +163,19 @@ func resume_game() -> void:
 func refresh_all_info() -> void:
 	# 1. Mission Info
 	var cur_obj := MissionManager.get_current_objective()
+	var imm_task: String = MissionManager.get_current_immediate_task()
+	var plain_guide: String = MissionManager.get_current_plain_guide() if MissionManager.has_method("get_current_plain_guide") else str(cur_obj.get("desc", ""))
+	var target_room: String = MissionManager.get_current_target_room() if MissionManager.has_method("get_current_target_room") else ""
 	if mission_title_lbl != null:
 		mission_title_lbl.text = "MISSION %d: %s" % [MissionManager.current_objective_index + 1, str(cur_obj.get("title", "")).to_upper()]
 	if immediate_task_lbl != null:
-		immediate_task_lbl.text = "IMMEDIATE TASK: %s" % str(cur_obj.get("immediate_task", "Follow Mission Directives"))
+		immediate_task_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if target_room != "":
+			immediate_task_lbl.text = "IMMEDIATE TASK: %s [%s]\n%s" % [imm_task, target_room, plain_guide]
+		else:
+			immediate_task_lbl.text = "IMMEDIATE TASK: %s\n%s" % [imm_task, plain_guide]
 	if mission_desc_lbl != null:
-		mission_desc_lbl.text = str(cur_obj.get("desc", ""))
+		mission_desc_lbl.text = "%s\n\nSTORY BRIEFING: %s" % [plain_guide, str(cur_obj.get("desc", ""))]
 	
 	# 2. Environmental Telemetry
 	var env_mgr = EnvironmentalManager.instance if ("instance" in EnvironmentalManager and EnvironmentalManager.instance != null) else (get_tree().root.find_child("EnvironmentalManager", true, false) if is_inside_tree() else null)
@@ -264,12 +271,18 @@ func update_player_status(afflictions: Array[String], telem: Dictionary) -> void
 			hazard_lbl.add_theme_color_override("font_color", Color(1.0, 0.2, 0.1))
 
 func update_mission(idx: int, title: String, immediate_task: String, desc: String) -> void:
+	var plain_guide: String = MissionManager.get_current_plain_guide() if MissionManager.has_method("get_current_plain_guide") else desc
+	var target_room: String = MissionManager.get_current_target_room() if MissionManager.has_method("get_current_target_room") else ""
 	if mission_title_lbl != null:
 		mission_title_lbl.text = "MISSION %d: %s" % [idx + 1, title.to_upper()]
 	if immediate_task_lbl != null:
-		immediate_task_lbl.text = "IMMEDIATE TASK: %s" % immediate_task
+		immediate_task_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if target_room != "":
+			immediate_task_lbl.text = "IMMEDIATE TASK: %s [%s]\n%s" % [immediate_task, target_room, plain_guide]
+		else:
+			immediate_task_lbl.text = "IMMEDIATE TASK: %s\n%s" % [immediate_task, plain_guide]
 	if mission_desc_lbl != null:
-		mission_desc_lbl.text = desc
+		mission_desc_lbl.text = "%s\n\nSTORY BRIEFING: %s" % [plain_guide, desc]
 
 func update_inventory(items: Array[String]) -> void:
 	if inventory_lbl == null:

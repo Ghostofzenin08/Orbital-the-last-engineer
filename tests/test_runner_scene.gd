@@ -3561,10 +3561,91 @@ func _test_final_phase_upgrades() -> void:
 	player._input(motion_event)
 	_assert_true(player.rotation.y != rot_before, "Mouse motion rotates player even when arrow_keys mode is active")
 
+	# 7. Sci-Fi PBR Textures, Horror WorldEnvironment, Observatory/Secret Chamber Props & Psychological Suspense
+	_assert_true(interior.get_node_or_null("HorrorWorldEnvironment") != null, "ShipInterior configures HorrorWorldEnvironment with fog and glow")
+	_assert_true(interior._scifi_normal_tex != null and interior._scifi_roughness_tex != null, "ShipInterior generates procedural sci-fi PBR normal and roughness textures")
+	_assert_true(interior.get_node_or_null("Compartments/ResearchObservatory/BotanicalFloraPod") != null, "Research Observatory contains BotanicalFloraPod")
+	_assert_true(interior.get_node_or_null("Compartments/ResearchObservatory/BotanicalFloraPod/CleanroomPedestalBase") != null, "BotanicalFloraPod includes polished CleanroomPedestalBase")
+	_assert_true(interior.get_node_or_null("Compartments/ResearchObservatory/ZoologicalSpecimenTerrarium") != null, "Research Observatory contains ZoologicalSpecimenTerrarium")
+	_assert_true(interior.get_node_or_null("Compartments/ResearchObservatory/BioAnalysisIsland") != null, "Research Observatory contains minimalist BioAnalysisIsland")
+	_assert_true(interior.get_node_or_null("Compartments/EngineeringBay/BioLabCeilingStrip") != null, "Cleanroom BioLabCeilingStrip recessed lighting present in EngineeringBay")
+	_assert_true(interior.get_node_or_null("Compartments/LifeSupport/BioLabCeilingStrip") != null, "Cleanroom BioLabCeilingStrip recessed lighting present in LifeSupport")
+	_assert_true(interior.get_node_or_null("Compartments/SpecimenVault/ShatteredSecretIncubator") != null, "Specimen Vault contains ShatteredSecretIncubator")
+	_assert_true(interior.get_node_or_null("Compartments/SpecimenVault/SecretChamberKeySecurityPanel") != null, "Specimen Vault contains SecretChamberKeySecurityPanel")
+	_assert_true(interior.has_method("trigger_psychological_suspense_pulse"), "ShipInterior implements trigger_psychological_suspense_pulse for mysterious animal/alien sounds")
+	interior.trigger_psychological_suspense_pulse("repair_step_0")
+
+	# 8. Plain-English 15+/18+ Workflow Guides, Attachment Descriptions & Simplified Alien Trigger/Trap
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+	_assert_true(MissionManager.get_current_plain_guide().contains("WHERE:") and MissionManager.get_current_plain_guide().contains("ACTION:"), "Mission 1 provides plain-English WHERE/ACTION guide")
+	_assert_true(MissionManager.get_current_target_room().contains("Engineering Bay"), "Mission 1 identifies target room")
+
+	# Verify completing all 4 repairs on the Bridge immediately awakens the alien without needing a 5th room detour
+	ShipSystemManager.set_generator_breaker(true)
+	ShipSystemManager.set_power_distribution(true)
+	ShipSystemManager.install_coolant_coupler()
+	ShipSystemManager.align_comms_array()
+	_assert_true(ShipState.crisis_manager.current_crisis == CrisisManagerClass.CrisisType.CREATURE_PREDATORY_HUNT, "Completing 4th repair (Bridge Comms) immediately triggers alien hunt without hidden room gate")
+
+	# Verify turning DecontaminationPoisonGasValve automatically traps & purges the alien in one step
+	var poison_valve = interior.get_node_or_null("Compartments/AirlockChamber/DecontaminationPoisonGasValve")
+	_assert_true(poison_valve != null, "DecontaminationPoisonGasValve present in AirlockChamber")
+	if poison_valve != null:
+		_assert_true(not ShipState.crisis_manager.is_creature_trapped, "Alien starts untrapped before valve turn")
+		poison_valve._on_interacted(player)
+		_assert_true(ShipState.crisis_manager.is_creature_trapped, "Turning Poison Gas Valve automatically traps alien in Airlock Chamber")
+		_assert_true(ShipState.crisis_manager.is_creature_eliminated, "Turning Poison Gas Valve eliminates alien in one decisive step")
+		_assert_true(MissionManager.get_current_plain_guide().contains("ALIEN ELIMINATED"), "Plain guide updates to direct player to Bridge Departure Switch after purge")
+
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+
+	# 9. Hotel Shrek 1 / Five Nights at Doraemon's Face-Lock Zoom-In/Zoom-Out Jumpscare & Boosted Audio
+	_assert_true(AudioManager._sound_cache.has("jumpscare_scream"), "AudioManager pregenerates jumpscare_scream stinger")
+	_assert_true(AudioManager.has_method("play_jumpscare_scream"), "AudioManager implements play_jumpscare_scream with boosted volume")
+	AudioManager.play_jumpscare_scream()
+
+	var js_stalker = interior.get_node_or_null("Compartments/SpecimenVault/AlienStalker")
+	if js_stalker != null:
+		player.player_health = 100.0
+		player.is_dead = false
+		player.global_position = Vector3(0, 0, 0)
+		js_stalker.global_position = Vector3(0, 0, -2.5)
+		js_stalker.zoom_near_player(player, 0.8)
+		_assert_true(player._jumpscare_focus_target == js_stalker, "Player camera locks onto AlienStalker face during jumpscare")
+		_assert_true(player.camera_trauma >= 0.99, "Jumpscare triggers full-screen maximum camera trauma shake")
+		var fov_sample_1: float = player.camera.fov
+		player._physics_process(0.065)
+		var fov_sample_2: float = player.camera.fov
+		_assert_true(fov_sample_1 != fov_sample_2 and fov_sample_2 < player._base_fov, "Camera FOV rapidly zooms in and out on alien face during jumpscare")
+		js_stalker._update_animation_effects(0.05)
+		_assert_true(js_stalker._face_thrash_timer > 0.0, "AlienStalker activates face thrash zoom-in/zoom-out animation")
+
+	ShipState.reset_to_defaults()
+	ShipSystemManager.reset_to_defaults()
+	MissionManager.reset_missions()
+
+	# 10. Player Motive, Story Monologue, 3D Glowing Objective Beacon & Live Wayfinder Compass
+	_assert_true(MissionManager.get_player_motive().contains("MOTIVE:"), "MissionManager provides clear player survival motive")
+	_assert_true(MissionManager.get_current_story_monologue().contains("DR. VANCE"), "MissionManager provides first-person story monologue")
+	_assert_true(interior.get_node_or_null("ObjectiveBeacon3D") != null, "ShipInterior instantiates 3D glowing ObjectiveBeacon3D")
+	var target_info: Dictionary = interior.get_current_objective_target_info()
+	_assert_true(target_info.get("node", null) == interior.get_node_or_null("Compartments/EngineeringBay/GeneratorBreaker"), "Objective 0 target beacon points to GeneratorBreaker")
+	var level_player = interior.get_node_or_null("Player")
+	if level_player != null and level_player.hud != null:
+		interior._update_objective_beacon_and_wayfinder(0.016)
+		_assert_true(level_player.hud.motive_lbl != null and level_player.hud.motive_lbl.text.contains("MOTIVE:"), "HUD displays player MotiveLabel")
+		_assert_true(level_player.hud.wayfinder_lbl != null and level_player.hud.wayfinder_lbl.text.contains("TARGET BEACON:"), "HUD displays live WayfinderLabel distance & direction")
+		_assert_true(level_player.hud.story_monologue_lbl != null and level_player.hud.story_monologue_lbl.text.contains("DR. VANCE"), "HUD displays first-person StoryMonologueLabel")
+
 	remove_child(player)
 	player.free()
 	remove_child(interior)
 	interior.free()
+
 
 
 

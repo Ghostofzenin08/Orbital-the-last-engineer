@@ -48,37 +48,69 @@ func _create_materials() -> void:
 	_mat_off.emission_energy_multiplier = 1.5
 
 func get_prompt() -> String:
-	var state_txt := "Open" if is_on else "Close"
-	return "[E / Enter] %s %s" % [state_txt, label_name]
+	match switch_target:
+		"primary_power":
+			if is_on:
+				return "[ONLINE] %s" % label_name
+			return "[E] Turn ON %s" % label_name
+		"power_distribution":
+			if is_on:
+				return "[ONLINE] %s" % label_name
+			if not ShipSystemManager.is_system_online("primary_power"):
+				return "[Locked] %s (Need Generator)" % label_name
+			return "[E] Turn ON %s" % label_name
+		"propulsion":
+			if is_on:
+				return "[ENGAGED] %s" % label_name
+			if has_node("/root/ShipState"):
+				var ss = get_node("/root/ShipState")
+				if ss.crisis_manager != null and ss.crisis_manager.current_crisis == ss.crisis_manager.CrisisType.CREATURE_PREDATORY_HUNT and not ss.crisis_manager.is_creature_eliminated:
+					return "[LOCKDOWN] Kill Alien in Airlock First!"
+			if not ShipSystemManager.is_system_online("communications"):
+				return "[Locked] %s" % label_name
+			return "[E] Engage %s" % label_name
+	var state_txt := "Turn OFF" if is_on else "Turn ON"
+	return "[E] %s %s" % [state_txt, label_name]
 
 func _on_interacted(_player: Node) -> void:
+	var hud = get_tree().root.find_child("HUD", true, false) if is_inside_tree() else null
 	match switch_target:
 		"primary_power":
 			var new_state := not is_on
 			var res := ShipSystemManager.set_generator_breaker(new_state)
 			if res.get("ok", false):
 				is_on = new_state
+				if hud != null and hud.has_method("show_notification") and is_on:
+					hud.show_notification("MAIN GENERATOR ONLINE! Next: Flip the Main Power Bus Switch on the Left Wall.", 4.5)
 			sync_state()
 		"power_distribution":
 			var new_state := not is_on
 			var res := ShipSystemManager.set_power_distribution(new_state)
 			if res.get("ok", false):
 				is_on = new_state
+				if hud != null and hud.has_method("show_notification") and is_on:
+					hud.show_notification("DOORS & PANELS POWERED! Next: Grab the Spare Coolant Coupler on the Engineering table.", 4.5)
 			else:
 				# Show failure feedback
 				is_on = false
+				if hud != null and hud.has_method("show_notification"):
+					hud.show_notification("CANNOT ENERGIZE BUS: Turn ON the Generator Breaker on the center cylinder first!", 4.0)
 			sync_state()
 		"propulsion":
 			var res := ShipSystemManager.engage_propulsion()
 			if res.get("ok", false):
 				is_on = true
 				sync_state()
+				if hud != null and hud.has_method("show_notification"):
+					hud.show_notification("DEPARTURE THRUSTERS ENGAGED! Escaping Astraea Station...", 3.0)
 				# Transition to mission complete after short delay
 				get_tree().create_timer(1.5).timeout.connect(func():
 					get_tree().change_scene_to_file("res://scenes/ui/mission_complete.tscn")
 				)
 			else:
 				is_on = false
+				if hud != null and hud.has_method("show_notification"):
+					hud.show_notification("DEPARTURE BLOCKED: %s" % str(res.get("reason", "Complete all station repairs and purge the alien in the Airlock first!")), 4.5)
 				sync_state()
 
 func _update_visuals() -> void:

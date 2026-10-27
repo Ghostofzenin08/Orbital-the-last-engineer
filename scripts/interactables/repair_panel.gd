@@ -59,10 +59,10 @@ func _create_materials() -> void:
 
 func get_prompt() -> String:
 	if is_repaired:
-		return "[Repaired] %s Operational" % panel_title
+		return "[Repaired] %s" % panel_title
 	if MissionManager.has_item(required_item):
-		return "[E / Enter] Install Spare %s" % component_name
-	return "[E / Enter] Missing %s (Check Engineering Storage)" % component_name
+		return "[E] Install %s" % component_name
+	return "[E] Missing %s" % component_name
 
 func can_interact(_player: Node) -> bool:
 	return not is_repaired
@@ -70,9 +70,11 @@ func can_interact(_player: Node) -> bool:
 func _on_interacted(_player: Node) -> void:
 	if is_repaired:
 		return
-	
+	var hud = get_tree().root.find_child("HUD", true, false) if is_inside_tree() else null
 	if not MissionManager.has_item(required_item):
 		AudioManager.play_sfx("denied")
+		if hud != null and hud.has_method("show_notification"):
+			hud.show_notification("MISSING ATTACHMENT (%s): Pick it up from the Workbench Table in Engineering Bay first!" % component_name, 4.0)
 		return
 	
 	MissionManager.remove_inventory_item(required_item)
@@ -87,6 +89,11 @@ func _on_interacted(_player: Node) -> void:
 	AudioManager.play_sfx("repair")
 	is_repaired = true
 	_update_visuals()
+	if hud != null and hud.has_method("show_notification"):
+		if device_id.is_empty():
+			hud.show_notification("LIFE SUPPORT RESTORED! Breathable O2 flowing. Next: Head North to Command Bridge Comms Terminal.", 4.5)
+		else:
+			hud.show_notification("REPAIRED: %s is now online!" % panel_title, 3.5)
 
 func _update_visuals() -> void:
 	if indicator_mesh != null:

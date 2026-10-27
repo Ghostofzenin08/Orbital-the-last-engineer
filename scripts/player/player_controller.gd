@@ -43,6 +43,8 @@ var _horror_zoom_timer: float = 0.0
 var _horror_zoom_duration: float = 1.0
 var _base_fov: float = 75.0
 var _target_fov: float = 75.0
+var _jumpscare_focus_target: Node3D = null
+var _jumpscare_osc_time: float = 0.0
 
 var is_arrow_look: bool:
 	get:
@@ -230,24 +232,42 @@ func _physics_process(delta: float) -> void:
 	
 	if _horror_zoom_timer > 0.0:
 		_horror_zoom_timer -= delta
-		var alpha := 1.0 - clampf(_horror_zoom_timer / _horror_zoom_duration, 0.0, 1.0)
+		_jumpscare_osc_time += delta
+		# Hotel Shrek 1 / Five Nights at Doraemon's style rapid ZOOM-IN | ZOOM-OUT face oscillation!
 		if camera != null:
-			camera.fov = lerpf(_target_fov, _base_fov, alpha)
+			var wave := 0.5 + 0.5 * sin(_jumpscare_osc_time * 48.0)
+			# Rapidly pump FOV between deep zoom-in (30 deg) and zoom-out (71 deg) while staying < _base_fov
+			camera.fov = lerpf(30.0, _base_fov - 3.5, wave)
+		# Lock player view onto the Alien Monster's face during the jumpscare
+		if _jumpscare_focus_target != null and is_instance_valid(_jumpscare_focus_target):
+			var face_pos := _jumpscare_focus_target.global_position + Vector3(0.0, 1.55, 0.0)
+			var to_face := face_pos - global_position
+			if Vector2(to_face.x, to_face.z).length() > 0.05:
+				var desired_yaw := atan2(-to_face.x, -to_face.z)
+				rotation.y = lerp_angle(rotation.y, desired_yaw, clampf(delta * 22.0, 0.0, 1.0))
+			if camera_pivot != null:
+				var cam_origin := camera_pivot.global_position
+				var dir_to_face := (face_pos - cam_origin).normalized()
+				var desired_pitch := clampf(asin(clampf(dir_to_face.y, -0.95, 0.95)), deg_to_rad(-65.0), deg_to_rad(65.0))
+				_pitch = lerpf(_pitch, desired_pitch, clampf(delta * 22.0, 0.0, 1.0))
+				camera_pivot.rotation.x = _pitch
 	elif camera != null and absf(camera.fov - _base_fov) > 0.1:
 		camera.fov = move_toward(camera.fov, _base_fov, delta * 35.0)
+		_jumpscare_focus_target = null
 
 	if camera != null:
 		if camera_trauma > 0.0:
 			camera_trauma = maxf(0.0, camera_trauma - delta * 0.9)
 			var shake := camera_trauma * camera_trauma
-			var is_critical := (player_health <= 35.0 or is_dead)
-			var amp_pos: float = 0.36 if is_critical else 0.14
-			var amp_rot: float = 0.14 if is_critical else 0.06
+			var is_jumpscare := (_horror_zoom_timer > 0.0)
+			var is_critical := (player_health <= 35.0 or is_dead or is_jumpscare)
+			var amp_pos: float = 0.52 if is_jumpscare else (0.36 if is_critical else 0.14)
+			var amp_rot: float = 0.24 if is_jumpscare else (0.14 if is_critical else 0.06)
 			camera.h_offset = (randf() * 2.0 - 1.0) * amp_pos * shake
 			camera.v_offset = (randf() * 2.0 - 1.0) * amp_pos * shake
 			camera.rotation.z = (randf() * 2.0 - 1.0) * amp_rot * shake
 			if is_critical and camera_pivot != null:
-				camera_pivot.rotation.x = _pitch + (randf() * 2.0 - 1.0) * 0.08 * shake
+				camera_pivot.rotation.x = _pitch + (randf() * 2.0 - 1.0) * (0.14 if is_jumpscare else 0.08) * shake
 		else:
 			camera.h_offset = 0.0
 			camera.v_offset = 0.0
@@ -326,14 +346,31 @@ func _handle_player_death(source: String) -> void:
 		get_tree().change_scene_to_file.call_deferred("res://scenes/ui/game_over.tscn")
 
 func trigger_horror_zoom(duration: float = 1.2, fov_drop: float = 24.0, trauma: float = 0.85) -> void:
+	_jumpscare_osc_time = 0.0
 	if camera != null:
-		_target_fov = maxf(42.0, _base_fov - fov_drop)
+		_target_fov = maxf(30.0, _base_fov - fov_drop)
 		camera.fov = _target_fov
 		_horror_zoom_duration = maxf(0.1, duration)
 		_horror_zoom_timer = _horror_zoom_duration
 	camera_trauma = clampf(camera_trauma + trauma, 0.0, 1.0)
 	if hud != null and hud.has_method("trigger_horror_vignette"):
 		hud.trigger_horror_vignette(duration)
+
+func trigger_jumpscare_face_zoom(stalker_node: Node3D = null, duration: float = 1.1) -> void:
+	_jumpscare_focus_target = stalker_node
+	trigger_horror_zoom(duration, 38.0, 1.0)
+	camera_trauma = 1.0
+	if stalker_node != null and is_instance_valid(stalker_node):
+		var face_pos := stalker_node.global_position + Vector3(0.0, 1.55, 0.0)
+		var to_face := face_pos - global_position
+		if Vector2(to_face.x, to_face.z).length() > 0.05:
+			rotation.y = atan2(-to_face.x, -to_face.z)
+		if camera_pivot != null:
+			var dir_to_face := (face_pos - camera_pivot.global_position).normalized()
+			_pitch = clampf(asin(clampf(dir_to_face.y, -0.95, 0.95)), deg_to_rad(-65.0), deg_to_rad(65.0))
+			camera_pivot.rotation.x = _pitch
+	if AudioManager != null and AudioManager.has_method("play_jumpscare_scream"):
+		AudioManager.play_jumpscare_scream()
 
 func trigger_vibration_alert(duration: float = 3.5, intensity: float = 0.6) -> void:
 	_vibration_duration = maxf(0.1, duration)

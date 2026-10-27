@@ -86,13 +86,18 @@ func _on_interacted(player: Node) -> void:
 	if valve_type == "poison_gas" or valve_type == "toxic_gas":
 		if ShipState != null and "crisis_manager" in ShipState and ShipState.crisis_manager != null:
 			var comp_id: String = get_parent().name.to_snake_case() if get_parent() != null else "airlock_chamber"
+			if comp_id.is_empty() or comp_id == "root":
+				comp_id = "airlock_chamber"
+			if not ShipState.crisis_manager.is_creature_trapped:
+				ShipState.trap_creature_in_chamber(comp_id)
 			ShipState.crisis_manager.execute_poison_gas_purge(comp_id)
 		if AudioManager != null:
 			AudioManager.play_sfx("gas_hiss")
 			AudioManager.play_sfx("creature_roar")
-		var msg := "Poisonous Gas Valve OPENED! Chamber flooded with lethal decontamination gas. Mutant alien exterminated."
-		if player != null and "hud" in player and player.hud != null and player.hud.has_method("show_notification"):
-			player.hud.show_notification(msg, 5.0)
+		var msg := "Poisonous Gas Valve OPENED! Chamber sealed & flooded with lethal decontamination gas. Mutant alien exterminated! Head to the Command Bridge Departure Switch to escape!"
+		var hud = (player.hud if (player != null and "hud" in player and player.hud != null) else (get_tree().root.find_child("HUD", true, false) if is_inside_tree() else null))
+		if hud != null and hud.has_method("show_notification"):
+			hud.show_notification(msg, 6.0)
 		if has_node("/root/MissionManager"):
 			get_node("/root/MissionManager")._broadcast_current_objective()
 		_update_visuals()

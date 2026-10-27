@@ -107,9 +107,9 @@ func get_prompt() -> String:
 			var cur_mode := InventoryManager.get_multitool_mode()
 			if equipped == "multitool":
 				if required_multitool_mode != "" and cur_mode != required_multitool_mode:
-					return "[E / Enter] Switch Multitool to %s Mode (Current: %s)" % [required_multitool_mode, cur_mode]
+					return "[Press Q] Switch Multitool to %s Mode (Current: %s) then Press [E / Enter]" % [required_multitool_mode, cur_mode]
 				return "[E / Enter] %s with Multitool [2]" % action_name
-			return "[E / Enter] %s (Equip Multitool [2])" % action_name
+			return "[Press 2] Equip Multitool then [E / Enter] %s" % action_name
 		
 		Stage.TEST:
 			return "[E / Enter] Run System Diagnostic Test"

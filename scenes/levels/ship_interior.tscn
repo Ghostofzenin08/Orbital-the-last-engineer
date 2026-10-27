@@ -22,51 +22,54 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/alien_stalker.tscn" id="20_stalker"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
-albedo_color = Color(0.18, 0.2, 0.24, 1)
-metallic = 0.8
-roughness = 0.35
+albedo_color = Color(0.12, 0.15, 0.19, 1)
+metallic = 0.55
+roughness = 0.24
+clearcoat_enabled = true
+clearcoat = 0.35
+clearcoat_roughness = 0.2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
-albedo_color = Color(0.14, 0.16, 0.2, 1)
-metallic = 0.5
-roughness = 0.55
+albedo_color = Color(0.22, 0.26, 0.31, 1)
+metallic = 0.28
+roughness = 0.36
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ceiling"]
-albedo_color = Color(0.1, 0.12, 0.15, 1)
-metallic = 0.3
-roughness = 0.7
+albedo_color = Color(0.14, 0.17, 0.21, 1)
+metallic = 0.22
+roughness = 0.48
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_machinery"]
-albedo_color = Color(0.22, 0.26, 0.3, 1)
-metallic = 0.85
-roughness = 0.3
+albedo_color = Color(0.26, 0.31, 0.37, 1)
+metallic = 0.68
+roughness = 0.28
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gen_core"]
-albedo_color = Color(0.1, 0.5, 0.8, 1)
+albedo_color = Color(0.1, 0.55, 0.85, 1)
 emission_enabled = true
-emission = Color(0.1, 0.6, 0.9, 1)
-emission_energy_multiplier = 3.0
+emission = Color(0.12, 0.65, 0.95, 1)
+emission_energy_multiplier = 1.6
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_scrubber"]
-albedo_color = Color(0.18, 0.3, 0.32, 1)
-metallic = 0.7
-roughness = 0.4
+albedo_color = Color(0.18, 0.32, 0.35, 1)
+metallic = 0.65
+roughness = 0.3
 emission_enabled = true
-emission = Color(0.1, 0.7, 0.6, 1)
-emission_energy_multiplier = 0.5
+emission = Color(0.1, 0.65, 0.55, 1)
+emission_energy_multiplier = 0.45
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o2_core"]
-albedo_color = Color(0.1, 0.8, 0.9, 1)
+albedo_color = Color(0.12, 0.75, 0.82, 1)
 emission_enabled = true
-emission = Color(0.1, 0.8, 0.9, 1)
-emission_energy_multiplier = 2.5
+emission = Color(0.12, 0.78, 0.82, 1)
+emission_energy_multiplier = 1.4
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_holo"]
-albedo_color = Color(0.1, 0.6, 1, 0.6)
+albedo_color = Color(0.12, 0.62, 0.95, 0.45)
 transparency = 1
 emission_enabled = true
-emission = Color(0.2, 0.7, 1, 1)
-emission_energy_multiplier = 2.5
+emission = Color(0.18, 0.68, 0.95, 1)
+emission_energy_multiplier = 1.2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_planet"]
 albedo_color = Color(0.6, 0.25, 0.15, 1)
@@ -76,15 +79,15 @@ emission = Color(0.4, 0.15, 0.08, 1)
 emission_energy_multiplier = 0.6
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_window"]
-albedo_color = Color(0.08, 0.15, 0.22, 0.5)
+albedo_color = Color(0.1, 0.18, 0.26, 0.42)
 transparency = 1
-metallic = 0.95
-roughness = 0.12
+metallic = 0.9
+roughness = 0.1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frame"]
-albedo_color = Color(0.12, 0.15, 0.18, 1)
-metallic = 0.9
-roughness = 0.28
+albedo_color = Color(0.15, 0.18, 0.22, 1)
+metallic = 0.82
+roughness = 0.26
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bridge_wall_side"]
 size = Vector3(2.7, 3.6, 0.4)

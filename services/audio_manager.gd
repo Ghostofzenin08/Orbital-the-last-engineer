@@ -40,17 +40,19 @@ func set_volume(linear: float) -> void:
 func get_volume() -> float:
 	return master_volume
 
-func play_sfx(sound_name: String, pitch_scale: float = 1.0) -> void:
+func play_sfx(sound_name: String, pitch_scale: float = 1.0, volume_boost_db: float = 0.0) -> void:
 	if not _sound_cache.has(sound_name):
 		return
 	var stream: AudioStream = _sound_cache[sound_name]
-	var sfx_vol: float = 0.0
-	if sound_name == "impact_hit" or sound_name == "player_death_scream":
-		sfx_vol = 6.0
+	var sfx_vol: float = volume_boost_db
+	if sound_name == "jumpscare_scream":
+		sfx_vol = maxf(sfx_vol, 11.5)
+	elif sound_name == "impact_hit" or sound_name == "player_death_scream" or sound_name == "horror_zoom":
+		sfx_vol = maxf(sfx_vol, 8.5)
 	elif sound_name == "creature_roar" or sound_name == "boss_screech":
-		sfx_vol = 4.0
+		sfx_vol = maxf(sfx_vol, 8.0)
 	elif sound_name == "creature_sound" or sound_name == "alien_sound":
-		sfx_vol = 3.0
+		sfx_vol = maxf(sfx_vol, 6.0)
 	
 	for player in _sfx_players:
 		if not player.playing:
@@ -153,6 +155,7 @@ func _pregenerate_sounds() -> void:
 	_sound_cache["heartbeat_rapid"] = _generate_heartbeat_rapid()
 	_sound_cache["footstep"] = _generate_footstep()
 	_sound_cache["impact_hit"] = _generate_impact_hit()
+	_sound_cache["jumpscare_scream"] = _generate_jumpscare_scream()
 
 	# Load authentic recorded audio files from resources/audio
 	_load_or_fallback("alien_footsteps", "res://resources/audio/alien_footsteps.mp3", null)
@@ -205,7 +208,39 @@ func play_boss_screech() -> void:
 	play_sfx("boss_screech")
 
 func play_horror_zoom() -> void:
-	play_sfx("horror_zoom")
+	play_sfx("horror_zoom", 1.0, 10.0)
+
+func play_jumpscare_scream() -> void:
+	play_sfx("jumpscare_scream", 1.0, 12.0)
+	play_sfx("alien_sound", 1.12, 11.0)
+	play_sfx("impact_hit", 0.92, 11.0)
+
+func _generate_jumpscare_scream() -> AudioStreamWAV:
+	# Hotel Shrek 1 / Five Nights at Doraemon's style distorted high-energy jumpscare stinger + monster shriek
+	var sample_rate := 22050
+	var duration := 1.15
+	var num_samples := int(sample_rate * duration)
+	var data := PackedByteArray()
+	data.resize(num_samples * 2)
+	for i in range(num_samples):
+		var t := float(i) / float(sample_rate)
+		var env := minf(1.0, t / 0.015) * exp(-t * 1.45)
+		var vibrato := sin(2.0 * PI * 28.0 * t) * 190.0
+		var shriek1 := sin(2.0 * PI * (940.0 + vibrato) * t) * 0.55
+		var shriek2 := sin(2.0 * PI * (1420.0 - vibrato * 0.8) * t) * 0.45
+		var sub_slam := sin(2.0 * PI * 68.0 * t) * 0.75 * exp(-t * 4.5)
+		var grit := (randf() * 2.0 - 1.0) * 0.52
+		# Hard-clip overdrive for classic indie horror jumpscare punch
+		var raw := (shriek1 + shriek2 + sub_slam + grit) * env * 1.85
+		var val := clampf(raw, -1.0, 1.0)
+		var sample := int(val * 32767.0)
+		data.encode_s16(i * 2, sample)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = sample_rate
+	wav.stereo = false
+	wav.data = data
+	return wav
 
 func play_heartbeat_rapid() -> void:
 	play_sfx("heartbeat_rapid")

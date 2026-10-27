@@ -105,11 +105,60 @@ var _notif_timer: SceneTreeTimer
 var _notif_seq: int = 0
 var _last_recovered_datapad_title: String = ""
 var _scan_timer: SceneTreeTimer
+var motive_lbl: Label = null
+var wayfinder_lbl: Label = null
+var story_monologue_lbl: Label = null
+
+func _setup_motive_and_wayfinder_ui() -> void:
+	var obj_vbox := get_node_or_null("TopLeftMargin/ObjectivePanel/Margin/VBox") as VBoxContainer
+	if obj_vbox == null:
+		return
+	if motive_lbl == null:
+		motive_lbl = Label.new()
+		motive_lbl.name = "MotiveLabel"
+		motive_lbl.visible = false
+		obj_vbox.add_child(motive_lbl)
+		obj_vbox.move_child(motive_lbl, 0)
+	if wayfinder_lbl == null:
+		wayfinder_lbl = Label.new()
+		wayfinder_lbl.name = "WayfinderLabel"
+		wayfinder_lbl.visible = false
+		obj_vbox.add_child(wayfinder_lbl)
+	if story_monologue_lbl == null:
+		story_monologue_lbl = Label.new()
+		story_monologue_lbl.name = "StoryMonologueLabel"
+		story_monologue_lbl.visible = false
+		obj_vbox.add_child(story_monologue_lbl)
+
+func update_wayfinder(target_name: String, distance_m: float, direction_hint: String) -> void:
+	if wayfinder_lbl != null:
+		if target_name.is_empty():
+			wayfinder_lbl.text = ""
+		else:
+			wayfinder_lbl.text = "TARGET BEACON: %s — %.1fm  [ %s ]" % [target_name, distance_m, direction_hint]
+	if immediate_task_lbl != null and MissionManager != null:
+		var immediate_task: String = MissionManager.get_current_immediate_task()
+		if target_name.is_empty():
+			immediate_task_lbl.text = immediate_task
+		else:
+			var short_arrow := "▲"
+			if direction_hint.contains("▼"):
+				short_arrow = "▼"
+			elif direction_hint.contains("◄"):
+				short_arrow = "◄"
+			elif direction_hint.contains("►"):
+				short_arrow = "►"
+			elif direction_hint.contains("↖"):
+				short_arrow = "↖"
+			elif direction_hint.contains("↗"):
+				short_arrow = "↗"
+			immediate_task_lbl.text = "%s  [%s %.0fm]" % [immediate_task, short_arrow, distance_m]
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	prompt_label.text = ""
 	notification_lbl.text = ""
+	_setup_motive_and_wayfinder_ui()
 	
 	if info_btn != null:
 		info_btn.pressed.connect(toggle_info)
@@ -322,15 +371,20 @@ func _update_status_overlay(afflictions: Array[String]) -> void:
 		mat.set_shader_parameter("distortion", 0.0)
 
 func _on_objective_updated(idx: int, title: String, desc: String) -> void:
+	if motive_lbl != null and MissionManager.has_method("get_player_motive"):
+		motive_lbl.text = MissionManager.get_player_motive()
 	if objective_title_lbl != null:
 		objective_title_lbl.text = "MISSION %d: %s" % [idx + 1, title.to_upper()]
 	
-	var cur_obj := MissionManager.get_current_objective()
-	var immediate_task: String = str(cur_obj.get("immediate_task", "Follow Mission Directives"))
+	var immediate_task: String = MissionManager.get_current_immediate_task()
+	var plain_guide: String = MissionManager.get_current_plain_guide() if MissionManager.has_method("get_current_plain_guide") else desc
 	if immediate_task_lbl != null:
-		immediate_task_lbl.text = "IMMEDIATE TASK: %s" % immediate_task
+		immediate_task_lbl.text = immediate_task
 	if objective_desc_lbl != null:
-		objective_desc_lbl.text = immediate_task
+		objective_desc_lbl.visible = false
+		objective_desc_lbl.text = plain_guide
+	if story_monologue_lbl != null and MissionManager.has_method("get_current_story_monologue"):
+		story_monologue_lbl.text = MissionManager.get_current_story_monologue()
 	
 	if pause_menu != null and pause_menu.has_method("update_mission"):
 		pause_menu.update_mission(idx, title, immediate_task, desc)
@@ -341,6 +395,10 @@ func _on_objective_completed(_idx: int, title: String) -> void:
 func _on_inventory_changed(items: Array[String]) -> void:
 	if pause_menu != null and pause_menu.has_method("update_inventory"):
 		pause_menu.update_inventory(items)
+	if objective_desc_lbl != null and MissionManager.has_method("get_current_plain_guide"):
+		objective_desc_lbl.text = MissionManager.get_current_plain_guide()
+	if story_monologue_lbl != null and MissionManager.has_method("get_current_story_monologue"):
+		story_monologue_lbl.text = MissionManager.get_current_story_monologue()
 	_update_tool_and_resource_hud()
 
 func show_notification(msg: String, duration: float = 3.0) -> void:
