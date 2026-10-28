@@ -113,8 +113,15 @@ func _on_interacted(_player: Node) -> void:
 				sync_state()
 				if hud != null and hud.has_method("show_notification"):
 					hud.show_notification("DEPARTURE THRUSTERS ENGAGED! Escaping Astraea Station...", 3.0)
+				# Stop harsh alarms and begin smooth calm transition
+				AudioManager.stop_alarm()
+				AudioManager.stop_ambient()
+				if AudioManager.has_method("play_revelation_chime"):
+					AudioManager.play_revelation_chime()
+				else:
+					AudioManager.play_sfx("revelation_chime")
 				# Transition to mission complete after short delay
-				get_tree().create_timer(1.5).timeout.connect(func():
+				get_tree().create_timer(1.8).timeout.connect(func():
 					get_tree().change_scene_to_file("res://scenes/ui/mission_complete.tscn")
 				)
 			else:

@@ -1,6 +1,26 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/mission_complete.gd" id="1_comp"]
+[ext_resource type="Texture2D" path="res://assets_ui/last.png" id="2_last"]
+[ext_resource type="Texture2D" path="res://assets_ui/Thank you For Playing.png" id="3_thankyou"]
+[ext_resource type="Texture2D" path="res://assets_ui/Press any key to continue.png" id="4_prompt"]
+[ext_resource type="FontFile" path="res://assets_ui/Instrument_Serif/InstrumentSerif-Regular.ttf" id="5_font"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_panel"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_btn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.25, 0.08, 0.08, 0.75)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.45, 0.45, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="MissionComplete" type="Control"]
 layout_mode = 3
@@ -18,7 +38,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.01, 0.05, 0.08, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -29,51 +49,77 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(620, 440)
+custom_minimum_size = Vector2(1100, 480)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 
 [node name="Margin" type="MarginContainer" parent="Center/Panel"]
 layout_mode = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 28
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 
 [node name="VBox" type="VBoxContainer" parent="Center/Panel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 28
+alignment = 1
 
-[node name="Title" type="Label" parent="Center/Panel/Margin/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.9, 0.4, 1)
-theme_override_font_sizes/font_size = 24
-text = "ORBITAL ESCAPE TRAJECTORY ACHIEVED"
-horizontal_alignment = 1
-
-[node name="Subtitle" type="Label" parent="Center/Panel/Margin/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "Astraea Biological Observatory Secured // Alien Threat Exterminated"
-horizontal_alignment = 1
-
-[node name="HSep" type="HSeparator" parent="Center/Panel/Margin/VBox"]
-layout_mode = 2
-
-[node name="BodyText" type="RichTextLabel" parent="Center/Panel/Margin/VBox"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "As the Lead Scientist engaged the ion drives, the Astraea Biological Research Station safely broke orbit.
-
-Arriving at the silent facility, you found the generators tripped, security panels dark, and the atmosphere choked with bio-spores. Step by step, you restored the massive plant and animal observatory chambers, tracked down the secret biological experiment that birthed the mutant alien predator, tactically lured the beast into the sealed chamber, and opened the emergency poisonous gas valve to exterminate it.
-
-The research facility is secured, the fallen crew's memory honored, and Earth command notified.
-
-The Lead Scientist's mission is accomplished."
-
-[node name="ReturnButton" type="Button" parent="Center/Panel/Margin/VBox"]
+[node name="BackstoryContainer" type="VBoxContainer" parent="Center/Panel/Margin/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
-size_flags_horizontal = 4
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="LastTexture" type="TextureRect" parent="Center/Panel/Margin/VBox/BackstoryContainer"]
+custom_minimum_size = Vector2(1075, 258)
+layout_mode = 2
+texture = ExtResource("2_last")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BodyText" type="RichTextLabel" parent="Center/Panel/Margin/VBox/BackstoryContainer"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(100, 20)
+layout_mode = 2
+text = "Lead Scientist mission accomplished: poisonous gas valve engaged."
+
+[node name="ThankYouContainer" type="VBoxContainer" parent="Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ThankYouTexture" type="TextureRect" parent="Center/Panel/Margin/VBox/ThankYouContainer"]
+custom_minimum_size = Vector2(879, 110)
+layout_mode = 2
+texture = ExtResource("3_thankyou")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BottomAction" type="CenterContainer" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="PromptTexture" type="TextureRect" parent="Center/Panel/Margin/VBox/BottomAction"]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("4_prompt")
+stretch_mode = 3
+
+[node name="ReturnButton" type="Button" parent="Center/Panel/Margin/VBox/BottomAction"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(320, 52)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.9, 1)
+theme_override_colors/font_color = Color(0.92, 0.44, 0.44, 1)
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 32
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn")
 text = "RETURN TO MAIN MENU"
