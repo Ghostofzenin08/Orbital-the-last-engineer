@@ -124,7 +124,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.78, 0.55, 0.55, 0.7)
 theme_override_fonts/font = ExtResource("2_font_regular")
 theme_override_font_sizes/font_size = 18
-text = "Astraea Biological Research Facility — Production Release"
+text = "Astraea Biological Research Facility — v1.0 Production Release"
 
 [node name="Spacer" type="Control" parent="Center/VBox"]
 custom_minimum_size = Vector2(0, 16)
