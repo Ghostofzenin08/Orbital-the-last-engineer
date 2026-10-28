@@ -2601,7 +2601,7 @@ func _test_m6_enhanced_visuals_and_storyline_verification() -> void:
 	_assert_true(mc_scene != null, "mission_complete.tscn loads successfully")
 	var mc = mc_scene.instantiate()
 	add_child(mc)
-	var mc_body = mc.get_node_or_null("Center/Panel/Margin/VBox/BodyText")
+	var mc_body = mc.find_child("BodyText", true, false)
 	_assert_true(mc_body != null and mc_body.text.contains("Lead Scientist"), "MissionComplete body text refers to Lead Scientist")
 	_assert_true(mc_body.text.contains("poisonous gas valve"), "MissionComplete body text mentions poisonous gas valve purge")
 	remove_child(mc)
