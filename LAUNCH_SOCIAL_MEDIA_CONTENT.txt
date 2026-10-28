@@ -1,0 +1,570 @@
+================================================================================
+ORBITAL: THE LAST ENGINEER - COMPLETE SOCIAL MEDIA & MARKETING LAUNCH KIT
+OFFICIAL LAUNCH DATE: OCTOBER 29, 2026
+================================================================================
+
+This document contains ready-to-use, tailored marketing copy for every major social
+media platform, content creator outreach, and community devlogs for the launch of
+"ORBITAL: The Last Engineer" on October 29, 2026.
+
+Replace placeholders in brackets:
+- [GAME_LINK] -> Your itch.io / Steam URL (e.g., https://zeninxparth.itch.io/orbital-the-last-engineer)
+- [TRAILER_LINK] -> YouTube trailer link
+- [PRESS_KIT_LINK] -> Google Drive / itch press kit link
+- [YOUR_TWITTER_HANDLE] -> e.g., @Oldest_dream08 / @ZeninXParth
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. X (TWITTER) LAUNCH CAMPAIGN
+   1.1. T-Minus 24h Countdown Teaser (Oct 28)
+   1.2. Official Launch Announcement Tweet (Oct 29)
+   1.3. Launch Day Mega-Thread (5-Part In-Depth Breakdown)
+   1.4. Post-Launch Community & Streamer Callout (Oct 30)
+
+2. REDDIT LAUNCH STRATEGY & POSTS
+   2.1. r/IndieGaming & r/godot (Developer & Tech Showcase)
+   2.2. r/gaming & r/pcgaming (Player-Facing Story Hook)
+   2.3. r/survivalhorror & r/horror (Atmospheric & Genre Fans)
+   2.4. r/playmygame (Direct Playtest / Launch Format)
+
+3. TIKTOK & INSTAGRAM REELS (SHORT-FORM VIDEO SCRIPTS & CAPTIONS)
+   3.1. Hook 1: "You have NO weapons, only engineering tools"
+   3.2. Hook 2: "The Jumpscare & Airlock Gas Trap"
+   3.3. Hook 3: "Feel Mode vs. Logical Mode"
+
+4. INSTAGRAM POST & CAROUSEL COPY
+   4.1. 5-Slide Carousel Architecture & Captions
+   4.2. Instagram Story Templates
+
+5. YOUTUBE LAUNCH TRAILER & GAMEPLAY COPY
+   5.1. Official Trailer Title, Description & Tags
+   5.2. Pinned Comment & Chapters
+
+6. DISCORD ANNOUNCEMENT TEMPLATES
+   6.1. Your Personal / Studio Discord Announcement
+   6.2. Godot & Indie Dev Community Showcase Channels
+
+7. ITCH.IO / STEAM LAUNCH DEVLOG POST
+   7.1. Official Release Post: "ORBITAL: The Last Engineer is OUT NOW!"
+
+8. CONTENT CREATOR & STREAMER EMAIL OUTREACH
+   8.1. High-Converting 60-Second Email Pitch
+   8.2. Follow-Up Email (48 Hours Later)
+
+9. LINKEDIN / PROFESSIONAL INDIE DEV POST
+   9.1. Solo Dev Milestones & Architecture Achievement
+
+================================================================================
+1. X (TWITTER) LAUNCH CAMPAIGN
+================================================================================
+
+--------------------------------------------------------------------------------
+1.1. T-Minus 24h Countdown Teaser (Post on Oct 28)
+--------------------------------------------------------------------------------
+Copy & Paste:
+--------------------------------------------------------------------------------
+T-MINUS 24 HOURS. 🚨
+
+The generators are dead.
+The atmospheric scrubbers have stopped.
+The science team didn't make it.
+...And whatever broke out of the lower vault is already inside the vents.
+
+ORBITAL: The Last Engineer launches TOMORROW, October 29. 🛰️👾
+
+Are you ready to survive?
+
+#indiedev #gamedev #madewithgodot #horror #indiehorror #gaming
+
+[ATTACH: 15-second teaser clip or GIF of red emergency lighting flickering]
+
+--------------------------------------------------------------------------------
+1.2. Official Launch Announcement Tweet (Post on Oct 29 Morning)
+--------------------------------------------------------------------------------
+Copy & Paste:
+--------------------------------------------------------------------------------
+ORBITAL: The Last Engineer is OUT NOW! 🚀🩸
+
+You dock at a dark orbital research station. No power. Falling oxygen. The crew is dead, and an apex genetic experiment is hunting you through the bulkheads.
+
+No weapons. Only your engineering tools and your wits.
+
+Play now: [GAME_LINK]
+
+RTs appreciated! 🔁🖤
+
+#gaming #indiegames #horror #scifi #survivalhorror #godotengine
+
+[ATTACH: Launch Trailer Video or Key Art Screenshot]
+
+--------------------------------------------------------------------------------
+1.3. Launch Day Mega-Thread (Post as replies under the Launch Tweet)
+--------------------------------------------------------------------------------
+Tweet 2 (The Premise):
+You aren't a space marine. You're an engineer.
+To survive, you must manually repair 13 interconnected compartments across 2 decks:
+🔧 Throw the 150 kW fusion breakers
+🎛️ Patch damaged coolant loops
+💨 Manage live O2, CO2 & pressure cascades
+Before suffocation or the entity takes you. (1/4)
+
+Tweet 3 (The Horror & The Alien):
+The specimen doesn't just chase you. It stalks you.
+👂 Hears your steps in the service ducts
+🚪 Bypasses locked doors and crawls through crawlways
+💥 Shakes your screen with violent 3-hit physical impacts
+Safe rooms exist... but you eventually have to leave to restore the ship. (2/4)
+
+Tweet 4 (Two Game Modes):
+Built for every horror fan with 2 dedicated modes:
+1️⃣ FEEL MODE: Minimalist HUD, pure cinematic dread, zero complex math. Perfect for story lovers.
+2️⃣ LOGICAL MODE: Hardcore sci-fi sim with real-time thermodynamic equations, CO2 ppm telemetry, and power routing matrices. (3/4)
+
+Tweet 5 (Call to Action & Tech Pride):
+Built 100% in Godot Engine 4.7.2 with 1,083 automated regression tests for a rock-solid 60 FPS experience even on integrated graphics!
+
+Grab it today, turn off your lights, put on headphones, and see if you can escape:
+👉 [GAME_LINK]
+
+Drop your gameplay clips below! (4/4)
+
+--------------------------------------------------------------------------------
+1.4. Post-Launch Community & Streamer Callout (Post on Oct 30)
+--------------------------------------------------------------------------------
+Copy & Paste:
+--------------------------------------------------------------------------------
+Seeing streamers scream at the Airlock sequence in ORBITAL: The Last Engineer is making my entire year 😂💀
+
+If you're streaming the game this weekend, drop your Twitch / YouTube link below so I can raid your stream and watch you survive!
+
+Play the game here: [GAME_LINK]
+
+#streamer #twitchaffiliate #horrorgame #indiedev
+
+
+================================================================================
+2. REDDIT LAUNCH STRATEGY & POSTS
+================================================================================
+
+--------------------------------------------------------------------------------
+2.1. Subreddits: r/IndieGaming, r/godot, r/gamedev
+--------------------------------------------------------------------------------
+Post Title:
+After months of development in Godot 4.7, my first-person sci-fi engineering horror game "ORBITAL: The Last Engineer" just launched! (1,083 automated tests, 100% GDScript)
+
+Post Body:
+Hey everyone! 👋
+
+Today I'm thrilled (and terrified) to officially launch my game, **ORBITAL: The Last Engineer**!
+
+🎮 **Watch the launch trailer:** [TRAILER_LINK]
+🚀 **Play the game on itch.io:** [GAME_LINK]
+
+### The Core Concept: "The ship is not a collection of rooms, it's one living machine"
+You play as a Lead Engineer docking at the *Astraea Biological Research Facility*. When you step aboard, the primary fusion turbine is dark, atmospheric scrubbers are offline, and the research team has been massacred by an apex genetic experiment that broke out of containment.
+
+You don't have plasma rifles or shotguns. Your arsenal consists of:
+- **Diagnostic Scanner (`[1]`)**: Scans circuits and machinery for fault codes and heat signatures.
+- **Multitool (`[2]`)**: Calibrates electronics, welds breaches, and fastens high-torque clamps.
+- **Consumables & Schematic Map (`[M]`)**: Spare fuses, battery cells, and live room-by-room pressure telemetry.
+
+### What makes it unique?
+1. **Paced Horror & The Airlock Trap**: The creature stays dormant during early exploration, but once all core systems are repaired, station tremors alert you that it has awakened. You cannot shoot it; you have to outsmart it, lure it into the dual-door Airlock Chamber, and pull the emergency Decontamination Poison Gas Valve to purge it.
+2. **Dual Experience Modes**:
+   - *Feel Mode*: Clean, gauge-free HUD with zero scientific formulas. Pure tension and atmosphere.
+   - *Logical Mode*: Hard sci-fi simulator showing live thermodynamic equations, CO2 ppm toxicity curves, and circuit routing matrices.
+3. **Engine & Tech**: Built 100% with native GDScript in Godot 4.7.2. Runs at a rock-solid 60 FPS on integrated graphics (Intel UHD / 8GB RAM) and verified by 1,083 automated unit/integration tests without external bloat.
+
+I would love to hear your feedback, thoughts on the atmosphere, or any bugs you encounter! Thank you so much to the Godot and indie dev community for all the support along the way. 🚀
+
+--------------------------------------------------------------------------------
+2.2. Subreddits: r/gaming, r/pcgaming
+--------------------------------------------------------------------------------
+Post Title:
+I wanted to play a sci-fi horror game where you're an actual engineer surviving with tools instead of weapons, so I spent the last few months making it. It just launched today!
+
+Post Body:
+Hey r/gaming!
+
+If you love the claustrophobia of *Alien: Isolation*, the industrial mechanical dread of *Dead Space*, or the system management of classic sci-fi, I just launched my solo-developed game: **ORBITAL: The Last Engineer**.
+
+🎬 **Trailer:** [TRAILER_LINK]
+🕹️ **Link:** [GAME_LINK]
+
+**The Premise:**
+You arrive at a dark orbital research station to investigate why it went silent. The fusion turbine is dead, oxygen is leaking at 0.3 kPa/s, and a mutated apex predator is stalking you through the maintenance crawlways. 
+
+There are NO weapons. You have to diagnose machinery with your scanner, replace blown fuses, crawl through decompression shafts, and manually stabilize life support before you asphyxiate. 
+
+When the alien hunts you, it doesn't give you instant cheap deaths: encounters feature a visceral 3-hit physical combat system with heavy camera trauma shake, giving you heart-pounding seconds to break line of sight and retreat into the Medical Bay safe room.
+
+To win, you have to lure the beast into the station airlock and flood it with decontamination gas.
+
+It's out today for PC. Check it out and let me know if you make it off the station alive!
+
+--------------------------------------------------------------------------------
+2.3. Subreddits: r/survivalhorror, r/horror
+--------------------------------------------------------------------------------
+Post Title:
+No guns. Falling oxygen. A predator in the ducts. My psychological sci-fi survival horror "ORBITAL: The Last Engineer" is out now!
+
+Post Body:
+To fellow horror fans:
+
+I've always felt horror games are scariest when you feel vulnerable and every system around you is failing. In **ORBITAL: The Last Engineer**, you are an isolated engineer sent to an orbital biological research vessel where an unauthorized experiment wiped out the crew.
+
+Highlights:
+- **Cat-and-Mouse AI**: The entity dynamically stalks you across 13 interconnected chambers, crawls through utility ducts, and unlatches doors in its path.
+- **Safe Room Sanctuary**: The Research Observatory and Medical Bay provide temporary airtight bulkheads where you can catch your breath and check your schematic map.
+- **Dynamic Horror Jumpscares**: High-speed camera rushes, screen trauma distortion, and rapid heartbeat audio.
+- **Feel Mode**: If you hate cluttered HUDs and just want raw, cinematic dread, toggle "Feel Mode" for a pure, immersive horror experience.
+
+Put on headphones and give it a spin: [GAME_LINK]
+
+--------------------------------------------------------------------------------
+2.4. Subreddit: r/playmygame
+--------------------------------------------------------------------------------
+Post Title:
+[Released] ORBITAL: The Last Engineer — First-person sci-fi engineering horror game with dynamic alien stalker
+
+Post Body:
+**Game Title:** ORBITAL: The Last Engineer  
+**Genre:** First-Person Sci-Fi Survival Horror / Engineering Sim  
+**Platforms:** PC (Windows)  
+**Engine:** Godot Engine 4.7.2  
+**Status:** Released (Oct 29, 2026)  
+**Play Link:** [GAME_LINK]  
+**Trailer:** [TRAILER_LINK]  
+
+**Description:**
+Dock at a derelict orbital research station where the fusion reactor is dark, life support is offline, and a predatory alien stalks the halls. Restore 13 interconnected chambers using diagnostic scanners and multitools, manage live atmospheric O2/CO2 levels, and trap the specimen in the airlock chamber. Features both "Feel Mode" (minimalist cinematic horror) and "Logical Mode" (hard sci-fi telemetry).
+
+**Feedback Request:**
+Looking for player feedback on the atmospheric pacing, alien stalker AI difficulty, and camera controls (360° mouse look vs. keyboard navigation).
+
+
+================================================================================
+3. TIKTOK & INSTAGRAM REELS (SHORT-FORM VIRAL VIDEO SCRIPTS)
+================================================================================
+
+--------------------------------------------------------------------------------
+3.1. Hook 1: "You have NO weapons, only engineering tools"
+--------------------------------------------------------------------------------
+Visual Style: Fast-paced gameplay cuts showing red flashing lights, throwing breakers, holding the diagnostic scanner, and then hearing a horrifying roar.
+Text on Screen: "Most horror games give you a shotgun. In this game... you only have a wrench."
+
+Script / Voiceover:
+"In most space horror games, you pick up a pulse rifle and blast monsters.
+In ORBITAL, you are just an engineer.
+You arrive at a dark orbital station. Oxygen is running out. 
+The crew was ripped apart by an apex genetic experiment.
+Your only tools? A diagnostic scanner, a multitool, and spare fuses.
+You have to manually crawl through breached crawlways, restart the fusion turbine, and manage real-time life support...
+While this THING stalks your footsteps through the walls.
+Can you lure it into the airlock before it catches you?
+ORBITAL: The Last Engineer is out now. Link in bio."
+
+Sound: Heavy industrial hum + sudden alien shriek sound effect.
+Hashtags: #indiegame #horror #gaming #scifi #gamer #pcgaming #godot #survivalhorror
+
+--------------------------------------------------------------------------------
+3.2. Hook 2: "The Jumpscare & Airlock Gas Trap"
+--------------------------------------------------------------------------------
+Visual Style: Player walking down the dark corridor, heartbeat accelerating, turning a corner and face-to-face with the Alien Stalker. Screen violently shakes. Player sprints to Airlock and pulls the red poison gas lever.
+Text on Screen: "POV: You forgot to check the air vents behind you 💀"
+
+Script / Voiceover:
+"Rule #1 of this game: If the lights start flickering... RUN.
+When you complete the station repairs, the alien wakes up.
+It doesn't kill you in one cheap hit—it hits with brutal screen-shaking claw strikes.
+Your only escape? Lure it into the dual-door airlock...
+Seal the bulkheads...
+And release the lethal decontamination gas.
+ORBITAL: The Last Engineer is out today on PC! Check the link in my bio to play."
+
+Sound: Rapid heartbeat panning into distorted sub-bass roar.
+Hashtags: #horrortok #jumpscare #indiehorror #scarygames #gamingontiktok
+
+--------------------------------------------------------------------------------
+3.3. Hook 3: "Feel Mode vs. Logical Mode"
+--------------------------------------------------------------------------------
+Visual Style: Split-screen comparing "Feel Mode" (clean, cinematic, pure dark hallway) with "Logical Mode" (showing complex gauges, CO2 ppm readouts, temperature spikes, circuit schematics).
+Text on Screen: "Which type of horror gamer are you?"
+
+Script / Voiceover:
+"I built two completely different modes into my sci-fi horror game:
+Option 1: Feel Mode. No complex gauges, no scientific equations. Just pure, unadulterated cinematic dread, your vitals, and your flashlight.
+Option 2: Logical Mode. Hardcore sci-fi simulation. Real-time CO2 toxicity, temperature cascades, thermodynamic equations, and circuit routing.
+Which one are you choosing to survive?
+ORBITAL: The Last Engineer is available now! Link in bio."
+
+Hashtags: #gamedev #gameplay #indiegames #scifihorror #gamersoftiktok
+
+
+================================================================================
+4. INSTAGRAM POST & CAROUSEL COPY
+================================================================================
+
+--------------------------------------------------------------------------------
+4.1. 5-Slide Carousel Guide
+--------------------------------------------------------------------------------
+Slide 1 (Image: Key art title screen with red emergency lighting):
+- Headline: "ORBITAL: The Last Engineer is Out Now!"
+- Subtext: "A first-person sci-fi engineering horror game."
+
+Slide 2 (Image: First-person view of Engineering Bay fusion turbine):
+- Headline: "The Ship is a Living Machine"
+- Subtext: "No magic health potions. Diagnose circuits with your scanner, replace blown fuses, and patch hull breaches before oxygen runs out."
+
+Slide 3 (Image: Close-up silhouette of the Alien Stalker with crimson eyes):
+- Headline: "You Are Being Hunted"
+- Subtext: "An apex predator born from an unauthorized genetic experiment. It crawls through ducts, unlatches doors, and tracks your scent."
+
+Slide 4 (Image: The Airlock Chamber and Poison Gas Valve):
+- Headline: "No Guns. Only Your Wits."
+- Subtext: "Lure the entity into the containment airlock and activate the decontamination gas to survive."
+
+Slide 5 (Image: Game logo & call to action):
+- Headline: "Play Now on PC"
+- Subtext: "Available today on itch.io. Link in bio!"
+
+Instagram Caption:
+--------------------------------------------------------------------------------
+The Astraea Research Station has gone dark... and something is breathing in the service ducts. 🛰️🩸
+
+I'm incredibly proud to announce that my first-person sci-fi engineering horror game, **ORBITAL: The Last Engineer**, is officially OUT NOW! 
+
+As the station's last engineer, you arrive to find failing fusion generators, falling oxygen, and a vanished research crew. You have no weapons—only diagnostic scanners, multitools, and 13 interconnected chambers to restore before an apex biological predator corners you.
+
+✨ Key Features:
+🔹 Real-time life support simulation (O2, CO2 ppm, temperature, pressure)
+🔹 13 explorable compartments across 2 decks
+🔹 "Feel Mode" (Cinematic horror) & "Logical Mode" (Hardcore engineering sim)
+🔹 Heart-pounding alien stalker AI with 3-hit lethal combat & screen trauma
+🔹 Full 360° mouse look or keyboard navigation
+
+👉 Link in bio to download and play today!
+
+Turn off your lights, put on your headphones, and let me know in the comments if you survive the night. 🎧👁️
+
+#indiegamedev #indiehorror #gamedev #madewithgodot #horrorgame #gamingcommunity #pcgamer #survivalhorror #solodev #scifiart
+
+
+================================================================================
+5. YOUTUBE LAUNCH TRAILER & GAMEPLAY COPY
+================================================================================
+
+--------------------------------------------------------------------------------
+5.1. Trailer Video Metadata
+--------------------------------------------------------------------------------
+Title:
+ORBITAL: The Last Engineer - Official Launch Trailer (Sci-Fi Survival Horror Game)
+
+Description:
+ORBITAL: The Last Engineer is OUT NOW!
+Download & Play: [GAME_LINK]
+
+"The ship is not a collection of rooms with decorative props. It is one interconnected machine."
+
+You are the Lead Engineer docking at the Astraea Biological Research Facility. The station is dark, the primary fusion generators have tripped, atmospheric scrubbers are offline, and the entire science team is dead. An unauthorized genetic experiment in the lower containment sector has unleashed an apex predator that now stalks the vessel.
+
+You have no weapons. You must restore the station's dying systems, investigate the tragedy through environmental datapads, and tactically lure the entity into the Airlock Chamber before purging it with lethal decontamination gas.
+
+🎮 GAME FEATURES:
+- Deterministic Subsystem Simulation: Power, Life Support, Coolant, and Pneumatics interact in real-time.
+- Hands-On Toolset: Diagnostic Scanners, 3-mode Multitools (Calibrate, Cut/Weld, Tighten), and consumable fuse packs.
+- Dual Game Modes: Choose "Feel Mode" for clean, minimalist atmospheric dread, or "Logical Mode" for in-depth engineering telemetry.
+- Dynamic Predator AI: 3-hit lethal damage, realistic camera screen shake, and duct-crawling pursuit.
+- Built 100% in Godot Engine 4.7.2 with 1,083 automated tests for 60 FPS performance on PC.
+
+⏱️ VIDEO CHAPTERS:
+0:00 - Docking at Astraea Station
+0:25 - Restoring the Fusion Turbine
+0:50 - The Atmosphere Collapses
+1:15 - It Awakens in the Ducts
+1:40 - The Airlock Gas Trap
+2:05 - Play Now on PC
+
+Tags:
+orbital the last engineer, sci fi horror game, indie horror game 2026, godot 4 horror game, alien isolation inspired game, survival horror pc, dead space indie, space engineering horror, first person horror game
+
+--------------------------------------------------------------------------------
+5.2. Pinned Comment (Copy and pin under your YouTube trailer):
+--------------------------------------------------------------------------------
+"Thank you all for watching! As a solo developer, launching ORBITAL: The Last Engineer is a dream come true. You can download and play the full game right now on itch.io: [GAME_LINK]
+
+Let me know in the comments what you think of the atmosphere and whether you managed to trap the alien!"
+
+
+================================================================================
+6. DISCORD ANNOUNCEMENT TEMPLATES
+================================================================================
+
+--------------------------------------------------------------------------------
+6.1. Your Studio / Community Discord Announcement
+--------------------------------------------------------------------------------
+Copy & Paste:
+--------------------------------------------------------------------------------
+@everyone 🚨 **ORBITAL: THE LAST ENGINEER IS OFFICIALLY RELEASED!** 🚨
+
+After months of intensive development, optimization, and testing, my first-person sci-fi engineering survival horror game is OUT NOW on PC! 🛰️👾
+
+**Play it here:** [GAME_LINK]
+**Watch the Launch Trailer:** [TRAILER_LINK]
+
+**What awaits you aboard the Astraea Research Facility:**
+🔧 **No Guns, Pure Engineering**: Throw 150 kW fusion breakers, patch breached coolant manifolds, and replace blown fuses using your diagnostic scanner and multitool.
+💨 **Living Subsystem Simulation**: Watch room-by-room O2, CO2, and pressure fluctuate as systems fail around you.
+👾 **Intelligent Alien Stalker**: An apex predator stalks the corridors, unlatches doors, and hunts you down. 
+🛡️ **Two Game Modes**: Choose **Feel Mode** for a pure, cinematic horror journey, or **Logical Mode** for hardcore scientific telemetry!
+
+Thank you so much to everyone in this server for testing, feedback, and encouragement along the way! 
+
+If you play, please share your screenshots, reaction clips, and feedback in #gameplay-feedback! Have fun, and try not to get cornered in the crawlways... 💀
+
+--------------------------------------------------------------------------------
+6.2. Godot Discord / Indie Dev Showcases (#showcase / #releases)
+--------------------------------------------------------------------------------
+Copy & Paste:
+--------------------------------------------------------------------------------
+**ORBITAL: The Last Engineer (Godot 4.7.2 / GDScript) is Released!** 🚀
+
+Hey Godot friends! I just launched my first-person sci-fi engineering horror game built 100% in Godot 4.7.2.
+
+- **Engine:** Godot Engine 4.7.2 Stable (Forward+ / Mobile)
+- **Code:** 100% Native GDScript
+- **Architecture:** Complete deterministic physical simulation for power, life support (O2, CO2, pressure), and door pneumatics.
+- **Testing:** 1,083 automated unit/integration tests running headlessly to ensure zero bugs or regressions.
+- **Link:** [GAME_LINK]
+- **Trailer:** [TRAILER_LINK]
+
+Would love to hear fellow Godot devs' thoughts on the procedural audio synthesis and PBR lighting!
+
+
+================================================================================
+7. ITCH.IO / STEAM LAUNCH DEVLOG POST
+================================================================================
+
+**Post Title:** ORBITAL: The Last Engineer is OUT NOW! (v1.0 Launch Release)
+**Post Category:** Release / Major Update
+
+Body (Markdown formatted):
+--------------------------------------------------------------------------------
+# The Station is Dark. The Doors Are Open.
+
+I am thrilled to announce that **ORBITAL: The Last Engineer** has officially launched in its complete **v1.0 release**!
+
+Starting today, you can step aboard the *Astraea Biological Research Facility* and experience a tense, tactile blend of spacecraft engineering and survival horror.
+
+### What is ORBITAL?
+You play as the Lead Engineer docking at an orbital facility that has suffered a catastrophic failure. The fusion turbines are offline, the life support scrubbers have broken down, and the science team is nowhere to be found. 
+
+As you restore the ship's 13 interconnected chambers, you discover that the crew's unauthorized genetic experiment in the lower vault has broken containment—and it is now hunting you.
+
+### What's Inside v1.0:
+- **13 Fully Realized Compartments**: Explore the Command Bridge, Research Observatory, Engineering Bay, Reactor Subdeck, Specimen Vault, and hazardous Maintenance Crawlways.
+- **Dual Game Modes**:
+  - **Feel Mode**: Created for players who want atmospheric immersion, minimal UI distraction, and visceral horror without dense math.
+  - **Logical Mode**: Hardcore engineering simulation with real-time thermodynamic equations, CO2 ppm readouts, and circuit diagrams.
+- **Hands-On Engineering Tools**: Diagnostic scanner, 3-mode multitool (calibrate, weld, tighten), spare fuses, and battery packs.
+- **Apex Alien Predator**: Dynamic spatial pathfinding, duct crawling, and heart-pounding 3-hit physical combat with realistic camera trauma.
+- **Full 360° View Options**: Seamlessly switch between mouse look and arrow-key keyboard panning.
+- **Rock-Solid Performance**: 1,083 automated tests ensure a polished, bug-free 60 FPS experience.
+
+### A Message From the Developer
+Building this game has been an incredible journey. I wanted to create a sci-fi horror game where the environment feels like a real machine rather than a movie set—where every valve, breaker, and oxygen scrubber matters.
+
+If you enjoy the game, please consider leaving a rating and review on itch.io—it helps solo indie developers tremendously!
+
+Grab your diagnostic scanner, watch your oxygen reserves, and welcome aboard the *Astraea*.
+
+👉 **[Download & Play ORBITAL: The Last Engineer Here]([GAME_LINK])**
+
+
+================================================================================
+8. CONTENT CREATOR & STREAMER EMAIL OUTREACH
+================================================================================
+
+Target: YouTubers and Twitch streamers who play indie horror (e.g., ManlyBadassHero, Fooster, IGP, Markiplier, generic horror streamers).
+
+--------------------------------------------------------------------------------
+8.1. High-Converting 60-Second Email Pitch
+--------------------------------------------------------------------------------
+Subject Line Options (Choose one):
+- Game Key: ORBITAL — Alien: Isolation meets spacecraft engineering (Out Oct 29)
+- New Sci-Fi Horror Game: What if you had no guns, only a wrench? (ORBITAL)
+- For [CREATOR_NAME]: Sci-fi horror game where the alien stalks you through vents
+
+Email Body:
+--------------------------------------------------------------------------------
+Hi [CREATOR_NAME],
+
+I've been a huge fan of your horror playthroughs, especially your videos on [MENTION_ONE_OF_THEIR_RECENT_HORROR_GAMES]. Because you enjoy tense, atmospheric survival horror, I wanted to share a free copy of my newly launched game: **ORBITAL: The Last Engineer**.
+
+🎬 **60-Second Launch Trailer:** [TRAILER_LINK]
+🔑 **Direct Download / Free Game Key:** [GAME_LINK] (or attached)
+📁 **Press Kit & Screenshots:** [PRESS_KIT_LINK]
+
+**The Hook:**
+You play as an isolated engineer docking at a dark orbital research station where the fusion reactor has failed, oxygen is dropping, and a mutated apex predator is hunting you through the bulkheads.
+
+**Why your viewers will love it:**
+- **No weapons, only tools:** You survive using diagnostic scanners, multitools, and rewiring breakers.
+- **Cat-and-mouse AI:** The alien stalker navigates service ducts, unlatches doors, and attacks with violent screen-shaking claw strikes (3 hits to survive, no instant cheap deaths).
+- **The Airlock Gas Purge:** To defeat the entity, you have to physically lure it into the station airlock and release lethal decontamination gas.
+- **Streamer friendly:** Clean 45-60 minute playtime with constant tension and cinematic jumpscares.
+
+There is zero embargo—you are free to stream or upload videos whenever you like! If you decide to play, let me know so I can share your video across our social channels.
+
+Thanks so much for your time and all the awesome content you create!
+
+Best regards,
+
+[YOUR_NAME]  
+Solo Developer, ORBITAL: The Last Engineer  
+[YOUR_TWITTER_HANDLE] | [GAME_LINK]
+
+--------------------------------------------------------------------------------
+8.2. Follow-Up Email (Send 48 hours later if no reply)
+--------------------------------------------------------------------------------
+Subject: Re: Game Key: ORBITAL — Alien: Isolation meets spacecraft engineering
+
+Hi [CREATOR_NAME],
+
+Just following up on my email from earlier this week regarding **ORBITAL: The Last Engineer**.
+
+The game officially launched yesterday and streamers have been having a blast getting jumpscared by the alien in the lower subdeck! Here is a direct link if you'd like to check it out for your channel this weekend:
+
+👉 [GAME_LINK]
+
+No pressure at all—keep up the great videos!
+
+Best,
+[YOUR_NAME]
+
+
+================================================================================
+9. LINKEDIN / PROFESSIONAL INDIE DEV POST
+================================================================================
+
+Copy & Paste:
+--------------------------------------------------------------------------------
+Today marks a major milestone: after months of development, I have officially launched my 3D sci-fi survival horror game, "ORBITAL: The Last Engineer"! 🚀🛰️
+
+Built in Godot Engine 4.7.2 using 100% native GDScript, the project was designed around a central architectural philosophy: "The ship is not a collection of rooms with decorative props, but one living, interconnected machine."
+
+A few engineering highlights from the journey:
+🔹 **Deterministic Physics & Atmosphere Simulation**: A unified subsystem network dynamically tracks power load curves, coolant loops, and atmospheric telemetry (O2, CO2 ppm, temperature, and pressure cascades) across 13 compartments.
+🔹 **Automated Quality Assurance**: Implemented 1,083 automated unit and integration tests running headlessly in CI to verify room mapping, save/load persistence, door mechanics, and alien AI routing.
+🔹 **Accessible UX Design**: Designed two distinct gameplay pipelines—"Feel Mode" (minimalist HUD for atmospheric horror) and "Logical Mode" (deep scientific telemetry for simulator enthusiasts).
+🔹 **High-Performance Procedural Assets**: Zero external asset bloat with procedural 16-bit PCM audio synthesis and optimized PBR materials running at a steady 60 FPS on integrated graphics.
+
+You can check out the game and trailer here: [GAME_LINK]
+
+Huge thank you to everyone who supported this project. On to the next chapter of game development! 
+
+#GameDevelopment #GodotEngine #IndieDev #SoftwareEngineering #GameDesign #Programming #IndieGame #QA
+================================================================================
+END OF SOCIAL MEDIA LAUNCH KIT
+================================================================================
