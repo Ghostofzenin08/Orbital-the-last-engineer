@@ -1,0 +1,136 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/story_intro.gd" id="1_intro"]
+[ext_resource type="Texture2D" path="res://assets_ui/image 4.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets_ui/Story01.png" id="3_story1"]
+[ext_resource type="Texture2D" path="res://assets_ui/Press any key to continue.png" id="4_prompt"]
+[ext_resource type="FontFile" path="res://assets_ui/Instrument_Serif/InstrumentSerif-Regular.ttf" id="5_font"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_skip"]
+
+[node name="StoryIntro" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_intro")
+
+[node name="Background" type="TextureRect" parent="."]
+texture_filter = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.02, 0.035, 0.78)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StoryContainer" type="VBoxContainer" parent="Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1040, 240)
+layout_mode = 2
+alignment = 1
+
+[node name="StoryTexture" type="TextureRect" parent="Center/StoryContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1000, 200)
+layout_mode = 2
+texture = ExtResource("3_story1")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StoryLabel" type="Label" parent="Center/StoryContainer"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(980, 160)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.38, 0.38, 1)
+theme_override_colors/font_shadow_color = Color(0.12, 0.02, 0.02, 0.8)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 38
+text = "The research team specializing in plant and animal biochemistry on the space station is specifically working on the new species..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="BottomBar" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -90.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_bottom = 36
+
+[node name="CenterPrompt" type="CenterContainer" parent="BottomBar"]
+layout_mode = 2
+
+[node name="PromptTexture" type="TextureRect" parent="BottomBar/CenterPrompt"]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("4_prompt")
+stretch_mode = 3
+
+[node name="TopBar" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 36
+
+[node name="HBox" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+alignment = 2
+
+[node name="SkipButton" type="Button" parent="TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(1, 0.85, 0.85, 1)
+theme_override_colors/font_color = Color(0.75, 0.5, 0.5, 0.65)
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 22
+theme_override_styles/focus = SubResource("StyleBoxEmpty_skip")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_skip")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_skip")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_skip")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_skip")
+text = "SKIP [ESC]"
+
+[node name="FadeRect" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.01, 0.015, 0.02, 1)

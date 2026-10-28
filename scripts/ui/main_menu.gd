@@ -125,7 +125,7 @@ func _on_new_game() -> void:
 	AudioManager.play_sfx("click")
 	ShipSystemManager.reset_to_defaults()
 	MissionManager.reset_missions()
-	get_tree().change_scene_to_file("res://scenes/levels/ship_interior.tscn")
+	get_tree().change_scene_to_file("res://scenes/ui/story_intro.tscn")
 
 func _on_continue() -> void:
 	if not SaveManager.has_save_file():
