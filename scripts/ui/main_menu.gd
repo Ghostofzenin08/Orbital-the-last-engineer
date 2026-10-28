@@ -8,6 +8,11 @@ extends Control
 @onready var game_mode_btn: Button = get_node_or_null("%GameModeButton")
 @onready var settings_btn: Button = %SettingsButton
 @onready var quit_btn: Button = %QuitButton
+@onready var arrow_start: TextureRect = get_node_or_null("%ArrowStart")
+@onready var arrow_continue: TextureRect = get_node_or_null("%ArrowContinue")
+@onready var arrow_game_mode: TextureRect = get_node_or_null("%ArrowGameMode")
+@onready var arrow_settings: TextureRect = get_node_or_null("%ArrowSettings")
+@onready var arrow_quit: TextureRect = get_node_or_null("%ArrowQuit")
 @onready var settings_panel: PanelContainer = %SettingsPanel
 @onready var close_settings_btn: Button = %CloseSettingsButton
 @onready var look_mode_btn: Button = get_node_or_null("%LookModeButton")
@@ -31,6 +36,14 @@ func _ready() -> void:
 		look_mode_btn.pressed.connect(_on_toggle_look_mode)
 	if settings_game_mode_btn != null:
 		settings_game_mode_btn.pressed.connect(_on_toggle_game_mode)
+
+	# Wire up arrow selector indicators for Figma hover/focus state
+	_setup_button_hover(new_game_btn, arrow_start)
+	_setup_button_hover(continue_btn, arrow_continue)
+	if game_mode_btn != null:
+		_setup_button_hover(game_mode_btn, arrow_game_mode)
+	_setup_button_hover(settings_btn, arrow_settings)
+	_setup_button_hover(quit_btn, arrow_quit)
 	
 	sens_slider.value_changed.connect(_on_sens_changed)
 	vol_slider.value_changed.connect(_on_vol_changed)
@@ -51,6 +64,34 @@ func _ready() -> void:
 	continue_btn.disabled = not SaveManager.has_save_file()
 	settings_panel.visible = false
 
+func _setup_button_hover(btn: Button, arrow: TextureRect) -> void:
+	if btn == null or arrow == null:
+		return
+	arrow.modulate.a = 0.0
+	btn.mouse_entered.connect(func():
+		_set_arrow_visible(arrow, true)
+	)
+	btn.mouse_exited.connect(func():
+		if not btn.has_focus():
+			_set_arrow_visible(arrow, false)
+	)
+	btn.focus_entered.connect(func():
+		_set_arrow_visible(arrow, true)
+	)
+	btn.focus_exited.connect(func():
+		_set_arrow_visible(arrow, false)
+	)
+
+func _set_arrow_visible(arrow: TextureRect, show: bool) -> void:
+	if arrow == null:
+		return
+	if is_inside_tree():
+		var tween = create_tween()
+		if tween:
+			tween.tween_property(arrow, "modulate:a", 1.0 if show else 0.0, 0.1)
+			return
+	arrow.modulate.a = 1.0 if show else 0.0
+
 func _on_toggle_game_mode() -> void:
 	AudioManager.play_sfx("click")
 	SaveManager.toggle_game_mode()
@@ -63,8 +104,8 @@ func _on_toggle_look_mode() -> void:
 
 func _update_mode_labels() -> void:
 	var is_feel := (SaveManager.game_mode == "feel")
-	var mode_text := "GAME MODE: FEEL (CASUAL)" if is_feel else "GAME MODE: LOGICAL (ENGINEERING)"
-	var col := Color(1.0, 0.75, 0.2) if is_feel else Color(0.2, 0.85, 1.0)
+	var mode_text := "Game Mode: Feel (Casual)" if is_feel else "Game Mode: Logical (Engineering)"
+	var col := Color(1.0, 0.72, 0.4) if is_feel else Color(0.88, 0.44, 0.44)
 	
 	if game_mode_btn != null:
 		game_mode_btn.text = mode_text
@@ -78,7 +119,7 @@ func _update_look_labels() -> void:
 	var look_text := "360° LOOK CONTROLS: ARROW KEYS" if is_arrows else "360° LOOK CONTROLS: MOUSE"
 	if look_mode_btn != null:
 		look_mode_btn.text = look_text
-		look_mode_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.6) if is_arrows else Color(0.2, 0.85, 1.0))
+		look_mode_btn.add_theme_color_override("font_color", Color(0.95, 0.65, 0.45) if is_arrows else Color(0.92, 0.42, 0.42))
 
 func _on_new_game() -> void:
 	AudioManager.play_sfx("click")
