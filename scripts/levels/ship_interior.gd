@@ -432,6 +432,22 @@ func _update_objective_beacon_and_wayfinder(delta: float) -> void:
 			player.hud.update_wayfinder("", 0.0, "")
 
 func _apply_scifi_horror_textures_and_environment() -> void:
+	if _scifi_normal_tex == null:
+		var fn := FastNoiseLite.new()
+		fn.frequency = 0.05
+		_scifi_normal_tex = NoiseTexture2D.new()
+		_scifi_normal_tex.width = 64
+		_scifi_normal_tex.height = 64
+		_scifi_normal_tex.as_normal_map = true
+		_scifi_normal_tex.noise = fn
+	if _scifi_roughness_tex == null:
+		var fn2 := FastNoiseLite.new()
+		fn2.frequency = 0.03
+		_scifi_roughness_tex = NoiseTexture2D.new()
+		_scifi_roughness_tex.width = 64
+		_scifi_roughness_tex.height = 64
+		_scifi_roughness_tex.noise = fn2
+
 	# 1. Configure sleek, moody, high-contrast Bio-Research Facility WorldEnvironment (no white blowout & fast GPU rendering)
 	if get_node_or_null("HorrorWorldEnvironment") == null:
 		var world_env := WorldEnvironment.new()
