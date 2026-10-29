@@ -6,4 +6,3 @@ my_assets/*
 my_assets/Shaders/vignette*
 !my_assets/alien/
 !my_assets/alien/**
-builds/
