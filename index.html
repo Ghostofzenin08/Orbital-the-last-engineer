@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORBITAL: The Last Engineer — Official Sci-Fi Survival Horror</title>
+  
+  <!-- SEO & Metadata -->
+  <meta name="description" content="A tense first-person sci-fi survival horror on a dying orbital derelict. No weapons. Only engineering tools. Survive the derelict. Escape the anomaly. Built with Godot 4.7 Forward+ Vulkan.">
+  <meta name="keywords" content="Orbital The Last Engineer, Indie Horror, Sci-Fi Horror, Godot 4, Vulkan, First Person Survival, ZeninXParth, itch.io game">
+  <meta name="author" content="ZeninXParth">
+  <meta name="theme-color" content="#07090e">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ghostofzenin08.github.io/Orbital-the-last-engineer/">
+  <meta property="og:title" content="ORBITAL: The Last Engineer">
+  <meta property="og:description" content="You have no firearms. No rescue fleet is coming. Use engineering tools and station systems to survive a relentless stalking entity.">
+  <meta property="og:image" content="assets_ui/image 4.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ORBITAL: The Last Engineer">
+  <meta name="twitter:description" content="Tense first-person sci-fi survival horror. Out now on Windows Desktop.">
+  <meta name="twitter:image" content="assets_ui/image 4.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --bg-card: rgba(13, 18, 28, 0.78);
+      --bg-card-border: rgba(45, 60, 85, 0.4);
+      --accent-red: #ff3b30;
+      --accent-red-glow: rgba(255, 59, 48, 0.45);
+      --accent-amber: #ff9500;
+      --accent-cyan: #00f0ff;
+      --accent-cyan-glow: rgba(0, 240, 255, 0.4);
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --font-display: 'Orbitron', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Space Grotesk', -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+    }
+
+    body {
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+      background: radial-gradient(circle at 50% 20%, #111726 0%, #07090e 70%);
+    }
+
+    /* Scanline & Grain CRT Overlay */
+    .crt-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 4px, 6px 100%;
+      opacity: 0.65;
+    }
+
+    /* Interactive Background Canvas */
+    #space-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Header & Navigation */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: rgba(7, 9, 14, 0.85);
+      border-bottom: 1px solid rgba(45, 60, 85, 0.35);
+      transition: border-color 0.3s ease;
+    }
+
+    .nav-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 72px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .logo-badge {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-red);
+      box-shadow: 0 0 10px var(--accent-red);
+      animation: pulse-dot 2s infinite ease-in-out;
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      letter-spacing: 1px;
+      transition: color 0.2s, text-shadow 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-cyan);
+      text-shadow: 0 0 8px var(--accent-cyan-glow);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .audio-btn {
+      background: rgba(18, 26, 40, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--accent-cyan);
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .audio-btn:hover {
+      background: rgba(0, 240, 255, 0.15);
+      box-shadow: 0 0 12px var(--accent-cyan-glow);
+    }
+
+    .btn-header-cta {
+      background: linear-gradient(135deg, var(--accent-red), #d6251b);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      box-shadow: 0 0 16px var(--accent-red-glow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-header-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 24px var(--accent-red);
+    }
+
+    /* Mobile Hamburger */
+    .mobile-menu-btn {
+      display: none;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 1.6rem;
+      cursor: pointer;
+    }
+
+    /* Warning Ticker Bar */
+    .ticker-bar {
+      background: rgba(255, 59, 48, 0.12);
+      border-bottom: 1px solid rgba(255, 59, 48, 0.3);
+      padding: 8px 0;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: #ff8b85;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .ticker-pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-red);
+      box-shadow: 0 0 8px var(--accent-red);
+      animation: pulse-dot 1.2s infinite;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 100px 0 80px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-pretitle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .hero-pretitle span.badge {
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 7vw, 5.2rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      background: linear-gradient(180deg, #ffffff 20%, #9cb3d5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.25));
+    }
+
+    .hero-subtitle {
+      font-family: var(--font-display);
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      font-weight: 700;
+      color: var(--accent-red);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      text-shadow: 0 0 15px var(--accent-red-glow);
+    }
+
+    .hero-desc {
+      max-width: 720px;
+      margin: 0 auto 40px;
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: #cbd5e1;
+      font-weight: 400;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 50px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff3b30 0%, #b31d14 100%);
+      color: #fff;
+      padding: 16px 36px;
+      border-radius: 8px;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 0 25px var(--accent-red-glow), 0 10px 20px rgba(0,0,0,0.4);
+      transition: all 0.25s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 0 40px rgba(255, 59, 48, 0.8), 0 15px 30px rgba(0,0,0,0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(18, 26, 42, 0.7);
+      color: #e2e8f0;
+      padding: 16px 32px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(70, 90, 130, 0.4);
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-cyan);
+      color: #fff;
+      box-shadow: 0 0 20px var(--accent-cyan-glow);
+      transform: translateY(-2px);
+    }
+
+    /* Live Station Telemetry Bar */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      max-width: 960px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .telemetry-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      padding: 16px 20px;
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .telemetry-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .telemetry-val {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .status-alert {
+      color: var(--accent-red);
+      text-shadow: 0 0 10px var(--accent-red-glow);
+    }
+
+    .status-warn {
+      color: var(--accent-amber);
+    }
+
+    .status-ok {
+      color: var(--accent-cyan);
+    }
+
+    /* Section Headings */
+    .section {
+      padding: 90px 0;
+      position: relative;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 18px;
+    }
+
+    .section-lead {
+      max-width: 680px;
+      margin: 0 auto;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    /* Dossier / Story Grid */
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
+    }
+
+    .dossier-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 12px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s;
+    }
+
+    .dossier-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+
+    .dossier-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent-cyan);
+    }
+
+    .dossier-card.card-red::before {
+      background: var(--accent-red);
+    }
+
+    .dossier-card.card-amber::before {
+      background: var(--accent-amber);
+    }
+
+    .dossier-num {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+
+    .dossier-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .dossier-text {
+      color: #cbd5e1;
+      font-size: 0.98rem;
+      line-height: 1.65;
+    }
+
+    /* Pillars of Gameplay */
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .pillar-card {
+      background: rgba(15, 23, 38, 0.65);
+      border: 1px solid rgba(45, 60, 85, 0.45);
+      border-radius: 10px;
+      padding: 28px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .pillar-card:hover {
+      background: rgba(22, 33, 54, 0.8);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.15);
+      transform: translateY(-4px);
+    }
+
+    .pillar-icon {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    .pillar-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    .pillar-desc {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    /* Interactive Computer Terminal Section */
+    .terminal-container {
+      background: #090c12;
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 240, 255, 0.1);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .terminal-topbar {
+      background: #111724;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(45, 60, 85, 0.5);
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #334155;
+    }
+
+    .terminal-dot.dot-red { background: #ef4444; }
+    .terminal-dot.dot-yellow { background: #f59e0b; }
+    .terminal-dot.dot-green { background: #10b981; }
+
+    .terminal-title {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--accent-cyan);
+      letter-spacing: 2px;
+    }
+
+    .terminal-tabs {
+      display: flex;
+      background: #0d121c;
+      border-bottom: 1px solid rgba(45, 60, 85, 0.4);
+      overflow-x: auto;
+    }
+
+    .terminal-tab {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid rgba(45, 60, 85, 0.4);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .terminal-tab.active {
+      background: #151e2e;
+      color: var(--accent-cyan);
+      border-bottom: 2px solid var(--accent-cyan);
+    }
+
+    .terminal-body {
+      padding: 28px;
+      min-height: 260px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #94a3b8;
+    }
+
+    .terminal-body p {
+      margin-bottom: 12px;
+    }
+
+    .term-highlight {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .term-danger {
+      color: var(--accent-red);
+      font-weight: 700;
+    }
+
+    .term-cyan {
+      color: var(--accent-cyan);
+    }
+
+    .terminal-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px dashed rgba(45, 60, 85, 0.5);
+    }
+
+    .term-action-btn {
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: var(--accent-cyan);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .term-action-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      color: #fff;
+    }
+
+    .term-action-btn.btn-purge {
+      border-color: rgba(255, 59, 48, 0.5);
+      color: #ff8b85;
+      background: rgba(255, 59, 48, 0.08);
+    }
+
+    .term-action-btn.btn-purge:hover {
+      background: rgba(255, 59, 48, 0.25);
+      color: #fff;
+    }
+
+    /* Controls Cheat-Sheet */
+    .controls-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 12px;
+      padding: 36px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .key-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .key-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .key-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      height: 44px;
+      padding: 0 10px;
+      background: #172133;
+      border: 1px solid rgba(70, 90, 130, 0.5);
+      border-radius: 8px;
+      box-shadow: 0 4px 0 #0c121e;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .key-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .key-desc strong {
+      color: #fff;
+      display: block;
+      font-size: 0.95rem;
+    }
+
+    /* System Requirements */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .spec-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 10px;
+      padding: 30px;
+    }
+
+    .spec-header {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(45, 60, 85, 0.4);
+      padding-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .spec-list {
+      list-style: none;
+      font-size: 0.9rem;
+      line-height: 2;
+      color: #cbd5e1;
+    }
+
+    .spec-list strong {
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      display: inline-block;
+      width: 110px;
+    }
+
+    /* Final CTA Banner */
+    .cta-banner {
+      background: radial-gradient(circle at 50% 50%, rgba(255, 59, 48, 0.15) 0%, rgba(7, 9, 14, 0.9) 80%), #0d121c;
+      border: 1px solid rgba(255, 59, 48, 0.4);
+      border-radius: 16px;
+      padding: 60px 30px;
+      text-align: center;
+      margin: 80px auto;
+      max-width: 1000px;
+      position: relative;
+      box-shadow: 0 0 50px rgba(255, 59, 48, 0.2);
+    }
+
+    .cta-banner h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 16px;
+      letter-spacing: 2px;
+    }
+
+    .cta-banner p {
+      max-width: 600px;
+      margin: 0 auto 36px;
+      color: #cbd5e1;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(45, 60, 85, 0.35);
+      background: #05070a;
+      padding: 50px 0 30px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-cyan);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(45, 60, 85, 0.2);
+      padding-top: 24px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+    }
+
+    /* Pulse Dot Animation */
+    @keyframes pulse-dot {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .nav-links {
+        display: none;
+      }
+      .mobile-menu-btn {
+        display: block;
+      }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 72px;
+        left: 0;
+        width: 100%;
+        background: #090d16;
+        padding: 24px;
+        border-bottom: 1px solid rgba(45, 60, 85, 0.5);
+      }
+      .btn-header-cta {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Retro CRT Scanline Shader Overlay -->
+  <div class="crt-overlay"></div>
+
+  <!-- Deep Space Particle Canvas -->
+  <canvas id="space-canvas"></canvas>
+
+  <!-- Navigation -->
+  <header>
+    <div class="container">
+      <div class="nav-wrapper">
+        <a href="#" class="logo">
+          <span class="logo-badge"></span>
+          <span class="logo-text">ORBITAL</span>
+        </a>
+
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#story">Dossier</a></li>
+          <li><a href="#mechanics">Systems</a></li>
+          <li><a href="#terminal">Terminal</a></li>
+          <li><a href="#controls">Controls</a></li>
+          <li><a href="#specs">Specs</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button id="audioToggle" class="audio-btn" title="Toggle Synthesized Station Atmosphere">
+            <span id="audioIcon">🔇</span> Audio
+          </button>
+          <a href="https://zeninxparth.itch.io/orbital-the-last-engineer" target="_blank" rel="noopener" class="btn-header-cta">
+            PLAY ON ITCH
+          </a>
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation">☰</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Station Warning Broadcast Ticker -->
+  <div class="ticker-bar">
+    <span class="ticker-pulse"></span>
+    <span>STATION AETHELGARD-IV // REACTOR CORE CRITICAL // O2 SCRUBBERS PURGED // OCT 29, 2026 LAUNCH</span>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero" id="overview">
+    <div class="container">
+      <div class="hero-pretitle">
+        <span class="badge">GODOT 4.7.2</span> FORWARD+ VULKAN ENGINE
+      </div>
+
+      <h1 class="hero-title">ORBITAL</h1>
+      <h2 class="hero-subtitle">The Last Engineer</h2>
+
+      <p class="hero-desc">
+        You have no weapons. No rescue fleet is coming. Stranded on a derelict deep-space research platform falling out of orbit, your only tools are mechanical scanners, bypass valves, and station power relays. Survive the evolving entity stalking the ventilation shafts.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="https://zeninxparth.itch.io/orbital-the-last-engineer" target="_blank" rel="noopener" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14v-4H8l4-4 4 4h-3v4h-2z"/>
+          </svg>
+          Download on itch.io
+        </a>
+
+        <a href="https://github.com/Ghostofzenin08/Orbital-the-last-engineer" target="_blank" rel="noopener" class="btn-secondary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+          View Source on GitHub
+        </a>
+      </div>
+
+      <!-- Live Telemetry Readouts -->
+      <div class="telemetry-grid">
+        <div class="telemetry-card">
+          <div class="telemetry-label">Reactor Core Temp <span>SEC-03</span></div>
+          <div class="telemetry-val status-alert" id="valCore">1,492°C [MELTDOWN]</div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-label">Oxygen Scrubbers <span>MED-01</span></div>
+          <div class="telemetry-val status-warn" id="valO2">18.4% [CRITICAL]</div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-label">Subdeck Integrity <span>HULL</span></div>
+          <div class="telemetry-val status-ok" id="valHull">42.8% [DEGRADED]</div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-label">Bio-Signatures <span>AIRLOCK</span></div>
+          <div class="telemetry-val status-alert">2 (1 UNKNOWN)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission Dossier Section -->
+  <section class="section" id="story">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// CLASSIFIED TRANSMISSION</span>
+        <h2 class="section-title">The Incident at Outpost 7</h2>
+        <p class="section-lead">
+          Three days ago, Deep Space Platform Aethelgard-IV went dark. Life support collapsed, containment vault protocols were severed, and the emergency beacon began broadcasting on loop.
+        </p>
+      </div>
+
+      <div class="dossier-grid">
+        <div class="dossier-card card-red">
+          <div class="dossier-num">DOSSIER FILE // 01</div>
+          <h3 class="dossier-title">The Meltdown</h3>
+          <p class="dossier-text">
+            The subdeck reactor is undergoing thermal runaway. The automated coolants were redirected by a catastrophic system fault. You must descend into the irradiated reactor subdeck and manually operate thermal release valves before the containment hull breaches.
+          </p>
+        </div>
+
+        <div class="dossier-card card-amber">
+          <div class="dossier-num">DOSSIER FILE // 02</div>
+          <h3 class="dossier-title">The Unseen Predator</h3>
+          <p class="dossier-text">
+            Whatever was housed in the sub-orbital cryogenic lab is now roaming freely. It hunts via spatial sound reflection and footstep acoustics. It maneuvers through ceiling ventilation ducts and traps unsuspecting survivors in darkened airlocks.
+          </p>
+        </div>
+
+        <div class="dossier-card">
+          <div class="dossier-num">DOSSIER FILE // 03</div>
+          <h3 class="dossier-title">The Lone Engineer</h3>
+          <p class="dossier-text">
+            You are not a combat specialist. You have no firearms, body armor, or plasma shields. Your only tools are diagnostic tablets, magnetic maintenance keys, chemical gas flushes, and the station's labyrinthine secondary power grid.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Gameplay Mechanics -->
+  <section class="section" id="mechanics">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// SURVIVAL ARCHITECTURE</span>
+        <h2 class="section-title">Core Survival Pillars</h2>
+        <p class="section-lead">
+          True survival horror built around realistic station engineering, spatial vulnerability, and adaptive artificial intelligence.
+        </p>
+      </div>
+
+      <div class="pillar-grid">
+        <div class="pillar-card">
+          <div class="pillar-icon">⚙️</div>
+          <h3 class="pillar-title">Subsystem Engineering</h3>
+          <p class="pillar-desc">
+            Manually calibrate high-pressure emergency valves, equalize atmospheric seals, and manage secondary auxiliary power across isolated station decks.
+          </p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon">🎧</div>
+          <h3 class="pillar-title">Dynamic Proximity Audio</h3>
+          <p class="pillar-desc">
+            Procedurally synthesized 16-bit PCM heartbeats and binaural vent scuttles adaptively intensify as the entity closes distance behind you.
+          </p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon">☣️</div>
+          <h3 class="pillar-title">Airlock Gas Purges</h3>
+          <p class="pillar-desc">
+            Turn the station's environment against the hunter. Route decontamination gas into sealed corridors or vent auxiliary airlocks to force its retreat.
+          </p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon">💡</div>
+          <h3 class="pillar-title">Vulkan Forward+ Lighting</h3>
+          <p class="pillar-desc">
+            Powered by Godot 4.7's Forward+ pipeline with physical PBR materials, dynamic shadow occlusion, and deep volumetric dust rendering.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Station Diagnostics Terminal -->
+  <section class="section" id="terminal">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// INTERACTIVE SHIP TELEMETRY HUD</span>
+        <h2 class="section-title">Station Mainframe Terminal</h2>
+        <p class="section-lead">
+          Access station telemetry logs and emergency bypass switches directly in your browser.
+        </p>
+      </div>
+
+      <div class="terminal-container">
+        <div class="terminal-topbar">
+          <div class="terminal-dots">
+            <span class="terminal-dot dot-red"></span>
+            <span class="terminal-dot dot-yellow"></span>
+            <span class="terminal-dot dot-green"></span>
+          </div>
+          <div class="terminal-title">AETHELGARD_OS // v4.7.2-STABLE</div>
+          <div></div>
+        </div>
+
+        <div class="terminal-tabs">
+          <button class="terminal-tab active" data-tab="telemetry">[1] TELEMETRY LOG</button>
+          <button class="terminal-tab" data-tab="audio-log">[2] AUDIO LOG #402</button>
+          <button class="terminal-tab" data-tab="containment">[3] CONTAINMENT PROTOCOL</button>
+          <button class="terminal-tab" data-tab="bypass">[4] MANUAL OVERRIDE</button>
+        </div>
+
+        <div class="terminal-body" id="termOutput">
+          <p><span class="term-cyan">[04:12:08]</span> STATION STATUS: <span class="term-danger">CODE RED</span></p>
+          <p><span class="term-cyan">[04:12:15]</span> Primary reactor temperature exceeding maximum safe threshold (+14°C/sec).</p>
+          <p><span class="term-cyan">[04:12:49]</span> Subdeck gate locked via automated lockdown. Emergency bypass valves require manual rotation.</p>
+          <p><span class="term-cyan">[04:13:22]</span> Warning: Biological motion detected in ventilation duct V-07 directly above Engineering Bay.</p>
+          <p class="term-highlight">&gt; System awaiting user instruction...</p>
+        </div>
+
+        <div class="terminal-topbar" style="background:#0b0f17; border-top:1px solid rgba(45,60,85,0.4)">
+          <div class="terminal-controls">
+            <button class="term-action-btn" id="btnReroute">Reroute Subdeck Power</button>
+            <button class="term-action-btn" id="btnPingBeacon">Broadcast Distress Pulse</button>
+            <button class="term-action-btn btn-purge" id="btnPurgeGas">Trigger Airlock Gas Purge</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Controls Cheat-Sheet -->
+  <section class="section" id="controls">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// FLIGHT & MAINTENANCE MANUAL</span>
+        <h2 class="section-title">Engineer Control Protocol</h2>
+        <p class="section-lead">Master the interface before stepping onto the station floor.</p>
+      </div>
+
+      <div class="controls-wrapper">
+        <div class="key-grid">
+          <div class="key-item">
+            <div class="key-badge">W A S D</div>
+            <div class="key-desc">
+              <strong>Locomotion</strong>
+              Move through station
+            </div>
+          </div>
+
+          <div class="key-item">
+            <div class="key-badge">SHIFT</div>
+            <div class="key-desc">
+              <strong>Sprint</strong>
+              Consumes stamina, makes noise
+            </div>
+          </div>
+
+          <div class="key-item">
+            <div class="key-badge">E</div>
+            <div class="key-desc">
+              <strong>Interact</strong>
+              Operate valves, levers & doors
+            </div>
+          </div>
+
+          <div class="key-item">
+            <div class="key-badge">F</div>
+            <div class="key-desc">
+              <strong>Flashlight</strong>
+              Toggle beam (draws attention)
+            </div>
+          </div>
+
+          <div class="key-item">
+            <div class="key-badge">MOUSE</div>
+            <div class="key-desc">
+              <strong>Look & Target</strong>
+              Seamless captured camera
+            </div>
+          </div>
+
+          <div class="key-item">
+            <div class="key-badge">ESC</div>
+            <div class="key-desc">
+              <strong>Diagnostics / Pause</strong>
+              Settings & Mission Status
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- System Specifications -->
+  <section class="section" id="specs">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// HARDWARE REQUIREMENTS</span>
+        <h2 class="section-title">System Requirements</h2>
+        <p class="section-lead">Optimized for 60 FPS Vulkan gameplay on modern Windows PC systems.</p>
+      </div>
+
+      <div class="specs-grid">
+        <div class="spec-card">
+          <div class="spec-header">
+            <span>MINIMUM</span>
+            <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-muted)">1080p @ 30 FPS</span>
+          </div>
+          <ul class="spec-list">
+            <li><strong>OS:</strong> Windows 10 64-bit</li>
+            <li><strong>Processor:</strong> Intel Core i3-6100 / AMD Ryzen 3 1200</li>
+            <li><strong>Memory:</strong> 4 GB RAM</li>
+            <li><strong>Graphics:</strong> Vulkan-compatible (GTX 1050 / RX 560)</li>
+            <li><strong>Storage:</strong> 250 MB free space</li>
+            <li><strong>DirectX:</strong> Vulkan 1.2+ API</li>
+          </ul>
+        </div>
+
+        <div class="spec-card">
+          <div class="spec-header">
+            <span>RECOMMENDED</span>
+            <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--accent-cyan)">1080p/1440p @ 60+ FPS</span>
+          </div>
+          <ul class="spec-list">
+            <li><strong>OS:</strong> Windows 11 64-bit</li>
+            <li><strong>Processor:</strong> Intel Core i5-8400 / AMD Ryzen 5 2600</li>
+            <li><strong>Memory:</strong> 8 GB RAM</li>
+            <li><strong>Graphics:</strong> GTX 1660 Super / RTX 2060 / RX 5600 XT</li>
+            <li><strong>Storage:</strong> 500 MB SSD</li>
+            <li><strong>Audio:</strong> Stereo Headphones (Recommended)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final Call to Action -->
+  <div class="container">
+    <div class="cta-banner">
+      <h2>WILL YOU SURVIVE THE ANOMALY?</h2>
+      <p>
+        The station is descending into orbital decay. Download the complete standalone Windows release on itch.io and attempt to survive the night.
+      </p>
+      <a href="https://zeninxparth.itch.io/orbital-the-last-engineer" target="_blank" rel="noopener" class="btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14v-4H8l4-4 4 4h-3v4h-2z"/>
+        </svg>
+        PLAY ORBITAL: THE LAST ENGINEER NOW
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <div class="logo-text" style="font-size:1.1rem; margin-bottom: 6px;">ORBITAL: THE LAST ENGINEER</div>
+          <p style="font-size:0.85rem; color:#64748b;">A First-Person Atmospheric Sci-Fi Survival Horror Game.</p>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="https://zeninxparth.itch.io/orbital-the-last-engineer" target="_blank" rel="noopener">itch.io</a></li>
+          <li><a href="https://github.com/Ghostofzenin08/Orbital-the-last-engineer" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://github.com/Ghostofzenin08/Orbital-the-last-engineer/blob/master/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-bottom">
+        &copy; 2026 ZeninXParth. Powered by Godot Engine 4.7.2 Forward+ Vulkan. All systems operational.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive JavaScript Engine -->
+  <script>
+    /* -------------------------------------------------------------
+       1. Interactive Starfield & Derelict Dust Particle Canvas
+       ------------------------------------------------------------- */
+    const canvas = document.getElementById('space-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = Math.random() * 1.8 + 0.4;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = (Math.random() - 0.5) * 0.3 - 0.1;
+        this.alpha = Math.random() * 0.7 + 0.2;
+        this.pulse = Math.random() * 0.02 + 0.005;
+        this.isRed = Math.random() < 0.08;
+      }
+      update() {
+        this.x += this.speedX + (mouse.x - width / 2) * 0.00005;
+        this.y += this.speedY + (mouse.y - height / 2) * 0.00005;
+        this.alpha += this.pulse;
+        if (this.alpha > 0.9 || this.alpha < 0.15) this.pulse = -this.pulse;
+
+        if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.isRed 
+          ? `rgba(255, 59, 48, ${this.alpha})`
+          : `rgba(180, 215, 255, ${this.alpha * 0.8})`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 90; i++) {
+      particles.push(new Particle());
+    }
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.targetX = e.clientX;
+      mouse.targetY = e.clientY;
+    });
+
+    function renderLoop() {
+      mouse.x += (mouse.targetX - mouse.x) * 0.05;
+      mouse.y += (mouse.targetY - mouse.y) * 0.05;
+
+      ctx.clearRect(0, 0, width, height);
+      for (let p of particles) {
+        p.update();
+        p.draw();
+      }
+      requestAnimationFrame(renderLoop);
+    }
+    renderLoop();
+
+    /* -------------------------------------------------------------
+       2. Web Audio API Procedural Synthesizer (Zero Audio Files)
+       ------------------------------------------------------------- */
+    let audioCtx = null;
+    let ambientDrone = null;
+    let droneGain = null;
+    let isAudioPlaying = false;
+
+    const audioToggleBtn = document.getElementById('audioToggle');
+    const audioIcon = document.getElementById('audioIcon');
+
+    function playBeep(freq = 660, duration = 0.08, type = 'sine') {
+      if (!isAudioPlaying) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (err) {}
+    }
+
+    function toggleAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (!isAudioPlaying) {
+        // Start atmospheric space drone
+        const osc = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        droneGain = audioCtx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.value = 55; // A1 low hum
+
+        osc2.type = 'sine';
+        osc2.frequency.value = 110;
+
+        filter.type = 'lowpass';
+        filter.frequency.value = 240;
+
+        droneGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        droneGain.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 1.5);
+
+        osc.connect(filter);
+        osc2.connect(filter);
+        filter.connect(droneGain);
+        droneGain.connect(audioCtx.destination);
+
+        osc.start();
+        osc2.start();
+
+        ambientDrone = { osc, osc2 };
+        isAudioPlaying = true;
+        audioIcon.textContent = '🔊';
+        audioToggleBtn.style.borderColor = 'var(--accent-cyan)';
+      } else {
+        if (droneGain) {
+          droneGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+          setTimeout(() => {
+            if (ambientDrone) {
+              ambientDrone.osc.stop();
+              ambientDrone.osc2.stop();
+              ambientDrone = null;
+            }
+          }, 500);
+        }
+        isAudioPlaying = false;
+        audioIcon.textContent = '🔇';
+        audioToggleBtn.style.borderColor = 'rgba(0, 240, 255, 0.3)';
+      }
+    }
+
+    audioToggleBtn.addEventListener('click', toggleAudio);
+
+    /* -------------------------------------------------------------
+       3. Mobile Navigation Menu Toggle
+       ------------------------------------------------------------- */
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const navLinks = document.getElementById('navLinks');
+
+    mobileBtn.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+      playBeep(880, 0.05);
+    });
+
+    // Close menu when clicking nav items
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        playBeep(750, 0.04);
+      });
+    });
+
+    /* -------------------------------------------------------------
+       4. Interactive Station Terminal
+       ------------------------------------------------------------- */
+    const termOutput = document.getElementById('termOutput');
+    const tabs = document.querySelectorAll('.terminal-tab');
+
+    const terminalData = {
+      'telemetry': `
+        <p><span class="term-cyan">[04:12:08]</span> STATION STATUS: <span class="term-danger">CODE RED</span></p>
+        <p><span class="term-cyan">[04:12:15]</span> Primary reactor temperature exceeding maximum safe threshold (+14°C/sec).</p>
+        <p><span class="term-cyan">[04:12:49]</span> Subdeck gate locked via automated lockdown. Emergency bypass valves require manual rotation.</p>
+        <p><span class="term-cyan">[04:13:22]</span> Warning: Biological motion detected in ventilation duct V-07 directly above Engineering Bay.</p>
+        <p class="term-highlight">&gt; System awaiting user instruction...</p>
+      `,
+      'audio-log': `
+        <p><span class="term-cyan">[LOG #402 - DR. ARIS VANE // AUDIO TRANSCRIPTION]</span></p>
+        <p>"If anyone intercepts this... do NOT send a standard salvage team. It didn't emerge from the asteroid sample. It was dormant inside the sub-floor conduit all along. It learned our patrol routes in six hours. We've barricaded ourselves in Medical, but the air scrubbers are failing fast..."</p>
+        <p><span class="term-danger">[AUDIO FEED SEVERED AT 02:44:19 UTC]</span></p>
+      `,
+      'containment': `
+        <p><span class="term-cyan">[CONTAINMENT PROTOCOL OMEGA-7]</span></p>
+        <p>• Vault Status: <span class="term-danger">BREACH DETECTED (LOWER HULL)</span></p>
+        <p>• Pressure Seals: 3/5 Compromised</p>
+        <p>• Alien Bio-Telemetry: Highly sensitive to high-frequency audio and sprint acoustics.</p>
+        <p>• Recommended Action: Deploy chemical decontamination gas in adjacent airlock chambers.</p>
+      `,
+      'bypass': `
+        <p><span class="term-cyan">[STATION EMERGENCY BYPASS CONSOLE]</span></p>
+        <p>Auxiliary hydraulic circuits: <span class="term-highlight">READY</span></p>
+        <p>Select an override protocol below to execute immediate station contingency routines.</p>
+      `
+    };
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const key = tab.getAttribute('data-tab');
+        termOutput.innerHTML = terminalData[key] || '';
+        playBeep(920, 0.05);
+      });
+    });
+
+    document.getElementById('btnReroute').addEventListener('click', () => {
+      playBeep(520, 0.1);
+      termOutput.innerHTML += `
+        <p><span class="term-cyan">[COMMAND EXECUTED]</span> Auxiliary power routed to Reactor Subdeck. Hydraulic pressure restored to vault ramp.</p>
+      `;
+      termOutput.scrollTop = termOutput.scrollHeight;
+    });
+
+    document.getElementById('btnPingBeacon').addEventListener('click', () => {
+      playBeep(1200, 0.15);
+      termOutput.innerHTML += `
+        <p><span class="term-cyan">[TRANSPONDER PING]</span> Emergency SOS pulse emitted on frequency 1420.4 MHz. No response received.</p>
+      `;
+      termOutput.scrollTop = termOutput.scrollHeight;
+    });
+
+    document.getElementById('btnPurgeGas').addEventListener('click', () => {
+      playBeep(320, 0.25, 'triangle');
+      termOutput.innerHTML += `
+        <p><span class="term-danger">[HAZARD WARNING]</span> Red decontamination gas released into Sector 4 airlock. Bio-anomaly forced into retreat.</p>
+      `;
+      termOutput.scrollTop = termOutput.scrollHeight;
+    });
+
+    /* -------------------------------------------------------------
+       5. Dynamic Fluctuation in Telemetry Readouts
+       ------------------------------------------------------------- */
+    const valCore = document.getElementById('valCore');
+    const valO2 = document.getElementById('valO2');
+    const valHull = document.getElementById('valHull');
+
+    setInterval(() => {
+      const coreTemp = (1485 + Math.random() * 15).toFixed(0);
+      const o2Level = (18.2 + Math.random() * 0.5).toFixed(1);
+      const hullVal = (42.5 + Math.random() * 0.6).toFixed(1);
+
+      if (valCore) valCore.textContent = `${coreTemp}°C [MELTDOWN]`;
+      if (valO2) valO2.textContent = `${o2Level}% [CRITICAL]`;
+      if (valHull) valHull.textContent = `${hullVal}% [DEGRADED]`;
+    }, 2800);
+  </script>
+</body>
+</html>
